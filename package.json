@@ -14,7 +14,9 @@
     "lint": "eslint \"src/**/*.{ts,html}\" --fix",
     "lint:check": "eslint \"src/**/*.{ts,html}\" --max-warnings=0",
     "lint:report": "eslint \"src/**/*.{ts,html}\" --format json --output-file eslint-report.json",
-    "typecheck": "npx tsc --noEmit --project tsconfig.json"
+    "typecheck": "npx tsc --noEmit --project tsconfig.json",
+    "import:openapi": "bash scripts/import-openapi.sh",
+    "import:async": "bash scripts/import-asyncapi.sh"
   },
   "private": true,
   "packageManager": "npm@11.9.0",
