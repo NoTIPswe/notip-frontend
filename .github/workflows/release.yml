@@ -26,7 +26,8 @@ jobs:
     name: Semantic Release
     needs: quality-checks
     runs-on: ubuntu-latest
-    image: ghcr.io/notipswe/notip-angular-dev:v0.0.1
+    container:
+      image: ghcr.io/notipswe/notip-angular-dev:v0.0.1
     outputs:
       released: ${{ steps.semantic.outputs.released }}
       version: ${{ steps.semantic.outputs.version }}
@@ -39,11 +40,16 @@ jobs:
           persist-credentials: true
           token: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Configure git safe directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Cache npm cache
+        uses: actions/cache@v5
         with:
-          node-version: '20'
-          cache: 'npm'
+          path: ~/.npm
+          key: npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            npm-cache-${{ runner.os }}-
 
       - name: Install dependencies
         run: npm ci

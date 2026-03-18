@@ -3,15 +3,26 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    /* --- Core Strictness --- */
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": true,
+    
+    /* --- Clean Code Enforcement --- */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    /* --- Ecosystem & Interop --- */
+    "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "isolatedModules": true,
     "experimentalDecorators": true,
     "importHelpers": true,
+    
+    /* --- Modern Build Targets --- */
     "target": "ES2022",
     "module": "preserve"
   },
@@ -19,7 +30,8 @@
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
-    "strictTemplates": true
+    "strictTemplates": true,
+    "strictStandalone": true
   },
   "files": [],
   "references": [
