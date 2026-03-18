@@ -7,6 +7,9 @@ import globals from 'globals';
 
 export default tseslint.config(
   {
+    ignores: ['eslint.config.mjs', 'src/generated/**'],
+  },
+  {
     files: ['**/*.ts'],
     extends: [
       eslint.configs.recommended,
