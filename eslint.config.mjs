@@ -7,7 +7,7 @@ import globals from 'globals';
 
 export default tseslint.config(
   {
-    ignores: ['eslint.config.mjs', 'src/app/generated/**'],
+    ignores: ['eslint.config.mjs', 'vitest.config.ts', 'src/app/generated/**'],
   },
   {
     files: ['**/*.ts'],
@@ -22,7 +22,7 @@ export default tseslint.config(
     languageOptions: {
       globals: {
         ...globals.browser,
-        ...globals.jest,
+        ...globals.vitest,
       },
       parserOptions: {
         projectService: true,

@@ -62,12 +62,6 @@
             }
           },
           "defaultConfiguration": "development"
-        },
-        "test": {
-          "builder": "@angular-builders/jest:run",
-          "options": {
-            "config": "jest.config.js"
-          }
         }
       }
     }
