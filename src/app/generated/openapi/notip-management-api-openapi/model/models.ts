@@ -18,6 +18,7 @@ export * from './set-alerts-config-default-request-dto';
 export * from './set-gateway-alerts-config-request-dto';
 export * from './set-threshold-default-type-request-dto';
 export * from './set-threshold-sensor-request-dto';
+export * from './tenants-controller-get-tenant-users200-response-inner';
 export * from './tenants-response-dto';
 export * from './update-gateway-request-dto';
 export * from './update-gateway-response-dto';

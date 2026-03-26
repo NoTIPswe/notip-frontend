@@ -42,6 +42,7 @@ model/set-alerts-config-default-request-dto.ts
 model/set-gateway-alerts-config-request-dto.ts
 model/set-threshold-default-type-request-dto.ts
 model/set-threshold-sensor-request-dto.ts
+model/tenants-controller-get-tenant-users200-response-inner.ts
 model/tenants-response-dto.ts
 model/update-gateway-request-dto.ts
 model/update-gateway-response-dto.ts

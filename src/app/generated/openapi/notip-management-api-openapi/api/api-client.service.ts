@@ -9,7 +9,7 @@
  */
 /* tslint:disable:no-unused-variable member-ordering */
 
-import { Injectable, inject } from '@angular/core';
+import { Inject, Injectable, Optional } from '@angular/core';
 import {
   HttpClient,
   HttpHeaders,
@@ -30,12 +30,11 @@ import { BaseService } from '../api.base.service';
   providedIn: 'root',
 })
 export class ApiClientService extends BaseService {
-  protected httpClient = inject(HttpClient);
-
-  constructor() {
-    const basePath = inject(BASE_PATH, { optional: true });
-    const configuration = inject(Configuration, { optional: true });
-
+  constructor(
+    protected httpClient: HttpClient,
+    @Optional() @Inject(BASE_PATH) basePath: string | string[],
+    @Optional() configuration?: Configuration,
+  ) {
     super(basePath, configuration);
   }
 
