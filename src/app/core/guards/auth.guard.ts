@@ -1,0 +1,24 @@
+import { Injectable, inject } from '@angular/core';
+import { CanActivate, Router, UrlTree } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+
+@Injectable({ providedIn: 'root' })
+export class AuthGuard implements CanActivate {
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+
+  async canActivate(): Promise<boolean | UrlTree> {
+    const initialized = await this.auth.init();
+    if (!initialized) {
+      this.auth.login();
+      return false;
+    }
+
+    const token = await this.auth.getToken();
+    if (!token) {
+      return this.router.parseUrl('/login');
+    }
+
+    return true;
+  }
+}
