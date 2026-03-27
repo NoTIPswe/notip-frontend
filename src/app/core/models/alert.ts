@@ -1,8 +1,13 @@
+import { AlertsType } from './enums';
+
+export { AlertsType } from './enums';
+
 export interface Alerts {
-  id: string;
+  tenantId: string;
+  type: AlertsType;
   gatewayId: string;
+  details: string;
   createdAt: string;
-  message?: string;
 }
 
 export interface AlertsFilter {
@@ -12,15 +17,23 @@ export interface AlertsFilter {
 }
 
 export interface DefaultAlertsConfig {
+  tenantId: string;
   timeoutMs: number;
+  updatedAt: string;
 }
 
 export interface GatewayAlertsConfig {
   gatewayId: string;
   timeoutMs: number;
+  updatedAt: string;
 }
 
 export interface AlertsConfig {
   default: DefaultAlertsConfig;
-  perGateway?: GatewayAlertsConfig[];
+  gatewayOverrides?: GatewayOverride[];
+}
+
+export interface GatewayOverride {
+  gatewayId: string;
+  timeoutMs: number;
 }

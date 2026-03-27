@@ -16,7 +16,7 @@ import {
   SendFirmwareRequestDto,
 } from '../../../generated/openapi/notip-management-api-openapi';
 import { CommandStatus, CommandStatusUpdate } from '../../../core/models/command';
-import { GatewayConfig, GatewayFirmware } from '../../../core/models/gateway';
+import { GatewayConfig, GatewayFirmware } from '../../../core/models/command';
 
 const TERMINAL_STATUSES = new Set<CommandStatus>([
   CommandStatus.ack,

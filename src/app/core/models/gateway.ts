@@ -2,9 +2,9 @@ export interface Gateway {
   id: string;
   name: string;
   status: string;
-  lastSeenAt: string;
+  lastSeenAt?: string;
   provisioned: boolean;
-  firmwareVersion: string;
+  firmwareVersion?: string;
   sendFrequencyMs: number;
 }
 
@@ -13,16 +13,6 @@ export interface GatewayUpdateResult {
   name: string;
   status: string;
   updatedAt: string;
-}
-
-export interface GatewayConfig {
-  send_frequency_ms?: number;
-  status?: 'online' | 'offline';
-}
-
-export interface GatewayFirmware {
-  firmware_version: string;
-  download_url: string;
 }
 
 export interface ObfuscatedGateway {

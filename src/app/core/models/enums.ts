@@ -17,3 +17,19 @@ export enum StreamStatus {
   closed = 'closed',
   error = 'error',
 }
+
+export enum AlertsType {
+  GATEWAY_OFFLINE = 'GATEWAY_OFFLINE',
+}
+
+export enum GatewayStatus {
+  online = 'online',
+  paused = 'paused',
+  provisioning = 'provisioning',
+  offline = 'offline',
+}
+
+export enum CmdGatewayStatus {
+  online = 'online',
+  paused = 'paused',
+}
