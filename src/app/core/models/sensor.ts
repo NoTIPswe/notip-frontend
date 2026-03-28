@@ -1,6 +1,6 @@
 export interface Sensor {
-  id: string;
+  sensorId: string;
   gatewayId: string;
-  type: string;
-  unit?: string;
+  sensorType: string;
+  lastSeen: string;
 }

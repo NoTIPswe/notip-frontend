@@ -51,12 +51,12 @@ export interface BaseEnvelope {
   sensorId: string;
   sensorType: string;
   timestamp: string;
-  unit: string;
 }
 
 export interface DecryptedEnvelope extends BaseEnvelope {
   type: 'decrypted';
   value: number;
+  unit: string;
   isOutOfBounds: boolean;
 }
 
@@ -66,39 +66,24 @@ export interface ObfuscatedEnvelope extends BaseEnvelope {
 
 export type ProcessedEnvelope = DecryptedEnvelope | ObfuscatedEnvelope;
 
-export interface StreamFilters {
-  gatewayIds?: string[];
-  sensorTypes?: string[];
-  since?: string;
-}
-
-export interface QueryParameters {
-  from: string;
-  to: string;
-  cursor?: string;
-  limit?: number;
-  gatewayIds?: string[];
-  sensorTypes?: string[];
-  sensorIds?: string[];
-}
-
-export interface ExportParameters {
-  from: string;
-  to: string;
-  gatewayIds?: string[];
-  sensorTypes?: string[];
-  sensorIds?: string[];
-  limit?: number;
-}
-
 export interface StreamParameters {
-  gatewayIds: string[];
+  gatewayIds?: string[];
   sensorTypes?: string[];
-  since?: string;
+  sensorIds?: string;
+}
+
+export interface ExportParameters extends StreamParameters {
+  from: string;
+  to: string;
+}
+
+export interface QueryParameters extends ExportParameters {
+  cursor?: string;
+  limit: number;
 }
 
 export interface MeasurePage {
-  data: TelemetryEnvelope[];
+  data: ProcessedEnvelope[];
   nextCursor?: string;
   hasMore: boolean;
 }

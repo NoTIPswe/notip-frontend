@@ -11,16 +11,16 @@ export class CryptoKeyService {
 
   private readonly versions = new Map<string, number>();
 
-  fetchKeys(ids: string[]): Observable<GatewayKeyMap> {
+  fetchKeys(gatewayIds: string[]): Observable<GatewayKeyMap> {
     if (this.impersonationStatus.isImpersonating()) {
       return of({});
     }
 
-    if (ids.length === 0) {
+    if (gatewayIds.length === 0) {
       return of({});
     }
 
-    return forkJoin(ids.map((id) => this.keysApi.keysControllerGetKeys(id))).pipe(
+    return forkJoin(gatewayIds.map((id) => this.keysApi.keysControllerGetKeys(id))).pipe(
       map((responses) => responses.flat()),
       map((rows) => this.toGatewayKeyMap(rows)),
     );
@@ -34,18 +34,18 @@ export class CryptoKeyService {
     return this.keysApi.keysControllerGetKeys('').pipe(map((rows) => this.toGatewayKeyMap(rows)));
   }
 
-  getCachedVersion(id: string): number | null {
-    return this.versions.get(id) ?? null;
+  /*getCachedVersion(gatewayId: string): number | null {
+    return this.versions.get(gatewayId) ?? null;
   }
 
-  invalidateCache(id?: string): void {
-    if (!id) {
+  invalidateCache(gatewayId?: string): void {
+    if (!gatewayId) {
       this.versions.clear();
       return;
     }
 
-    this.versions.delete(id);
-  }
+    this.versions.delete(gatewayId);
+  }*/
 
   private toGatewayKeyMap(rows: KeysResponseDto[]): GatewayKeyMap {
     const mapResult: GatewayKeyMap = {};

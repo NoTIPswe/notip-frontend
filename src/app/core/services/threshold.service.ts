@@ -71,20 +71,22 @@ export class ThresholdService {
 
   private toThresholds(rows: Record<string, unknown>[]): ThresholdConfig[] {
     return rows.map((row) => {
-      const mapped: ThresholdConfig = {
+      const mapped: Partial<ThresholdConfig> = {
         minValue: typeof row['min_value'] === 'number' ? row['min_value'] : null,
         maxValue: typeof row['max_value'] === 'number' ? row['max_value'] : null,
       };
 
-      if (typeof row['sensor_id'] === 'string') {
-        mapped.sensorId = row['sensor_id'];
+      if (row['type'] == 'sensorId' && typeof row['sensor_id'] === 'string') {
+        (mapped as unknown as { sensorId?: string }).sensorId = row['sensor_id'];
+        (mapped as unknown as { type?: string }).type = 'sensorId';
       }
 
-      if (typeof row['sensor_type'] === 'string') {
-        mapped.sensorType = row['sensor_type'];
+      if (row['type'] === 'sensorType' && typeof row['sensor_type'] === 'string') {
+        (mapped as unknown as { sensorType?: string }).sensorType = row['sensor_type'];
+        (mapped as unknown as { type?: string }).type = 'sensorType';
       }
 
-      return mapped;
+      return mapped as ThresholdConfig;
     });
   }
 }

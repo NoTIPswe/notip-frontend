@@ -79,10 +79,6 @@ export class MeasureService {
       params = params.append('sensorId', sensorId);
     }
 
-    if (dp.limit) {
-      params = params.set('limit', String(dp.limit));
-    }
-
     return this.http
       .get<TelemetryEnvelope[]>('/api/data/measures/export', { params })
       .pipe(map((rows) => rows.map((row) => this.mapEnvelope(row))));
@@ -104,7 +100,6 @@ export class MeasureService {
         sensorId: envelope.sensorId,
         sensorType: envelope.sensorType,
         timestamp: envelope.timestamp,
-        unit: '',
       };
 
       return obfuscated;

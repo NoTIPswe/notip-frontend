@@ -1,26 +1,24 @@
 import { UserRole } from './enums';
 
-export interface ViewUser {
+export interface ObfuscatedUser {
   userId: string;
-  name?: string;
-  email?: string;
   role: UserRole;
-  lastAccess?: string | null;
 }
 
-export interface CreatedUser {
-  userId: string;
+export interface BaseUser extends ObfuscatedUser {
   name: string;
   email: string;
-  role: UserRole;
+}
+
+export interface ViewUser extends BaseUser {
+  lastAccess: string | null;
+}
+
+export interface CreatedUser extends BaseUser {
   createdAt: string;
 }
 
-export interface UpdatedUser {
-  userId: string;
-  name: string;
-  email: string;
-  role: UserRole;
+export interface UpdatedUser extends BaseUser {
   updatedAt: string;
 }
 
@@ -39,10 +37,5 @@ export interface UpdateUserParameters {
 
 export interface DeleteUserFeedback {
   deleted: number;
-  failed: string[];
-}
-
-export interface ObfuscatedUser {
-  userId: string;
-  role: UserRole;
+  failed?: string[];
 }

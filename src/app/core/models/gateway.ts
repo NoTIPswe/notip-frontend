@@ -1,5 +1,5 @@
 export interface Gateway {
-  id: string;
+  gatewayId: string;
   name: string;
   status: string;
   lastSeenAt?: string;
@@ -9,14 +9,14 @@ export interface Gateway {
 }
 
 export interface GatewayUpdateResult {
-  id: string;
+  gatewayId: string;
   name: string;
   status: string;
   updatedAt: string;
 }
 
 export interface ObfuscatedGateway {
-  id: string;
+  gatewayId: string;
   tenantId: string;
   model?: string;
   firmware?: string;

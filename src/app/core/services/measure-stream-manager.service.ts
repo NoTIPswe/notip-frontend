@@ -13,14 +13,11 @@ export class MeasureStreamManagerService {
     this.closeStream();
 
     const query = new URLSearchParams();
-    for (const gatewayId of sp.gatewayIds) {
+    for (const gatewayId of sp.gatewayIds ?? []) {
       query.append('gatewayId', gatewayId);
     }
     for (const sensorType of sp.sensorTypes ?? []) {
       query.append('sensorType', sensorType);
-    }
-    if (sp.since) {
-      query.set('since', sp.since);
     }
 
     this.eventSource = new EventSource(`/api/data/measures/stream?${query.toString()}`);
