@@ -15,7 +15,7 @@ export class AdminGatewayService {
       map((rows) =>
         (rows as Record<string, unknown>[]).map((row) => {
           const mapped: ObfuscatedGateway = {
-            id: this.asString(row['id']),
+            gatewayId: this.asString(row['id']),
             tenantId: this.asString(row['tenant_id']),
             provisioned: Boolean(row['provisioned']),
           };

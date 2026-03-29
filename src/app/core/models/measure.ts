@@ -69,7 +69,7 @@ export type ProcessedEnvelope = DecryptedEnvelope | ObfuscatedEnvelope;
 export interface StreamParameters {
   gatewayIds?: string[];
   sensorTypes?: string[];
-  sensorIds?: string;
+  sensorIds?: string[];
 }
 
 export interface ExportParameters extends StreamParameters {
