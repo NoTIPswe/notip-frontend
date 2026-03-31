@@ -1,5 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { GatewayConfig, GatewayFirmware } from '../../../../core/models/command';
+import { CmdGatewayStatus } from '../../../../core/models/enums';
 
 export type CommandModalMode = 'config' | 'firmware' | null;
 
@@ -26,12 +27,19 @@ export class CommandModalComponent {
     event.preventDefault();
 
     const frequency = Number.parseInt(frequencyRaw, 10);
-    const status = statusRaw === 'online' || statusRaw === 'paused' ? statusRaw : undefined;
+    let status: CmdGatewayStatus | null = null;
+    if (statusRaw === 'online') {
+      status = CmdGatewayStatus.online;
+    } else if (statusRaw === 'paused') {
+      status = CmdGatewayStatus.paused;
+    }
 
-    this.configSubmitted.emit({
-      send_frequency_ms: Number.isFinite(frequency) ? frequency : undefined,
-      status,
-    });
+    const payload: GatewayConfig = {
+      ...(Number.isFinite(frequency) ? { send_frequency_ms: frequency } : {}),
+      ...(status ? { status } : {}),
+    };
+
+    this.configSubmitted.emit(payload);
   }
 
   submitFirmware(event: Event, version: string, downloadUrl: string): void {

@@ -47,22 +47,22 @@ export class AlertListPageComponent implements OnInit {
     this.isLoading.set(true);
 
     const gateway = this.gatewayId().trim();
-    this.alertService
-      .getAlerts({
-        from: this.toIsoOrNow(this.from()),
-        to: this.toIsoOrNow(this.to()),
-        gatewayId: gateway ? [gateway] : undefined,
-      })
-      .subscribe({
-        next: (rows) => {
-          this.isLoading.set(false);
-          this.alerts.set(rows);
-        },
-        error: () => {
-          this.isLoading.set(false);
-          this.errorMessage.set('Impossibile caricare gli alert.');
-        },
-      });
+    const filter = {
+      from: this.toIsoOrNow(this.from()),
+      to: this.toIsoOrNow(this.to()),
+      ...(gateway ? { gatewayId: [gateway] } : {}),
+    };
+
+    this.alertService.getAlerts(filter).subscribe({
+      next: (rows) => {
+        this.isLoading.set(false);
+        this.alerts.set(rows);
+      },
+      error: () => {
+        this.isLoading.set(false);
+        this.errorMessage.set('Impossibile caricare gli alert.');
+      },
+    });
   }
 
   private toIsoOrNow(value: string): string {

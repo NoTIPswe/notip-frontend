@@ -32,10 +32,13 @@ export class ThresholdFormComponent {
       return;
     }
 
+    const minValue = this.parseNumber(minRaw);
+    const maxValue = this.parseNumber(maxRaw);
+
     this.typeSubmitted.emit({
       sensorType: cleanSensorType,
-      minValue: this.parseNumber(minRaw),
-      maxValue: this.parseNumber(maxRaw),
+      ...(minValue === undefined ? {} : { minValue }),
+      ...(maxValue === undefined ? {} : { maxValue }),
     });
   }
 
@@ -47,10 +50,13 @@ export class ThresholdFormComponent {
       return;
     }
 
+    const minValue = this.parseNumber(minRaw);
+    const maxValue = this.parseNumber(maxRaw);
+
     this.sensorSubmitted.emit({
       sensorId: cleanSensorId,
-      minValue: this.parseNumber(minRaw),
-      maxValue: this.parseNumber(maxRaw),
+      ...(minValue === undefined ? {} : { minValue }),
+      ...(maxValue === undefined ? {} : { maxValue }),
     });
   }
 
