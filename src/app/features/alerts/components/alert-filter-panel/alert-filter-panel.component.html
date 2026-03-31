@@ -1,0 +1,25 @@
+<section class="alert-filter-panel">
+  <h3>Filtri Alert</h3>
+
+  <form (submit)="submit($event, fromInput.value, toInput.value, gatewayInput.value)">
+    <label>
+      Da
+      <input #fromInput type="datetime-local" [value]="from()" />
+    </label>
+
+    <label>
+      A
+      <input #toInput type="datetime-local" [value]="to()" />
+    </label>
+
+    <label>
+      Gateway ID
+      <input #gatewayInput type="text" [value]="gatewayId()" placeholder="gateway_123" />
+    </label>
+
+    <div class="actions">
+      <button type="submit" [disabled]="isLoading()">Applica</button>
+      <button type="button" class="ghost" (click)="reset()" [disabled]="isLoading()">Reset</button>
+    </div>
+  </form>
+</section>

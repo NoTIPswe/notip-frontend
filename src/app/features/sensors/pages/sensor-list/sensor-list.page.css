@@ -1,0 +1,79 @@
+.sensor-list-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  max-width: 1200px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.filter-row {
+  display: flex;
+  align-items: end;
+  gap: 0.7rem;
+}
+
+.filter-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  color: #364152;
+}
+
+.filter-row input {
+  height: 2.2rem;
+  border: 1px solid #d4dae3;
+  border-radius: 8px;
+  padding: 0 0.65rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+button {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #fff;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+}
+
+button.ghost {
+  background: #fff;
+  color: #1e293b;
+}
+
+.meta {
+  margin: 0;
+  color: #576074;
+  font-size: 0.9rem;
+}
+
+.error {
+  margin: 0;
+  color: #b91c1c;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.6rem;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.88rem;
+}

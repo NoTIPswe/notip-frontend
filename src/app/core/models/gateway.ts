@@ -18,10 +18,10 @@ export interface GatewayUpdateResult {
 export interface ObfuscatedGateway {
   gatewayId: string;
   tenantId: string;
-  model?: string;
+  model: string;
   firmware?: string;
   provisioned?: boolean;
-  factoryId?: string;
+  factoryId: string;
   createdAt?: string;
 }
 
@@ -29,4 +29,5 @@ export interface AddGatewayParameters {
   factoryId: string;
   tenantId: string;
   factoryKeyHash: string;
+  model: string;
 }

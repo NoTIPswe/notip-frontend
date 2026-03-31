@@ -1,5 +1,5 @@
 import { Injectable, Signal, signal, inject } from '@angular/core';
-import { map, Observable, tap } from 'rxjs';
+import { finalize, map, Observable, tap } from 'rxjs';
 import {
   GatewayResponseDto,
   GatewaysService as GatewaysApiService,
@@ -24,8 +24,8 @@ export class GatewayService {
       map((rows) => rows.map((row) => this.toGateway(row))),
       tap((rows) => {
         this.listSignal.set(rows);
-        this.loadingSignal.set(false);
       }),
+      finalize(() => this.loadingSignal.set(false)),
     );
   }
 
@@ -36,8 +36,8 @@ export class GatewayService {
       map((dto) => this.toGateway(dto)),
       tap((gateway) => {
         this.selectedGatewaySignal.set(gateway);
-        this.loadingSignal.set(false);
       }),
+      finalize(() => this.loadingSignal.set(false)),
     );
   }
 

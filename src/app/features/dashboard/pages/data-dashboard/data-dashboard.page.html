@@ -1,0 +1,14 @@
+<section class="dashboard-page">
+  <h2>Dashboard Dati</h2>
+
+  <p class="meta">Stream status: {{ streamStatus() }} | Records: {{ measures().length }}</p>
+
+  <app-filter-panel
+    (filtersApplied)="onFiltersApplied($event)"
+    (clearRequested)="onFiltersCleared()"
+  ></app-filter-panel>
+
+  <app-telemetry-table [measures]="measures()" [isLoading]="isLoading()"></app-telemetry-table>
+
+  <app-telemetry-chart [measures]="measures()"></app-telemetry-chart>
+</section>

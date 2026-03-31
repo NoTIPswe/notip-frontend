@@ -1,0 +1,72 @@
+<section class="sensor-list-page">
+  <h2>Lista Sensori</h2>
+
+  <form class="filter-row" (submit)="$event.preventDefault()">
+    <label>
+      Gateway ID
+      <input
+        #gatewayFilterInput
+        type="text"
+        (input)="onFilterChanged(gatewayFilterInput.value, typeFilterInput.value)"
+      />
+    </label>
+
+    <label>
+      Sensor Type
+      <input
+        #typeFilterInput
+        type="text"
+        (input)="onFilterChanged(gatewayFilterInput.value, typeFilterInput.value)"
+      />
+    </label>
+
+    <div class="actions">
+      <button
+        type="button"
+        class="ghost"
+        (click)="onClearFilters(gatewayFilterInput, typeFilterInput)"
+      >
+        Pulisci
+      </button>
+    </div>
+  </form>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  @if (isLoading()) {
+    <p class="meta">Caricamento sensori...</p>
+  }
+
+  @if (!isLoading() && filteredSensors().length === 0) {
+    <p class="meta">Nessun sensore trovato.</p>
+  }
+
+  @if (filteredSensors().length > 0) {
+    <table>
+      <thead>
+        <tr>
+          <th>Sensor ID</th>
+          <th>Gateway ID</th>
+          <th>Type</th>
+          <th>Last seen</th>
+          <th>Azioni</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (sensor of filteredSensors(); track sensor.sensorId) {
+          <tr>
+            <td>{{ sensor.sensorId }}</td>
+            <td>{{ sensor.gatewayId }}</td>
+            <td>{{ sensor.sensorType }}</td>
+            <td>{{ sensor.lastSeen }}</td>
+            <td>
+              <button type="button" (click)="openSensorDetail(sensor.sensorId)">Dettaglio</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>

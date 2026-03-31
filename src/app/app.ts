@@ -3,7 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { IMPERSONATION_STATUS, ImpersonationStatus } from './core/auth/contracts';
 import { UserRole } from './core/models/enums';
 import { AuthService } from './core/services/auth.service';
-import { SidebarComponent } from './shared/components/sidebar.component';
+import { SidebarComponent } from './shared/components/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-root',

@@ -1,0 +1,12 @@
+<button
+  type="button"
+  class="impersonate-btn"
+  (click)="requestImpersonation()"
+  [disabled]="disabled() || inProgress()"
+>
+  @if (inProgress()) {
+    Avvio...
+  } @else {
+    Impersona
+  }
+</button>

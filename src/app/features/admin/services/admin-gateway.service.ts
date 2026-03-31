@@ -18,16 +18,11 @@ export class AdminGatewayService {
             gatewayId: this.asString(row['id']),
             tenantId: this.asString(row['tenant_id']),
             provisioned: Boolean(row['provisioned']),
+            model: this.asString(row['model']),
+            factoryId: this.asString(row['factory_id']),
           };
-
-          if (row['model']) {
-            mapped.model = this.asString(row['model']);
-          }
           if (row['firmware']) {
             mapped.firmware = this.asString(row['firmware']);
-          }
-          if (row['factory_id']) {
-            mapped.factoryId = this.asString(row['factory_id']);
           }
           if (row['created_at']) {
             mapped.createdAt = this.asString(row['created_at']);

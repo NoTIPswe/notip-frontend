@@ -1,0 +1,34 @@
+<section class="audit-filter-panel">
+  <h3>Filtri Audit</h3>
+
+  <form
+    (submit)="
+      submit($event, fromInput.value, toInput.value, userIdsInput.value, actionsInput.value)
+    "
+  >
+    <label>
+      Da
+      <input #fromInput type="datetime-local" [value]="from()" />
+    </label>
+
+    <label>
+      A
+      <input #toInput type="datetime-local" [value]="to()" />
+    </label>
+
+    <label>
+      User IDs (csv)
+      <input #userIdsInput type="text" [value]="userIds()" placeholder="u1,u2" />
+    </label>
+
+    <label>
+      Actions (csv)
+      <input #actionsInput type="text" [value]="actions()" placeholder="login,create,update" />
+    </label>
+
+    <div class="actions-row">
+      <button type="submit" [disabled]="isLoading()">Applica</button>
+      <button type="button" class="ghost" (click)="reset()" [disabled]="isLoading()">Reset</button>
+    </div>
+  </form>
+</section>

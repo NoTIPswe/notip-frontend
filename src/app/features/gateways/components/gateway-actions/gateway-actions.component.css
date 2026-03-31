@@ -1,0 +1,45 @@
+.gateway-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+}
+
+h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.hint {
+  margin: 0;
+  color: #576074;
+  font-size: 0.9rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+button {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #1e293b;
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+}
+
+button.danger {
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}

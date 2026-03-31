@@ -1,0 +1,25 @@
+<section class="tenant-manager">
+  <h2>Tenant Manager</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  <app-tenant-table
+    [tenants]="tenants()"
+    [selectedTenantId]="selectedTenantId()"
+    [isLoading]="isLoading()"
+    (selected)="onTenantSelected($event)"
+    (editRequested)="onEditTenantRequested($event)"
+    (deleteRequested)="onDeleteTenantRequested($event)"
+  ></app-tenant-table>
+
+  <app-tenant-form
+    [tenantId]="editingTenant()?.tenantId ?? null"
+    [initialName]="editingTenant()?.name ?? ''"
+    [isSaving]="isSaving()"
+    (createRequested)="onCreateRequested($event)"
+    (updateRequested)="onUpdateRequested($event)"
+    (cancelRequested)="onCancelEdit()"
+  ></app-tenant-form>
+</section>

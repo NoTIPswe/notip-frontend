@@ -1,0 +1,44 @@
+.gateway-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  padding: 0.9rem;
+}
+
+.gateway-card.selected {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 2px #dbeafe;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.meta {
+  margin: 0;
+  color: #576074;
+  font-size: 0.87rem;
+}
+
+.actions {
+  margin-top: 0.3rem;
+}
+
+button {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #fff;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+}

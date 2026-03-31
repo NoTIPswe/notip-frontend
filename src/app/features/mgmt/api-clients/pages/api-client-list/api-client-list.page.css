@@ -1,0 +1,78 @@
+.api-client-page {
+  display: grid;
+  gap: 0.9rem;
+  max-width: 1100px;
+}
+
+h2,
+h3 {
+  margin: 0;
+}
+
+.create-form {
+  display: flex;
+  gap: 0.6rem;
+  align-items: end;
+}
+
+label {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.88rem;
+  color: #364152;
+}
+
+input {
+  height: 2.1rem;
+  border: 1px solid #d4dae3;
+  border-radius: 8px;
+  padding: 0 0.6rem;
+  min-width: 260px;
+}
+
+button {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #fff;
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+}
+
+.error,
+.info {
+  margin: 0;
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.9rem;
+}
+
+.error {
+  color: #b91c1c;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+}
+
+.info {
+  color: #0f766e;
+  background: #ecfeff;
+  border: 1px solid #a5f3fc;
+}
+
+.secret-box {
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+  background: #fffbeb;
+  padding: 0.8rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.secret-box p {
+  margin: 0;
+}
+
+.hint {
+  color: #92400e;
+  font-size: 0.86rem;
+}

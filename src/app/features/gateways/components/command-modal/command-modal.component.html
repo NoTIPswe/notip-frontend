@@ -1,0 +1,43 @@
+@if (open()) {
+  <section class="command-modal">
+    <div class="header-row">
+      <h3>Invia comando</h3>
+      <button type="button" class="ghost" (click)="close()" [disabled]="busy()">Chiudi</button>
+    </div>
+
+    @if (mode() === 'config') {
+      <form (submit)="submitConfig($event, sendFrequency.value, status.value)">
+        <label>
+          Send frequency (ms)
+          <input #sendFrequency type="number" min="1000" step="100" required />
+        </label>
+
+        <label>
+          Status
+          <select #status>
+            <option value="online">online</option>
+            <option value="paused">paused</option>
+          </select>
+        </label>
+
+        <button type="submit" [disabled]="busy()">Invia config</button>
+      </form>
+    }
+
+    @if (mode() === 'firmware') {
+      <form (submit)="submitFirmware($event, version.value, url.value)">
+        <label>
+          Firmware version
+          <input #version type="text" required minlength="2" />
+        </label>
+
+        <label>
+          Download URL
+          <input #url type="url" required />
+        </label>
+
+        <button type="submit" [disabled]="busy()">Invia firmware</button>
+      </form>
+    }
+  </section>
+}

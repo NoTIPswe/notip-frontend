@@ -1,0 +1,18 @@
+<section class="audit-log-page">
+  <h2>Audit Log</h2>
+  <app-audit-filter-panel
+    [from]="from()"
+    [to]="to()"
+    [userIds]="userIds()"
+    [actions]="actions()"
+    [isLoading]="isLoading()"
+    (filterSubmitted)="applyFilters($event)"
+    (resetRequested)="resetFilters()"
+  ></app-audit-filter-panel>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  <app-audit-log-table [logs]="logs()" [isLoading]="isLoading()"></app-audit-log-table>
+</section>

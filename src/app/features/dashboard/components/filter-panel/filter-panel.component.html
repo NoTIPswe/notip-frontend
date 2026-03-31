@@ -1,0 +1,31 @@
+<section class="filter-panel">
+  <h3>Filtri stream</h3>
+
+  <form (submit)="applyFilters($event, gatewayIds.value, sensorIds.value, sensorTypes.value)">
+    <label>
+      Gateway IDs (csv)
+      <input #gatewayIds type="text" placeholder="gw-1,gw-2" />
+    </label>
+
+    <label>
+      Sensor IDs (csv)
+      <input #sensorIds type="text" placeholder="s1,s2" />
+    </label>
+
+    <label>
+      Sensor Types (csv)
+      <input #sensorTypes type="text" placeholder="temperature,humidity" />
+    </label>
+
+    <div class="actions">
+      <button type="submit">Applica</button>
+      <button
+        type="button"
+        class="ghost"
+        (click)="clearFilters(gatewayIds, sensorIds, sensorTypes)"
+      >
+        Pulisci
+      </button>
+    </div>
+  </form>
+</section>

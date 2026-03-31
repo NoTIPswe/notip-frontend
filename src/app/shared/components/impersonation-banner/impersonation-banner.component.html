@@ -1,0 +1,6 @@
+@if (active()) {
+  <section class="impersonation-banner">
+    <p class="title">Modalita impersonazione attiva</p>
+    <p class="details">Stai operando come utente {{ impersonatedUserId() || 'sconosciuto' }}.</p>
+  </section>
+}

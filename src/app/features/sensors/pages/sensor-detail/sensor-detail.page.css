@@ -1,0 +1,36 @@
+.sensor-detail-page {
+  display: grid;
+  gap: 1rem;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid #d9e2ec;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.summary p {
+  margin: 0;
+  color: #243b53;
+  font-size: 0.95rem;
+}
+
+.meta {
+  margin: 0;
+  color: #52606d;
+  font-size: 0.95rem;
+}
+
+.error {
+  margin: 0;
+  color: #8a1c1c;
+  background: #fde8e8;
+  border: 1px solid #f8b4b4;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+}

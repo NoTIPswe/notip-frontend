@@ -1,0 +1,41 @@
+<section class="admin-gateway-table">
+  <div class="header-row">
+    <h3>Gateways</h3>
+    @if (isLoading()) {
+      <span class="status">Caricamento...</span>
+    }
+  </div>
+
+  @if (!isLoading() && gateways().length === 0) {
+    <p class="empty">Nessun gateway disponibile.</p>
+  }
+
+  @if (gateways().length > 0) {
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tenant ID</th>
+          <th>Model</th>
+          <th>Firmware</th>
+          <th>Provisioned</th>
+          <th>Factory ID</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (gateway of gateways(); track gateway.gatewayId) {
+          <tr>
+            <td>{{ gateway.gatewayId }}</td>
+            <td>{{ gateway.tenantId }}</td>
+            <td>{{ gateway.model || '-' }}</td>
+            <td>{{ gateway.firmware ?? '-' }}</td>
+            <td>{{ gateway.provisioned ? 'yes' : 'no' }}</td>
+            <td>{{ gateway.factoryId || '-' }}</td>
+            <td>{{ gateway.createdAt ?? '-' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>

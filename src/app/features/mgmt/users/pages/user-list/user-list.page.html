@@ -1,0 +1,36 @@
+<section class="user-list-page">
+  <h2>Gestione Utenti</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  @if (infoMessage()) {
+    <p class="info">{{ infoMessage() }}</p>
+  }
+
+  <app-user-table
+    [users]="users()"
+    [isLoading]="isLoading()"
+    [selectedUserId]="editingUserId()"
+    (editRequested)="requestEdit($event)"
+    (deleteRequested)="requestDelete($event)"
+  ></app-user-table>
+
+  <app-user-form
+    [editUser]="editingUser()"
+    [isSaving]="isSaving()"
+    (createRequested)="createUser($event)"
+    (updateRequested)="updateUser($event)"
+    (cancelRequested)="cancelEdit()"
+  ></app-user-form>
+
+  <app-delete-confirm-modal
+    [open]="!!deletingUserId()"
+    [title]="'Eliminare utente'"
+    [message]="'Confermi l\'eliminazione dell\'utente selezionato?'"
+    [busy]="isSaving()"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()"
+  ></app-delete-confirm-modal>
+</section>

@@ -1,0 +1,39 @@
+<section class="tenant-user-list">
+  <div class="header-row">
+    <h3>Utenti Tenant (oscurati)</h3>
+    @if (isLoading()) {
+      <span class="status">Caricamento...</span>
+    }
+  </div>
+
+  @if (!isLoading() && users().length === 0) {
+    <p class="empty">Nessun utente disponibile per questo tenant.</p>
+  }
+
+  @if (users().length > 0) {
+    <table>
+      <thead>
+        <tr>
+          <th>User ID</th>
+          <th>Ruolo</th>
+          <th>Azioni</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (user of users(); track user.userId) {
+          <tr>
+            <td>{{ user.userId }}</td>
+            <td>{{ user.role }}</td>
+            <td>
+              <app-impersonate-button
+                [userId]="user.userId"
+                (started)="onStarted($event)"
+                (failed)="onFailed($event)"
+              ></app-impersonate-button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>

@@ -1,0 +1,24 @@
+<section class="sensor-detail-page">
+  <h2>Dettaglio Sensore</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  @if (sensor()) {
+    <section class="summary">
+      <p><strong>Sensor ID:</strong> {{ sensor()!.sensorId }}</p>
+      <p><strong>Gateway ID:</strong> {{ sensor()!.gatewayId }}</p>
+      <p><strong>Type:</strong> {{ sensor()!.sensorType }}</p>
+      <p><strong>Last seen:</strong> {{ sensor()!.lastSeen }}</p>
+    </section>
+  }
+
+  <p class="meta">Stream status: {{ streamStatus() }} | Record: {{ telemetry().length }}</p>
+
+  <app-telemetry-table
+    [measures]="telemetry()"
+    [isLoading]="isTelemetryLoading()"
+  ></app-telemetry-table>
+  <app-telemetry-chart [measures]="telemetry()"></app-telemetry-chart>
+</section>

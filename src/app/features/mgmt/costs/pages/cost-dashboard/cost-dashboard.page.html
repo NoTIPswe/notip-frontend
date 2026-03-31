@@ -1,0 +1,9 @@
+<section class="cost-dashboard-page">
+  <h2>Dashboard Costi</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  <app-cost-card [costs]="costs()" [isLoading]="isLoading()"></app-cost-card>
+</section>

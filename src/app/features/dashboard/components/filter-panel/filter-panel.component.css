@@ -1,0 +1,52 @@
+.filter-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+}
+
+h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+form {
+  display: grid;
+  gap: 0.65rem;
+}
+
+label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  color: #364152;
+}
+
+input {
+  height: 2.2rem;
+  border: 1px solid #d4dae3;
+  border-radius: 8px;
+  padding: 0 0.65rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+button {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #fff;
+  padding: 0.45rem 0.8rem;
+  cursor: pointer;
+}
+
+button.ghost {
+  background: #fff;
+  color: #1e293b;
+}

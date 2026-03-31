@@ -1,0 +1,37 @@
+<section class="api-client-page">
+  <h2>Client API</h2>
+
+  <form
+    class="create-form"
+    (submit)="$event.preventDefault(); createClient(name.value); name.value = ''"
+  >
+    <label>
+      Nome client
+      <input #name type="text" required minlength="2" placeholder="Backoffice integration" />
+    </label>
+    <button type="submit" [disabled]="isSaving()">Crea client</button>
+  </form>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  @if (infoMessage()) {
+    <p class="info">{{ infoMessage() }}</p>
+  }
+
+  @if (lastCreated()) {
+    <section class="secret-box">
+      <h3>Nuovo client creato</h3>
+      <p><strong>Client ID:</strong> {{ lastCreated()!.clientId }}</p>
+      <p><strong>Client Secret:</strong> {{ lastCreated()!.clientSecret }}</p>
+      <p class="hint">Conserva il secret: non sara mostrato di nuovo.</p>
+    </section>
+  }
+
+  <app-api-client-table
+    [clients]="clients()"
+    [isLoading]="isLoading()"
+    (deleteRequested)="requestDelete($event)"
+  ></app-api-client-table>
+</section>

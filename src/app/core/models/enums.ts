@@ -4,6 +4,11 @@ export enum UserRole {
   tenant_user = 'tenant_user',
 }
 
+export enum TenantStatus {
+  active = 'active',
+  suspended = 'suspended',
+}
+
 export enum CommandStatus {
   queued = 'queued',
   ack = 'ack',

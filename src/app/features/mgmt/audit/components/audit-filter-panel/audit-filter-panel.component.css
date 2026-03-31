@@ -1,0 +1,53 @@
+.audit-filter-panel {
+  display: grid;
+  gap: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  padding: 0.85rem;
+}
+
+h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.55rem;
+}
+
+label {
+  display: grid;
+  gap: 0.2rem;
+  color: #364152;
+  font-size: 0.88rem;
+}
+
+input {
+  height: 2.1rem;
+  border: 1px solid #d4dae3;
+  border-radius: 8px;
+  padding: 0 0.55rem;
+}
+
+.actions-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: end;
+}
+
+button {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #fff;
+  padding: 0.42rem 0.75rem;
+  cursor: pointer;
+}
+
+button.ghost {
+  background: #fff;
+  color: #1e293b;
+}

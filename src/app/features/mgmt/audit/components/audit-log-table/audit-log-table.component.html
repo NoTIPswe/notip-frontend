@@ -1,0 +1,37 @@
+<section class="audit-log-table">
+  <div class="header-row">
+    <h3>Log Audit</h3>
+    @if (isLoading()) {
+      <span class="status">Caricamento...</span>
+    }
+  </div>
+
+  @if (!isLoading() && logs().length === 0) {
+    <p class="empty">Nessun log disponibile.</p>
+  }
+
+  @if (logs().length > 0) {
+    <table>
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>User ID</th>
+          <th>Azione</th>
+          <th>Risorsa</th>
+          <th>Dettagli</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (log of logs(); track log.id) {
+          <tr>
+            <td>{{ log.timestamp }}</td>
+            <td>{{ log.userId }}</td>
+            <td>{{ log.action }}</td>
+            <td>{{ log.resource }}</td>
+            <td>{{ log.details }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>
