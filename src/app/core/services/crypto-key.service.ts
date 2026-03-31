@@ -34,6 +34,10 @@ export class CryptoKeyService {
     return this.keysApi.keysControllerGetKeys('').pipe(map((rows) => this.toGatewayKeyMap(rows)));
   }
 
+  isImpersonating(): boolean {
+    return this.impersonationStatus.isImpersonating();
+  }
+
   /*getCachedVersion(gatewayId: string): number | null {
     return this.versions.get(gatewayId) ?? null;
   }

@@ -1,5 +1,7 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, effect, signal, inject } from '@angular/core';
 import { Observable, Subject, map } from 'rxjs';
+import { KEYCLOAK_EVENT_SIGNAL, KeycloakEventType } from 'keycloak-angular';
+import Keycloak from 'keycloak-js';
 import { AuthService as AuthApiService } from '../../generated/openapi/notip-management-api-openapi';
 import { ImpersonationStatus, SessionLifeCycle } from '../auth/contracts';
 import { UserRole } from '../models/enums';
@@ -8,11 +10,16 @@ interface JwtPayload {
   sub?: string;
   preferred_username?: string;
   tenant_id?: string;
-  role?: UserRole;
+  role?: string;
+  realm_access?: {
+    roles?: string[];
+  };
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService implements SessionLifeCycle, ImpersonationStatus {
+  private readonly keycloak = inject(Keycloak);
+  private readonly keycloakEventSignal = inject(KEYCLOAK_EVENT_SIGNAL);
   private readonly authApi = inject(AuthApiService);
 
   private readonly logoutSubject = new Subject<void>();
@@ -21,20 +28,42 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
   readonly logout$: Observable<void> = this.logoutSubject.asObservable();
   readonly isImpersonating = this.impersonatingSignal.asReadonly();
 
+  constructor() {
+    effect(() => {
+      const event = this.keycloakEventSignal();
+      if (event.type === KeycloakEventType.AuthLogout) {
+        this.impersonatingSignal.set(false);
+        this.logoutSubject.next();
+      }
+    });
+  }
+
   init(): Promise<boolean> {
-    return Promise.resolve(true);
+    return Promise.resolve(Boolean(this.keycloak.authenticated));
   }
 
   login(): void {
-    // Actual OIDC redirect is environment-specific and will be wired via keycloak-angular.
+    void this.keycloak.login();
   }
 
   logout(): void {
+    this.impersonatingSignal.set(false);
     this.logoutSubject.next();
+    void this.keycloak.logout({ redirectUri: globalThis.location.origin });
   }
 
-  getToken(): Promise<string> {
-    return Promise.resolve(localStorage.getItem('access_token') ?? '');
+  async getToken(): Promise<string> {
+    if (!this.keycloak.authenticated) {
+      return '';
+    }
+
+    try {
+      await this.keycloak.updateToken(30);
+    } catch {
+      return this.keycloak.token ?? '';
+    }
+
+    return this.keycloak.token ?? '';
   }
 
   getUsername(): Promise<string> {
@@ -42,9 +71,18 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
   }
 
   getRole(): UserRole {
-    const role = this.decodeJwtPayload().role;
+    const payload = this.decodeJwtPayload();
+    const role = payload.role;
     if (role === UserRole.system_admin || role === UserRole.tenant_admin) {
-      return role;
+      return role as UserRole;
+    }
+
+    const realmRoles = payload.realm_access?.roles ?? [];
+    if (realmRoles.includes(UserRole.system_admin)) {
+      return UserRole.system_admin;
+    }
+    if (realmRoles.includes(UserRole.tenant_admin)) {
+      return UserRole.tenant_admin;
     }
 
     return UserRole.tenant_user;
@@ -69,22 +107,7 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
   }
 
   private decodeJwtPayload(): JwtPayload {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      return {};
-    }
-
-    const payloadPart = token.split('.')[1];
-    if (!payloadPart) {
-      return {};
-    }
-
-    try {
-      const normalized = payloadPart.replaceAll('-', '+').replaceAll('_', '/');
-      const decoded = atob(normalized);
-      return JSON.parse(decoded) as JwtPayload;
-    } catch {
-      return {};
-    }
+    const parsed = this.keycloak.tokenParsed as JwtPayload | undefined;
+    return parsed ?? {};
   }
 }

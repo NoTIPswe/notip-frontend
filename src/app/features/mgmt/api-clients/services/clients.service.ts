@@ -13,12 +13,10 @@ export class ClientsService {
         (rows as Record<string, unknown>[]).map((row) => {
           const mapped: Client = {
             id: this.asString(row['id']),
+            clientId: this.asString(row['client_id']),
             name: this.asString(row['name']),
+            createdAt: this.asString(row['created_at']),
           };
-
-          if (row['created_at']) {
-            mapped.createdAt = this.asString(row['created_at']);
-          }
 
           return mapped;
         }),
@@ -32,13 +30,11 @@ export class ClientsService {
         const dict = res as Record<string, unknown>;
         const mapped: SecretClient = {
           id: this.asString(dict['id']),
+          clientId: this.asString(dict['client_id']),
           name: this.asString(dict['name']),
           clientSecret: this.asString(dict['client_secret']),
+          createdAt: this.asString(dict['created_at']),
         };
-
-        if (dict['created_at']) {
-          mapped.createdAt = this.asString(dict['created_at']);
-        }
 
         return mapped;
       }),

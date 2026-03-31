@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map, scan } from 'rxjs';
+import { Observable, catchError, forkJoin, from, map, mergeMap, of, scan, switchMap } from 'rxjs';
 import { SESSION_LIFECYCLE, SessionLifeCycle } from '../../../core/auth/contracts';
 import { StreamStatus } from '../../../core/models/enums';
 import {
+  DecryptedTelemetry,
   DecryptedEnvelope,
   ExportParameters,
   MeasurePage,
@@ -13,14 +13,15 @@ import {
   StreamParameters,
   TelemetryEnvelope,
 } from '../../../core/models/measure';
+import { MeasuresService as DataApiMeasuresService } from '../../../generated/openapi/notip-data-api-openapi/api/measures.service';
 import { MeasureStreamManagerService } from '../../../core/services/measure-stream-manager.service';
 import { WorkerOrchestratorService } from '../../../core/services/worker-orchestrator.service';
 
 @Injectable({ providedIn: 'root' })
 export class MeasureService {
-  private readonly http = inject(HttpClient);
+  private readonly measuresApi = inject(DataApiMeasuresService);
   private readonly msm = inject(MeasureStreamManagerService);
-  private readonly os = inject(WorkerOrchestratorService);
+  private readonly wos = inject(WorkerOrchestratorService);
 
   constructor() {
     const slc = inject<SessionLifeCycle>(SESSION_LIFECYCLE);
@@ -34,54 +35,35 @@ export class MeasureService {
     this.msm.openStream(sp);
 
     return this.msm.stream$().pipe(
-      map((envelope) => this.mapEnvelope(envelope)),
+      mergeMap((envelope) => this.decryptEnvelope(envelope)),
       scan((acc, current) => [...acc, current], [] as ProcessedEnvelope[]),
     );
   }
 
   query(qp: QueryParameters): Observable<MeasurePage> {
-    let params = new HttpParams()
-      .set('from', qp.from)
-      .set('to', qp.to)
-      .set('limit', String(qp.limit ?? 100));
-
-    if (qp.cursor) {
-      params = params.set('cursor', qp.cursor);
-    }
-
-    for (const gatewayId of qp.gatewayIds ?? []) {
-      params = params.append('gatewayId', gatewayId);
-    }
-
-    for (const sensorType of qp.sensorTypes ?? []) {
-      params = params.append('sensorType', sensorType);
-    }
-
-    for (const sensorId of qp.sensorIds ?? []) {
-      params = params.append('sensorId', sensorId);
-    }
-
-    return this.http.get<MeasurePage>('/api/data/measures/query', { params });
+    return this.measuresApi
+      .measureControllerQuery(
+        qp.from,
+        qp.to,
+        qp.limit ?? 100,
+        qp.cursor,
+        qp.gatewayIds,
+        qp.sensorIds,
+        qp.sensorTypes,
+      )
+      .pipe(switchMap((response) => this.toMeasurePage(response as unknown)));
   }
 
   export(dp: ExportParameters): Observable<ProcessedEnvelope[]> {
-    let params = new HttpParams().set('from', dp.from).set('to', dp.to);
-
-    for (const gatewayId of dp.gatewayIds ?? []) {
-      params = params.append('gatewayId', gatewayId);
-    }
-
-    for (const sensorType of dp.sensorTypes ?? []) {
-      params = params.append('sensorType', sensorType);
-    }
-
-    for (const sensorId of dp.sensorIds ?? []) {
-      params = params.append('sensorId', sensorId);
-    }
-
-    return this.http
-      .get<TelemetryEnvelope[]>('/api/data/measures/export', { params })
-      .pipe(map((rows) => rows.map((row) => this.mapEnvelope(row))));
+    return this.measuresApi
+      .measureControllerExport(dp.from, dp.to, dp.gatewayIds, dp.sensorIds, dp.sensorTypes)
+      .pipe(
+        switchMap((rows) =>
+          this.decryptEnvelopes(
+            Array.isArray(rows) ? (rows as unknown as TelemetryEnvelope[]) : [],
+          ),
+        ),
+      );
   }
 
   closeStream(): void {
@@ -92,30 +74,73 @@ export class MeasureService {
     return this.msm.streamStatus();
   }
 
-  mapEnvelope(envelope: TelemetryEnvelope): ProcessedEnvelope {
-    if (!this.os.keysInitialized()()) {
-      const obfuscated: ObfuscatedEnvelope = {
-        type: 'obfuscated',
-        gatewayId: envelope.gatewayId,
-        sensorId: envelope.sensorId,
-        sensorType: envelope.sensorType,
-        timestamp: envelope.timestamp,
-      };
+  private decryptEnvelope(envelope: TelemetryEnvelope): Observable<ProcessedEnvelope> {
+    return from(this.wos.decryptEnvelope(envelope)).pipe(
+      map((decrypted) => this.toDecryptedEnvelope(decrypted)),
+      catchError(() => of(this.toObfuscatedEnvelope(envelope))),
+    );
+  }
 
-      return obfuscated;
+  private decryptEnvelopes(envelopes: TelemetryEnvelope[]): Observable<ProcessedEnvelope[]> {
+    if (envelopes.length === 0) {
+      return of([]);
     }
 
-    const decrypted: DecryptedEnvelope = {
+    return forkJoin(envelopes.map((envelope) => this.decryptEnvelope(envelope)));
+  }
+
+  private toMeasurePage(response: unknown): Observable<MeasurePage> {
+    const page = this.asRecord(response);
+    const data = Array.isArray(page['data']) ? (page['data'] as TelemetryEnvelope[]) : [];
+
+    return this.decryptEnvelopes(data).pipe(
+      map((rows) => {
+        const nextCursor = this.asOptionalString(page['nextCursor']);
+
+        if (nextCursor) {
+          return {
+            data: rows,
+            nextCursor,
+            hasMore: Boolean(page['hasMore']),
+          };
+        }
+
+        return {
+          data: rows,
+          hasMore: Boolean(page['hasMore']),
+        };
+      }),
+    );
+  }
+
+  private toDecryptedEnvelope(decrypted: DecryptedTelemetry): DecryptedEnvelope {
+    return {
       type: 'decrypted',
+      gatewayId: decrypted.gatewayId,
+      sensorId: decrypted.sensorId,
+      sensorType: decrypted.sensorType,
+      timestamp: decrypted.timestamp,
+      value: decrypted.value,
+      unit: decrypted.unit,
+      isOutOfBounds: false,
+    };
+  }
+
+  private toObfuscatedEnvelope(envelope: TelemetryEnvelope): ObfuscatedEnvelope {
+    return {
+      type: 'obfuscated',
       gatewayId: envelope.gatewayId,
       sensorId: envelope.sensorId,
       sensorType: envelope.sensorType,
       timestamp: envelope.timestamp,
-      value: Number.NaN,
-      unit: '',
-      isOutOfBounds: false,
     };
+  }
 
-    return decrypted;
+  private asRecord(value: unknown): Record<string, unknown> {
+    return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
+  }
+
+  private asOptionalString(value: unknown): string | undefined {
+    return typeof value === 'string' ? value : undefined;
   }
 }

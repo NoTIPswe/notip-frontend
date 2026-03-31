@@ -2,13 +2,11 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
 import { UserRole } from './core/models/enums';
-import { LoginPageComponent } from './features/auth/pages/login.page';
 import { ErrorPageComponent } from './features/system/pages/error.page';
 import { PlaceholderPageComponent } from './shared/components/placeholder-page.component';
 import { DashboardResolver } from './core/resolvers/dashboard.resolver';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginPageComponent },
   {
     path: 'dashboard',
     component: PlaceholderPageComponent,

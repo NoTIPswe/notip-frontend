@@ -9,6 +9,15 @@ paths:
           description: ''
       tags:
         - App
+  /health:
+    get:
+      operationId: AppController_getHealth
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - App
   /admin/gateways:
     get:
       operationId: GatewaysController_getAdminGateways

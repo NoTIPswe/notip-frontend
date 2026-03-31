@@ -11,6 +11,7 @@ export interface TelemetryEnvelope {
   encryptedData: string;
   iv: string;
   authTag: string;
+  unit: string;
 }
 
 export interface DecryptedTelemetry {
@@ -19,6 +20,7 @@ export interface DecryptedTelemetry {
   sensorType: string;
   timestamp: string;
   value: number;
+  unit: string;
 }
 
 export interface DecryptedBatchProgress {

@@ -46,7 +46,7 @@ export class GatewayService {
 
     return this.gatewaysApi.gatewaysControllerUpdateGateway(gatewayId, body).pipe(
       map((dto) => ({
-        id: dto.id,
+        gatewayId: dto.id,
         name: dto.name,
         status: dto.status,
         updatedAt: dto.updated_at,
@@ -76,7 +76,7 @@ export class GatewayService {
 
   private toGateway(dto: GatewayResponseDto): Gateway {
     return {
-      id: dto.id,
+      gatewayId: dto.id,
       name: dto.name,
       status: dto.status,
       lastSeenAt: dto.last_seen_at,

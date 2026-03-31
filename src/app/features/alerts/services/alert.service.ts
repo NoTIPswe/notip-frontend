@@ -9,6 +9,7 @@ import {
   Alerts,
   AlertsConfig,
   AlertsFilter,
+  AlertsType,
   DefaultAlertsConfig,
   GatewayAlertsConfig,
 } from '../../../core/models/alert';
@@ -20,24 +21,25 @@ export class AlertService {
   getAlertsConfig(): Observable<AlertsConfig> {
     return this.alertsApi.alertsControllerGetAlertsConfig().pipe(
       map((row) => {
+        const data = this.asRecord(row);
+        const gatewayConfigs = data['gateway_configs'];
+
         const cfg: AlertsConfig = {
           default: {
-            timeoutMs: Number(
-              (row as Record<string, unknown>)['tenant_unreachable_timeout_ms'] ?? 0,
-            ),
+            tenantId: this.asString(data['tenant_id']),
+            timeoutMs: this.asNumber(data['tenant_unreachable_timeout_ms']),
+            updatedAt: this.asString(data['updated_at']),
           },
         };
 
-        const gatewayConfigs = (row as Record<string, unknown>)['gateway_configs'] as
-          | Record<string, unknown>[]
-          | undefined
-          | null;
-
         if (Array.isArray(gatewayConfigs)) {
-          cfg.perGateway = gatewayConfigs.map((item) => ({
-            gatewayId: this.asString(item['gateway_id']),
-            timeoutMs: Number(item['gateway_unreachable_timeout_ms'] ?? 0),
-          }));
+          cfg.gatewayOverrides = gatewayConfigs.map((item) => {
+            const gatewayConfig = this.asRecord(item);
+            return {
+              gatewayId: this.asString(gatewayConfig['gateway_id']),
+              timeoutMs: this.asNumber(gatewayConfig['gateway_unreachable_timeout_ms']),
+            };
+          });
         }
 
         return cfg;
@@ -47,46 +49,76 @@ export class AlertService {
 
   setDefaultConfig(timeoutMs: number): Observable<DefaultAlertsConfig> {
     const body: SetAlertsConfigDefaultRequestDto = { tenant_unreachable_timeout_ms: timeoutMs };
-    return this.alertsApi
-      .alertsControllerSetDefaultAlertsConfig(body)
-      .pipe(map(() => ({ timeoutMs })));
+    return this.alertsApi.alertsControllerSetDefaultAlertsConfig(body).pipe(
+      map((row) => {
+        const data = this.asRecord(row);
+        return {
+          tenantId: this.asString(data['tenant_id']),
+          timeoutMs: this.asNumber(data['tenant_unreachable_timeout_ms'], timeoutMs),
+          updatedAt: this.asString(data['updated_at']),
+        };
+      }),
+    );
   }
 
   sendGatewayConfig(gatewayId: string, timeoutMs: number): Observable<GatewayAlertsConfig> {
     const body: SetGatewayAlertsConfigRequestDto = {
       gateway_unreachable_timeout_ms: timeoutMs,
     };
-    return this.alertsApi
-      .alertsControllerSetGatewayAlertsConfig(gatewayId, body)
-      .pipe(map(() => ({ gatewayId, timeoutMs })));
+    return this.alertsApi.alertsControllerSetGatewayAlertsConfig(gatewayId, body).pipe(
+      map((row) => {
+        const data = this.asRecord(row);
+        return {
+          gatewayId: this.asString(data['gateway_id']) || gatewayId,
+          timeoutMs: this.asNumber(data['gateway_unreachable_timeout_ms'], timeoutMs),
+          updatedAt: this.asString(data['updated_at']),
+        };
+      }),
+    );
   }
 
   getAlerts(af: AlertsFilter): Observable<Alerts[]> {
     return this.alertsApi
       .alertsControllerGetAlerts(af.from, af.to, af.gatewayId?.[0])
-      .pipe(map((rows) => this.toAlerts(rows as Record<string, unknown>[])));
+      .pipe(
+        map((rows) =>
+          this.toAlerts(Array.isArray(rows) ? (rows as Record<string, unknown>[]) : []),
+        ),
+      );
   }
 
   deleteGatewayConfig(gatewayId: string): Observable<void> {
     return this.alertsApi
-      .alertsControllerSetGatewayAlertsConfig(gatewayId, { gateway_unreachable_timeout_ms: 0 })
+      .alertsControllerDeleteGatewayAlertsConfig(gatewayId)
       .pipe(map(() => void 0));
   }
 
   private toAlerts(rows: Record<string, unknown>[]): Alerts[] {
     return rows.map((row) => {
+      const data = this.asRecord(row);
       const mapped: Alerts = {
-        id: this.asString(row['id']),
-        gatewayId: this.asString(row['gateway_id']),
-        createdAt: this.asString(row['created_at']),
+        tenantId: this.asString(data['tenant_id']),
+        type: this.toAlertsType(data['type']),
+        gatewayId: this.asString(data['gateway_id']),
+        details: this.asString(data['details']) || this.asString(data['message']),
+        createdAt: this.asString(data['created_at']),
       };
-
-      if (row['message']) {
-        mapped.message = this.asString(row['message']);
-      }
 
       return mapped;
     });
+  }
+
+  private toAlertsType(value: unknown): AlertsType {
+    return value === AlertsType.GATEWAY_OFFLINE ? value : AlertsType.GATEWAY_OFFLINE;
+  }
+
+  private asRecord(value: unknown): Record<string, unknown> {
+    return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
+  }
+
+  private asNumber(value: unknown, fallback: number = 0): number {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
   }
 
   private asString(value: unknown): string {

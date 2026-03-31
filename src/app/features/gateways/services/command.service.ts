@@ -15,14 +15,24 @@ import {
   SendConfigRequestDto,
   SendFirmwareRequestDto,
 } from '../../../generated/openapi/notip-management-api-openapi';
-import { CommandStatus, CommandStatusUpdate } from '../../../core/models/command';
-import { GatewayConfig, GatewayFirmware } from '../../../core/models/command';
+import {
+  CmdGatewayStatus,
+  CommandStatus,
+  CommandStatusUpdate,
+  GatewayConfig,
+  GatewayFirmware,
+} from '../../../core/models/command';
 
 const TERMINAL_STATUSES = new Set<CommandStatus>([
   CommandStatus.ack,
   CommandStatus.nack,
   CommandStatus.expired,
   CommandStatus.timeout,
+]);
+
+const ALLOWED_CMD_GATEWAY_STATUSES = new Set<CmdGatewayStatus>([
+  CmdGatewayStatus.online,
+  CmdGatewayStatus.paused,
 ]);
 
 @Injectable({ providedIn: 'root' })
@@ -34,7 +44,7 @@ export class CommandService {
     if (typeof config.send_frequency_ms === 'number') {
       body.send_frequency_ms = config.send_frequency_ms;
     }
-    if (typeof config.status === 'string') {
+    if (this.isCmdGatewayStatus(config.status)) {
       body.status = config.status;
     }
 
@@ -101,5 +111,13 @@ export class CommandService {
       default:
         return CommandStatus.queued;
     }
+  }
+
+  private isCmdGatewayStatus(status: unknown): status is CmdGatewayStatus {
+    if (typeof status !== 'string') {
+      return false;
+    }
+
+    return ALLOWED_CMD_GATEWAY_STATUSES.has(status as CmdGatewayStatus);
   }
 }

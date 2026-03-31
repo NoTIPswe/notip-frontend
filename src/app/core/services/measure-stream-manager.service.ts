@@ -58,6 +58,12 @@ export class MeasureStreamManagerService {
         return;
       }
 
+      if (!token) {
+        this.statusSubject.next(StreamStatus.error);
+        this.auth.login();
+        return;
+      }
+
       let consecutiveMalformedMessages = 0;
 
       try {
@@ -90,6 +96,10 @@ export class MeasureStreamManagerService {
               consecutiveMalformedMessages += 1;
               this.throwIfTooManyMalformedMessages(consecutiveMalformedMessages);
               return;
+            }
+
+            if (this.isTokenExpiredEvent(parsed)) {
+              throw new Error('SSE token expired');
             }
 
             if (!this.isTelemetryEnvelope(parsed)) {
@@ -182,7 +192,17 @@ export class MeasureStreamManagerService {
       typeof row.encryptedData === 'string' &&
       typeof row.iv === 'string' &&
       typeof row.authTag === 'string' &&
-      typeof row.keyVersion === 'number'
+      typeof row.keyVersion === 'number' &&
+      typeof row.unit === 'string'
     );
+  }
+
+  private isTokenExpiredEvent(value: unknown): boolean {
+    if (typeof value !== 'object' || value === null) {
+      return false;
+    }
+
+    const payload = value as Record<string, unknown>;
+    return payload['type'] === 'error' && payload['reason'] === 'token_expired';
   }
 }

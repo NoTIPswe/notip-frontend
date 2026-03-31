@@ -1,11 +1,11 @@
 import { Injectable, Signal, inject, signal } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { SESSION_LIFECYCLE, SessionLifeCycle } from '../auth/contracts';
+import { CryptoKeyService } from './crypto-key.service';
 import {
   DecryptedBatchProgress,
   DecryptedTelemetry,
   GatewayKeyMap,
-  KeyVersionMismatchEvent,
   TelemetryEnvelope,
   WorkerError,
 } from '../models/measure';
@@ -14,12 +14,10 @@ import {
 export class WorkerOrchestratorService {
   private readonly ready = signal(false);
   private readonly keysReady = signal(false);
+  private readonly cryptoKeyService = inject(CryptoKeyService);
   private readonly workerErrorSubject = new Subject<WorkerError>();
-  private readonly keyVersionMismatchSubject = new Subject<KeyVersionMismatchEvent>();
 
   readonly workerError$: Observable<WorkerError> = this.workerErrorSubject.asObservable();
-  readonly keyVersionMismatch$: Observable<KeyVersionMismatchEvent> =
-    this.keyVersionMismatchSubject.asObservable();
   private readonly slc = inject<SessionLifeCycle>(SESSION_LIFECYCLE);
 
   constructor() {
@@ -56,8 +54,15 @@ export class WorkerOrchestratorService {
   }
 
   decryptEnvelope(envelope: TelemetryEnvelope): Promise<DecryptedTelemetry> {
+    if (this.cryptoKeyService.isImpersonating()) {
+      const error = new Error('IMPERSONATION_ACTIVE');
+      this.workerErrorSubject.next({ code: 'WORKER_NOT_READY', detail: 'Impersonation active' });
+      return Promise.reject<DecryptedTelemetry>(error);
+    }
+
     if (!this.keysReady()) {
       const error = new Error('WORKER_NOT_READY');
+      this.workerErrorSubject.next({ code: 'WORKER_NOT_READY' });
       return Promise.reject<DecryptedTelemetry>(error);
     }
 
@@ -68,11 +73,34 @@ export class WorkerOrchestratorService {
       sensorType: envelope.sensorType,
       timestamp: envelope.timestamp,
       value: Number.NaN,
+      unit: envelope.unit,
     });
   }
 
   decryptBatch(envelopes: TelemetryEnvelope[]): Observable<DecryptedBatchProgress> {
     return new Observable<DecryptedBatchProgress>((subscriber) => {
+      if (this.cryptoKeyService.isImpersonating()) {
+        this.workerErrorSubject.next({ code: 'WORKER_NOT_READY', detail: 'Impersonation active' });
+        subscriber.next({
+          total: envelopes.length,
+          completed: envelopes.length,
+          failed: envelopes.length,
+        });
+        subscriber.complete();
+        return;
+      }
+
+      if (!this.keysReady()) {
+        this.workerErrorSubject.next({ code: 'WORKER_NOT_READY' });
+        subscriber.next({
+          total: envelopes.length,
+          completed: envelopes.length,
+          failed: envelopes.length,
+        });
+        subscriber.complete();
+        return;
+      }
+
       let completed = 0;
 
       for (const envelope of envelopes) {
@@ -87,6 +115,7 @@ export class WorkerOrchestratorService {
             sensorType: envelope.sensorType,
             timestamp: envelope.timestamp,
             value: Number.NaN,
+            unit: envelope.unit,
           },
         });
       }

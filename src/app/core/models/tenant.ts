@@ -1,15 +1,8 @@
-export interface BaseTenant {
+export interface Tenant {
   tenantId: string;
   name: string;
   status: string;
-}
-
-export interface ViewTenant extends BaseTenant {
   createdAt: string;
-}
-
-export interface UpdatedTenant extends BaseTenant {
-  updatedAt: string;
 }
 
 export interface CreateTenantParameters {
