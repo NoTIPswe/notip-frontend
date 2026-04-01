@@ -17,12 +17,6 @@ export enum CommandStatus {
   timeout = 'timeout',
 }
 
-export enum StreamStatus {
-  connected = 'connected',
-  closed = 'closed',
-  error = 'error',
-}
-
 export enum AlertsType {
   GATEWAY_OFFLINE = 'GATEWAY_OFFLINE',
 }

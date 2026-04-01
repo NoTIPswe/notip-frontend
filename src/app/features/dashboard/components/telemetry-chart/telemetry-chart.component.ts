@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { ProcessedEnvelope } from '../../../../core/models/measure';
+import { CheckedEnvelope, ObfuscatedEnvelope } from '../../../../core/models/measure';
 
 type ChartPoint = {
   sensorId: string;
@@ -14,13 +14,11 @@ type ChartPoint = {
   styleUrl: './telemetry-chart.component.css',
 })
 export class TelemetryChartComponent {
-  readonly measures = input<ProcessedEnvelope[]>([]);
+  readonly measures = input<Array<CheckedEnvelope | ObfuscatedEnvelope>>([]);
 
   points(): ChartPoint[] {
     const decrypted = this.measures()
-      .filter(
-        (row): row is Extract<ProcessedEnvelope, { type: 'decrypted' }> => row.type === 'decrypted',
-      )
+      .filter((row): row is CheckedEnvelope => this.isCheckedEnvelope(row))
       .filter((row) => Number.isFinite(row.value))
       .slice(-10);
 
@@ -37,6 +35,10 @@ export class TelemetryChartComponent {
   }
 
   obfuscatedCount(): number {
-    return this.measures().filter((row) => row.type === 'obfuscated').length;
+    return this.measures().filter((row) => !this.isCheckedEnvelope(row)).length;
+  }
+
+  private isCheckedEnvelope(row: CheckedEnvelope | ObfuscatedEnvelope): row is CheckedEnvelope {
+    return 'value' in row;
   }
 }

@@ -2,34 +2,35 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DecryptedEnvelope } from '../models/measure';
 import { ThresholdService } from './threshold.service';
-import { DataEvaluationService } from './data-evaluation.service';
+import { MeasureBoundsEvaluationService } from './measure-bounds-evaluation.service';
 
-describe('DataEvaluationService', () => {
-  let service: DataEvaluationService;
+describe('MeasureBoundsEvaluationService', () => {
+  let service: MeasureBoundsEvaluationService;
 
   const thresholdMock = {
     getCached: vi.fn(),
   };
 
   const baseEnvelope: DecryptedEnvelope = {
-    type: 'decrypted',
     gatewayId: 'gw-1',
     sensorId: 'sensor-1',
     sensorType: 'temperature',
     timestamp: '2026-03-31T10:00:00.000Z',
     value: 10,
     unit: 'C',
-    isOutOfBounds: false,
   };
 
   beforeEach(async () => {
     thresholdMock.getCached.mockReset();
 
     await TestBed.configureTestingModule({
-      providers: [DataEvaluationService, { provide: ThresholdService, useValue: thresholdMock }],
+      providers: [
+        MeasureBoundsEvaluationService,
+        { provide: ThresholdService, useValue: thresholdMock },
+      ],
     }).compileComponents();
 
-    service = TestBed.inject(DataEvaluationService);
+    service = TestBed.inject(MeasureBoundsEvaluationService);
   });
 
   it('returns false when no threshold matches sensor id or type', () => {

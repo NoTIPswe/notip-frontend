@@ -1,20 +1,22 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { distinctUntilChanged, filter, map, tap } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subscription, distinctUntilChanged, filter, map, tap } from 'rxjs';
 import { Sensor } from '../../../../core/models/sensor';
 import { Gateway } from '../../../../core/models/gateway';
+import { CheckedEnvelope, ObfuscatedEnvelope } from '../../../../core/models/measure';
 import {
   CommandStatus,
   CommandStatusUpdate,
   GatewayConfig,
   GatewayFirmware,
 } from '../../../../core/models/command';
-import { StreamStatus, UserRole } from '../../../../core/models/enums';
+import { UserRole } from '../../../../core/models/enums';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SensorService } from '../../../sensors/services/sensor.service';
-import { MeasureFacade } from '../../../dashboard/facades/measure.facade';
 import { TelemetryTableComponent } from '../../../dashboard/components/telemetry-table/telemetry-table.component';
+import { ObfuscatedMeasureService } from '../../../dashboard/services/obfuscated-measure.service';
+import { ValidatedMeasureFacadeService } from '../../../dashboard/services/validated-measure-facade.service';
 import {
   CommandModalComponent,
   CommandModalMode,
@@ -43,7 +45,10 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
   private readonly gatewayService = inject(GatewayService);
   private readonly commandService = inject(CommandService);
   private readonly sensorService = inject(SensorService);
-  private readonly measureFacade = inject(MeasureFacade);
+  private readonly obfuscatedMeasureService = inject(ObfuscatedMeasureService);
+  private readonly validatedMeasureFacadeService = inject(ValidatedMeasureFacadeService);
+
+  private streamSubscription: Subscription | null = null;
 
   readonly gatewayId = signal<string>('');
   readonly gateway = signal<Gateway | null>(null);
@@ -59,11 +64,8 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
 
   readonly canManage = this.authService.getRole() === UserRole.tenant_admin;
   readonly isLoading = this.gatewayService.isLoading();
-  readonly isTelemetryLoading = this.measureFacade.isLoading();
-  readonly telemetry = this.measureFacade.processedMeasures();
-  readonly streamStatus = toSignal(this.measureFacade.streamStatus(), {
-    initialValue: StreamStatus.closed,
-  });
+  readonly isTelemetryLoading = signal(false);
+  readonly telemetry = signal<Array<CheckedEnvelope | ObfuscatedEnvelope>>([]);
 
   ngOnInit(): void {
     this.route.paramMap
@@ -75,7 +77,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
           this.errorMessage.set(null);
           this.infoMessage.set(null);
           this.commandStatus.set(null);
-          this.measureFacade.closeStream();
+          this.stopTelemetryStream();
         }),
         takeUntilDestroyed(),
       )
@@ -83,12 +85,12 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
         this.gatewayId.set(gatewayId);
         this.loadGateway(gatewayId);
         this.loadSensors(gatewayId);
-        this.measureFacade.openStream({ gatewayIds: [gatewayId], sensorIds: [], sensorTypes: [] });
+        this.startTelemetryStream(gatewayId);
       });
   }
 
   ngOnDestroy(): void {
-    this.measureFacade.closeStream();
+    this.stopTelemetryStream();
   }
 
   requestRename(): void {
@@ -215,7 +217,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.isBusy.set(false);
-          this.measureFacade.closeStream();
+          this.stopTelemetryStream();
           void this.router.navigate(['/gateways']);
         },
         error: () => {
@@ -251,5 +253,49 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
           this.errorMessage.set('Impossibile caricare i sensori del gateway.');
         },
       });
+  }
+
+  private startTelemetryStream(gatewayId: string): void {
+    this.stopTelemetryStream();
+    this.telemetry.set([]);
+    this.isTelemetryLoading.set(true);
+
+    const filters = { gatewayIds: [gatewayId], sensorIds: [], sensorTypes: [] };
+
+    if (this.authService.isImpersonating()) {
+      this.streamSubscription = this.obfuscatedMeasureService.openStream(filters).subscribe({
+        next: (batch) => {
+          this.telemetry.update((rows) => [...rows, ...batch]);
+          this.isTelemetryLoading.set(false);
+        },
+        error: () => {
+          this.isTelemetryLoading.set(false);
+          this.errorMessage.set('Impossibile ricevere stream telemetria.');
+        },
+      });
+      return;
+    }
+
+    this.streamSubscription = this.validatedMeasureFacadeService.openStream(filters).subscribe({
+      next: (row) => {
+        this.telemetry.update((rows) => [...rows, row]);
+        this.isTelemetryLoading.set(false);
+      },
+      error: () => {
+        this.isTelemetryLoading.set(false);
+        this.errorMessage.set('Impossibile ricevere stream telemetria.');
+      },
+    });
+  }
+
+  private stopTelemetryStream(): void {
+    if (this.streamSubscription) {
+      this.streamSubscription.unsubscribe();
+      this.streamSubscription = null;
+    }
+
+    this.obfuscatedMeasureService.closeStream();
+    this.validatedMeasureFacadeService.closeStream();
+    this.isTelemetryLoading.set(false);
   }
 }

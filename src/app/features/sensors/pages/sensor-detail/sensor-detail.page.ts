@@ -1,12 +1,14 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { distinctUntilChanged, filter, map } from 'rxjs';
-import { StreamStatus } from '../../../../core/models/enums';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subscription, distinctUntilChanged, filter, map } from 'rxjs';
+import { AuthService } from '../../../../core/services/auth.service';
 import { Sensor } from '../../../../core/models/sensor';
-import { MeasureFacade } from '../../../dashboard/facades/measure.facade';
+import { CheckedEnvelope, ObfuscatedEnvelope } from '../../../../core/models/measure';
 import { TelemetryChartComponent } from '../../../dashboard/components/telemetry-chart/telemetry-chart.component';
 import { TelemetryTableComponent } from '../../../dashboard/components/telemetry-table/telemetry-table.component';
+import { ObfuscatedMeasureService } from '../../../dashboard/services/obfuscated-measure.service';
+import { ValidatedMeasureFacadeService } from '../../../dashboard/services/validated-measure-facade.service';
 import { SensorService } from '../../services/sensor.service';
 
 @Component({
@@ -18,18 +20,19 @@ import { SensorService } from '../../services/sensor.service';
 })
 export class SensorDetailPageComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
+  private readonly authService = inject(AuthService);
   private readonly sensorService = inject(SensorService);
-  private readonly measureFacade = inject(MeasureFacade);
+  private readonly obfuscatedMeasureService = inject(ObfuscatedMeasureService);
+  private readonly validatedMeasureFacadeService = inject(ValidatedMeasureFacadeService);
+
+  private streamSubscription: Subscription | null = null;
 
   readonly sensorId = signal<string>('');
   readonly sensor = signal<Sensor | null>(null);
   readonly errorMessage = signal<string | null>(null);
 
-  readonly telemetry = this.measureFacade.processedMeasures();
-  readonly isTelemetryLoading = this.measureFacade.isLoading();
-  readonly streamStatus = toSignal(this.measureFacade.streamStatus(), {
-    initialValue: StreamStatus.closed,
-  });
+  readonly telemetry = signal<Array<CheckedEnvelope | ObfuscatedEnvelope>>([]);
+  readonly isTelemetryLoading = signal(false);
 
   ngOnInit(): void {
     this.route.paramMap
@@ -42,18 +45,12 @@ export class SensorDetailPageComponent implements OnInit, OnDestroy {
       .subscribe((id) => {
         this.sensorId.set(id);
         this.loadSensor(id);
-
-        this.measureFacade.closeStream();
-        this.measureFacade.openStream({
-          gatewayIds: [],
-          sensorIds: [id],
-          sensorTypes: [],
-        });
+        this.startTelemetryStream(id);
       });
   }
 
   ngOnDestroy(): void {
-    this.measureFacade.closeStream();
+    this.stopTelemetryStream();
   }
 
   private loadSensor(sensorId: string): void {
@@ -75,5 +72,53 @@ export class SensorDetailPageComponent implements OnInit, OnDestroy {
           this.errorMessage.set('Impossibile caricare il dettaglio sensore.');
         },
       });
+  }
+
+  private startTelemetryStream(sensorId: string): void {
+    this.stopTelemetryStream();
+    this.telemetry.set([]);
+    this.isTelemetryLoading.set(true);
+
+    const filters = {
+      gatewayIds: [],
+      sensorIds: [sensorId],
+      sensorTypes: [],
+    };
+
+    if (this.authService.isImpersonating()) {
+      this.streamSubscription = this.obfuscatedMeasureService.openStream(filters).subscribe({
+        next: (batch) => {
+          this.telemetry.update((rows) => [...rows, ...batch]);
+          this.isTelemetryLoading.set(false);
+        },
+        error: () => {
+          this.isTelemetryLoading.set(false);
+          this.errorMessage.set('Impossibile ricevere stream telemetria.');
+        },
+      });
+      return;
+    }
+
+    this.streamSubscription = this.validatedMeasureFacadeService.openStream(filters).subscribe({
+      next: (row) => {
+        this.telemetry.update((rows) => [...rows, row]);
+        this.isTelemetryLoading.set(false);
+      },
+      error: () => {
+        this.isTelemetryLoading.set(false);
+        this.errorMessage.set('Impossibile ricevere stream telemetria.');
+      },
+    });
+  }
+
+  private stopTelemetryStream(): void {
+    if (this.streamSubscription) {
+      this.streamSubscription.unsubscribe();
+      this.streamSubscription = null;
+    }
+
+    this.obfuscatedMeasureService.closeStream();
+    this.validatedMeasureFacadeService.closeStream();
+    this.isTelemetryLoading.set(false);
   }
 }

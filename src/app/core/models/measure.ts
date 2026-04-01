@@ -14,7 +14,7 @@ export interface TelemetryEnvelope {
   unit: string;
 }
 
-export interface DecryptedTelemetry {
+export interface DecryptedEnvelope {
   gatewayId: string;
   sensorId: string;
   sensorType: string;
@@ -23,50 +23,16 @@ export interface DecryptedTelemetry {
   unit: string;
 }
 
-export interface DecryptedBatchProgress {
-  total: number;
-  completed: number;
-  failed: number;
-  lastDecrypted?: DecryptedTelemetry;
+export interface CheckedEnvelope extends DecryptedEnvelope {
+  isOutofBounds: boolean;
 }
 
-export interface WorkerError {
-  code:
-    | 'KEY_NOT_FOUND'
-    | 'DECRYPT_FAILED'
-    | 'KEY_VERSION_MISMATCH'
-    | 'TIMEOUT'
-    | 'WORKER_NOT_READY';
-  gatewayId?: string;
-  detail?: string;
-}
-
-export interface KeyVersionMismatchEvent {
-  cachedVersion: number;
-  payloadVersion: number;
-  gatewayId: string;
-}
-
-export interface BaseEnvelope {
-  type: 'decrypted' | 'obfuscated';
+export interface ObfuscatedEnvelope {
   gatewayId: string;
   sensorId: string;
   sensorType: string;
   timestamp: string;
 }
-
-export interface DecryptedEnvelope extends BaseEnvelope {
-  type: 'decrypted';
-  value: number;
-  unit: string;
-  isOutOfBounds: boolean;
-}
-
-export interface ObfuscatedEnvelope extends BaseEnvelope {
-  type: 'obfuscated';
-}
-
-export type ProcessedEnvelope = DecryptedEnvelope | ObfuscatedEnvelope;
 
 export interface StreamParameters {
   gatewayIds?: string[];
@@ -84,8 +50,20 @@ export interface QueryParameters extends ExportParameters {
   limit: number;
 }
 
-export interface MeasurePage {
-  data: ProcessedEnvelope[];
+export interface ObfuscatedQueryResPage {
+  data: ObfuscatedEnvelope[];
+  nextCursor?: string;
+  hasMore: boolean;
+}
+
+export interface QueryResPage {
+  data: DecryptedEnvelope[];
+  nextCursor?: string;
+  hasMore: boolean;
+}
+
+export interface CheckedQueryResPage {
+  data: CheckedEnvelope[];
   nextCursor?: string;
   hasMore: boolean;
 }

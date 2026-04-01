@@ -3,7 +3,7 @@ import { DecryptedEnvelope } from '../models/measure';
 import { ThresholdService } from './threshold.service';
 
 @Injectable({ providedIn: 'root' })
-export class DataEvaluationService {
+export class MeasureBoundsEvaluationService {
   private readonly thresholds = inject(ThresholdService);
 
   evaluate(envelope: DecryptedEnvelope): boolean {

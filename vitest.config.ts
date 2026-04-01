@@ -1,8 +1,16 @@
 import { defineConfig } from 'vitest/config';
 import angular from '@analogjs/vite-plugin-angular';
+import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
   plugins: [angular()],
+  resolve: {
+    alias: {
+      '@notip/crypto-sdk': fileURLToPath(
+        new URL('./node_modules/@notip/crypto-sdk/dist/index.js', import.meta.url),
+      ),
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',

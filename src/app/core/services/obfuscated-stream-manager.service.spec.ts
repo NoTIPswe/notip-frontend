@@ -2,17 +2,16 @@ import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EventSourceMessage, fetchEventSource } from '@microsoft/fetch-event-source';
-import { StreamStatus } from '../models/enums';
 import { TelemetryEnvelope } from '../models/measure';
 import { AuthService } from './auth.service';
-import { MeasureStreamManagerService } from './measure-stream-manager.service';
+import { ObfuscatedStreamManagerService } from './obfuscated-stream-manager.service';
 
 vi.mock('@microsoft/fetch-event-source', () => ({
   fetchEventSource: vi.fn(),
 }));
 
-describe('MeasureStreamManagerService', () => {
-  let service: MeasureStreamManagerService;
+describe('ObfuscatedStreamManagerService', () => {
+  let service: ObfuscatedStreamManagerService;
   const fetchEventSourceMock = vi.mocked(fetchEventSource);
 
   const authMock = {
@@ -32,41 +31,30 @@ describe('MeasureStreamManagerService', () => {
     unit: 'C',
   };
 
-  const flushMicrotasks = async (): Promise<void> => {
-    await Promise.resolve();
-    await Promise.resolve();
-  };
-
   beforeEach(async () => {
     authMock.getToken.mockReset();
     authMock.login.mockReset();
     fetchEventSourceMock.mockReset();
 
     await TestBed.configureTestingModule({
-      providers: [MeasureStreamManagerService, { provide: AuthService, useValue: authMock }],
+      providers: [ObfuscatedStreamManagerService, { provide: AuthService, useValue: authMock }],
     }).compileComponents();
 
-    service = TestBed.inject(MeasureStreamManagerService);
+    service = TestBed.inject(ObfuscatedStreamManagerService);
   });
 
-  it('emits error and triggers login when token is missing', async () => {
-    const statuses: StreamStatus[] = [];
-    service.streamStatus().subscribe((status) => statuses.push(status));
-
+  it('emits observable error and triggers login when token is missing', async () => {
     authMock.getToken.mockResolvedValue('');
 
-    service.openStream({ gatewayIds: ['gw-1'] });
-    await flushMicrotasks();
+    await expect(firstValueFrom(service.openStream({ gatewayIds: ['gw-1'] }))).rejects.toThrow(
+      'Missing auth token for SSE stream',
+    );
 
-    expect(statuses).toContain(StreamStatus.error);
     expect(authMock.login).toHaveBeenCalledOnce();
     expect(fetchEventSourceMock).not.toHaveBeenCalled();
   });
 
-  it('opens stream, emits connected status and telemetry envelopes', async () => {
-    const statuses: StreamStatus[] = [];
-    service.streamStatus().subscribe((status) => statuses.push(status));
-
+  it('opens stream and emits telemetry envelopes', async () => {
     authMock.getToken.mockResolvedValue('token-1');
 
     fetchEventSourceMock.mockImplementation(async (_input, init) => {
@@ -87,20 +75,18 @@ describe('MeasureStreamManagerService', () => {
       });
     });
 
-    const firstEnvelopePromise = firstValueFrom(service.stream$());
-
-    service.openStream({
-      gatewayIds: ['gw-1'],
-      sensorTypes: ['temperature'],
-      sensorIds: ['sensor-1'],
-    });
+    const firstEnvelopePromise = firstValueFrom(
+      service.openStream({
+        gatewayIds: ['gw-1'],
+        sensorTypes: ['temperature'],
+        sensorIds: ['sensor-1'],
+      }),
+    );
 
     const received = await firstEnvelopePromise;
     service.closeStream();
-    await flushMicrotasks();
 
     expect(received).toEqual(envelope);
-    expect(statuses).toContain(StreamStatus.connected);
 
     const call = fetchEventSourceMock.mock.calls[0];
     const input = call[0];
@@ -122,10 +108,7 @@ describe('MeasureStreamManagerService', () => {
     expect(options.headers).toEqual({ Authorization: 'Bearer token-1' });
   });
 
-  it('emits error when too many malformed messages are received', async () => {
-    const statuses: StreamStatus[] = [];
-    service.streamStatus().subscribe((status) => statuses.push(status));
-
+  it('emits observable error when too many malformed messages are received', async () => {
     authMock.getToken.mockResolvedValue('token-2');
 
     fetchEventSourceMock.mockImplementation(async (_input, init) => {
@@ -139,13 +122,8 @@ describe('MeasureStreamManagerService', () => {
       options.onmessage?.({ data: 'again-not-json' } as EventSourceMessage);
     });
 
-    service.openStream({});
-    await flushMicrotasks();
-
-    expect(statuses).toContain(StreamStatus.error);
-
-    service.closeStream();
-    await flushMicrotasks();
-    expect(statuses).toContain(StreamStatus.closed);
+    await expect(firstValueFrom(service.openStream({}))).rejects.toThrow(
+      'Too many malformed SSE messages: 3 consecutive payloads rejected',
+    );
   });
 });

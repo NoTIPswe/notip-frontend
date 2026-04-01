@@ -25,7 +25,7 @@ export const routes: Routes = [
     path: 'dashboard',
     component: DataDashboardPageComponent,
     canActivate: [AuthGuard, RoleGuard],
-    resolve: { ready: DashboardResolver },
+    resolve: { dataMode: DashboardResolver },
     data: { title: 'Dashboard', roles: [UserRole.tenant_user, UserRole.tenant_admin] },
   },
   {

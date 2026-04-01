@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { ProcessedEnvelope } from '../../../../core/models/measure';
+import { CheckedEnvelope, ObfuscatedEnvelope } from '../../../../core/models/measure';
 
 @Component({
   selector: 'app-telemetry-table',
@@ -8,11 +8,11 @@ import { ProcessedEnvelope } from '../../../../core/models/measure';
   styleUrl: './telemetry-table.component.css',
 })
 export class TelemetryTableComponent {
-  readonly measures = input<ProcessedEnvelope[]>([]);
+  readonly measures = input<Array<CheckedEnvelope | ObfuscatedEnvelope>>([]);
   readonly isLoading = input<boolean>(false);
 
-  formatValue(row: ProcessedEnvelope): string {
-    if (row.type === 'obfuscated') {
+  formatValue(row: CheckedEnvelope | ObfuscatedEnvelope): string {
+    if (!this.isCheckedEnvelope(row)) {
       return '*** OSCURATO ***';
     }
 
@@ -23,11 +23,15 @@ export class TelemetryTableComponent {
     return `${row.value.toFixed(2)} ${row.unit}`;
   }
 
-  rowClass(row: ProcessedEnvelope): string {
-    if (row.type === 'decrypted' && row.isOutOfBounds) {
+  rowClass(row: CheckedEnvelope | ObfuscatedEnvelope): string {
+    if (this.isCheckedEnvelope(row) && row.isOutofBounds) {
       return 'row-alert';
     }
 
     return '';
+  }
+
+  private isCheckedEnvelope(row: CheckedEnvelope | ObfuscatedEnvelope): row is CheckedEnvelope {
+    return 'value' in row;
   }
 }

@@ -35,38 +35,76 @@ export class ThresholdService {
     return this.fetchThresholds();
   }
 
-  setDefaultThreshold(sensorType: string, minValue?: number, maxValue?: number): Observable<void> {
-    const body: SetThresholdDefaultTypeRequestDto = {
-      sensor_type: sensorType,
-      min_value: minValue ?? 0,
-      max_value: maxValue ?? 0,
-    };
+  setDefaultThreshold(
+    sensorType: string,
+    minValue?: number | null,
+    maxValue?: number | null,
+  ): Observable<void> {
+    const existing = this.getTypeThreshold(sensorType);
+    const bounds = this.resolveBounds(minValue, maxValue, existing);
 
-    return this.thresholdsApi.thresholdsControllerSetDefaultThreshold(body).pipe(map(() => void 0));
+    const body = {
+      sensor_type: sensorType,
+      min_value: bounds.min,
+      max_value: bounds.max,
+    } as unknown as SetThresholdDefaultTypeRequestDto;
+
+    return this.thresholdsApi
+      .thresholdsControllerSetDefaultThreshold(body)
+      .pipe(map(() => undefined));
   }
 
-  setSensorThreshold(sensorId: string, minValue?: number, maxValue?: number): Observable<void> {
-    const body: SetThresholdSensorRequestDto = {
-      min_value: minValue ?? 0,
-      max_value: maxValue ?? 0,
+  setSensorThreshold(
+    sensorId: string,
+    minValue?: number | null,
+    maxValue?: number | null,
+  ): Observable<void> {
+    const existing = this.getSensorThreshold(sensorId);
+    const bounds = this.resolveBounds(minValue, maxValue, existing);
+
+    const body = {
+      min_value: bounds.min,
+      max_value: bounds.max,
       sensor_type: '',
-    };
+    } as unknown as SetThresholdSensorRequestDto;
 
     return this.thresholdsApi
       .thresholdsControllerSetSensorThreshold(sensorId, body)
-      .pipe(map(() => void 0));
+      .pipe(map(() => undefined));
   }
 
   deleteSensorThreshold(sensorId: string): Observable<void> {
     return this.thresholdsApi
       .thresholdsControllerDeleteSensorThreshold(sensorId)
-      .pipe(map(() => void 0));
+      .pipe(map(() => undefined));
   }
 
   deleteTypeThreshold(sensorType: string): Observable<void> {
     return this.thresholdsApi
       .thresholdsControllerDeleteThresholdType(sensorType)
-      .pipe(map(() => void 0));
+      .pipe(map(() => undefined));
+  }
+
+  private getSensorThreshold(sensorId: string): ThresholdConfig | undefined {
+    return this.cache.find((row) => row.type === 'sensorId' && row.sensorId === sensorId);
+  }
+
+  private getTypeThreshold(sensorType: string): ThresholdConfig | undefined {
+    return this.cache.find((row) => row.type === 'sensorType' && row.sensorType === sensorType);
+  }
+
+  private resolveBounds(
+    minValue: number | null | undefined,
+    maxValue: number | null | undefined,
+    existing?: ThresholdConfig,
+  ): { min: number | null; max: number | null } {
+    const resolvedMin = minValue ?? existing?.minValue ?? null;
+    const resolvedMax = maxValue ?? existing?.maxValue ?? null;
+
+    return {
+      min: typeof resolvedMin === 'number' ? resolvedMin : null,
+      max: typeof resolvedMax === 'number' ? resolvedMax : null,
+    };
   }
 
   private toThresholds(rows: Record<string, unknown>[]): ThresholdConfig[] {
