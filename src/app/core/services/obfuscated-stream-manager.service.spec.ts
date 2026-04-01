@@ -108,7 +108,7 @@ describe('ObfuscatedStreamManagerService', () => {
     expect(options.headers).toEqual({ Authorization: 'Bearer token-1' });
   });
 
-  it('emits observable error when too many malformed messages are received', async () => {
+  it('emits observable error on first malformed message', async () => {
     authMock.getToken.mockResolvedValue('token-2');
 
     fetchEventSourceMock.mockImplementation(async (_input, init) => {
@@ -118,12 +118,10 @@ describe('ObfuscatedStreamManagerService', () => {
       const options = init;
       await options.onopen?.(new Response(null, { status: 200 }));
       options.onmessage?.({ data: 'not-json' } as EventSourceMessage);
-      options.onmessage?.({ data: 'still-not-json' } as EventSourceMessage);
-      options.onmessage?.({ data: 'again-not-json' } as EventSourceMessage);
     });
 
     await expect(firstValueFrom(service.openStream({}))).rejects.toThrow(
-      'Too many malformed SSE messages: 3 consecutive payloads rejected',
+      'Malformed SSE message rejected',
     );
   });
 });

@@ -1,5 +1,3 @@
-// TODO: Refactor this service because it has been made by Copilot
-
 import { fetchEventSource, type EventSourceMessage } from '@microsoft/fetch-event-source';
 import { Injectable, inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
@@ -30,7 +28,6 @@ function createObservableChannel<T>(): ObservableChannel<T> {
 @Injectable({ providedIn: 'root' })
 export class ObfuscatedStreamManagerService {
   private readonly auth = inject(AuthService);
-  private readonly maxConsecutiveMalformedMessages = 3;
 
   private abortController: AbortController | null = null;
   private channel: ObservableChannel<TelemetryEnvelope> | null = null;
@@ -93,8 +90,6 @@ export class ObfuscatedStreamManagerService {
       return;
     }
 
-    let consecutiveMalformedMessages = 0;
-
     try {
       await fetchEventSource(`/api/data/measures/stream?${query.toString()}`, {
         signal: abortController.signal,
@@ -113,26 +108,15 @@ export class ObfuscatedStreamManagerService {
           }
 
           if (!event.data) {
-            this.handleMalformedMessage(
-              ++consecutiveMalformedMessages,
-              abortController,
-              channel,
-              'Empty SSE payload',
-            );
+            this.handleMalformedMessage(abortController, channel, 'Empty SSE payload');
             return;
           }
 
           try {
             const envelope = this.parseTelemetryEnvelope(event.data);
-            consecutiveMalformedMessages = 0;
             channel.push(envelope);
           } catch (error) {
-            this.handleMalformedMessage(
-              ++consecutiveMalformedMessages,
-              abortController,
-              channel,
-              error,
-            );
+            this.handleMalformedMessage(abortController, channel, error);
           }
         },
         onclose: () => {
@@ -204,20 +188,13 @@ export class ObfuscatedStreamManagerService {
   }
 
   private handleMalformedMessage(
-    count: number,
     abortController: AbortController,
     channel: ObservableChannel<TelemetryEnvelope>,
     reason: unknown,
   ): void {
-    if (count < this.maxConsecutiveMalformedMessages) {
-      return;
-    }
-
+    const message = 'Malformed SSE message rejected';
     channel.error(
-      this.toError(
-        reason,
-        `Too many malformed SSE messages: ${count} consecutive payloads rejected`,
-      ),
+      reason instanceof Error ? new Error(message, { cause: reason }) : new Error(message),
     );
     abortController.abort();
   }
