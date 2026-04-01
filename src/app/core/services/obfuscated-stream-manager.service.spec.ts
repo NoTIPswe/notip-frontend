@@ -124,4 +124,88 @@ describe('ObfuscatedStreamManagerService', () => {
       'Malformed SSE message rejected',
     );
   });
+
+  it('emits observable error when SSE handshake fails', async () => {
+    authMock.getToken.mockResolvedValue('token-3');
+
+    fetchEventSourceMock.mockImplementation(async (_input, init) => {
+      if (!init) {
+        return;
+      }
+      const options = init;
+      await options.onopen?.(new Response(null, { status: 503 }));
+    });
+
+    await expect(firstValueFrom(service.openStream({}))).rejects.toThrow(
+      'SSE handshake failed with status 503',
+    );
+  });
+
+  it('emits observable error on token-expired SSE event payload', async () => {
+    authMock.getToken.mockResolvedValue('token-4');
+
+    fetchEventSourceMock.mockImplementation(async (_input, init) => {
+      if (!init) {
+        return;
+      }
+      const options = init;
+      await options.onopen?.(new Response(null, { status: 200 }));
+      options.onmessage?.({
+        data: JSON.stringify({ type: 'error', reason: 'token_expired' }),
+      } as EventSourceMessage);
+    });
+
+    await expect(firstValueFrom(service.openStream({}))).rejects.toThrow(
+      'Malformed SSE message rejected',
+    );
+  });
+
+  it('emits observable error on invalid telemetry envelope payload', async () => {
+    authMock.getToken.mockResolvedValue('token-5');
+
+    fetchEventSourceMock.mockImplementation(async (_input, init) => {
+      if (!init) {
+        return;
+      }
+      const options = init;
+      await options.onopen?.(new Response(null, { status: 200 }));
+      options.onmessage?.({ data: JSON.stringify({ gatewayId: 'gw-1' }) } as EventSourceMessage);
+    });
+
+    await expect(firstValueFrom(service.openStream({}))).rejects.toThrow(
+      'Malformed SSE message rejected',
+    );
+  });
+
+  it('emits observable error on empty SSE payload', async () => {
+    authMock.getToken.mockResolvedValue('token-6');
+
+    fetchEventSourceMock.mockImplementation(async (_input, init) => {
+      if (!init) {
+        return;
+      }
+      const options = init;
+      await options.onopen?.(new Response(null, { status: 200 }));
+      options.onmessage?.({ data: '' } as EventSourceMessage);
+    });
+
+    await expect(firstValueFrom(service.openStream({}))).rejects.toThrow(
+      'Malformed SSE message rejected',
+    );
+  });
+
+  it('emits fallback SSE stream error when onerror receives a non-error', async () => {
+    authMock.getToken.mockResolvedValue('token-7');
+
+    fetchEventSourceMock.mockImplementation(async (_input, init) => {
+      if (!init) {
+        return;
+      }
+      const options = init;
+      await options.onopen?.(new Response(null, { status: 200 }));
+      options.onerror?.('boom');
+    });
+
+    await expect(firstValueFrom(service.openStream({}))).rejects.toThrow('SSE stream error');
+  });
 });

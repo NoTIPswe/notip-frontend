@@ -145,6 +145,45 @@ describe('DecryptedMeasureService', () => {
     });
   });
 
+  it('queries with only required fields and maps page without nextCursor', async () => {
+    const qp: QueryParameters = {
+      from: '2026-03-01T00:00:00.000Z',
+      to: '2026-03-31T23:59:59.999Z',
+      limit: 0,
+      cursor: '',
+      gatewayIds: [],
+      sensorIds: [],
+      sensorTypes: [],
+    };
+
+    const sdkPage: TestQueryResponsePage = {
+      data: [plain2],
+      hasMore: false,
+    };
+    queryMeasuresMock.mockResolvedValue(sdkPage);
+
+    const result = await firstValueFrom(service.query(qp));
+
+    expect(queryMeasuresMock).toHaveBeenCalledWith({
+      from: qp.from,
+      to: qp.to,
+    });
+    expect(result).toEqual({
+      data: [
+        {
+          gatewayId: 'gw-1',
+          sensorId: 'sensor-2',
+          sensorType: 'humidity',
+          timestamp: '2026-03-31T10:01:00.000Z',
+          value: 58,
+          unit: '%',
+        },
+      ],
+      hasMore: false,
+    });
+    expect('nextCursor' in result).toBe(false);
+  });
+
   it('streams decrypted envelopes one-by-one', async () => {
     const sp: StreamParameters = {
       gatewayIds: ['gw-1'],
@@ -228,6 +267,86 @@ describe('DecryptedMeasureService', () => {
         unit: 'C',
       },
     ]);
+  });
+
+  it('opens stream with empty model when optional filters are missing', async () => {
+    streamMeasuresMock.mockReturnValue(
+      (async function* () {
+        await Promise.resolve();
+        for (const row of [] as TestPlaintextMeasure[]) {
+          yield row;
+        }
+      })(),
+    );
+
+    const emitted = await firstValueFrom(service.openStream({}).pipe(toArray()));
+
+    expect(streamMeasuresMock).toHaveBeenCalledOnce();
+    const [streamModel, signal] = streamMeasuresMock.mock.calls[0] as [
+      Record<string, unknown>,
+      AbortSignal,
+    ];
+    expect(streamModel).toEqual({});
+    expect(signal).toBeInstanceOf(AbortSignal);
+    expect(emitted).toEqual<DecryptedEnvelope[]>([]);
+  });
+
+  it('exports with only required fields when optional filters are missing', async () => {
+    const ep: ExportParameters = {
+      from: '2026-03-01T00:00:00.000Z',
+      to: '2026-03-31T23:59:59.999Z',
+      gatewayIds: [],
+      sensorIds: [],
+      sensorTypes: [],
+    };
+
+    exportMeasuresMock.mockReturnValue(
+      (async function* () {
+        await Promise.resolve();
+        for (const row of [] as TestPlaintextMeasure[]) {
+          yield row;
+        }
+      })(),
+    );
+
+    const emitted = await firstValueFrom(service.export(ep).pipe(toArray()));
+
+    expect(exportMeasuresMock).toHaveBeenCalledWith({
+      from: ep.from,
+      to: ep.to,
+    });
+    expect(emitted).toEqual<DecryptedEnvelope[]>([]);
+  });
+
+  it('propagates sdk errors from stream generator', async () => {
+    const { ApiError } = await import('@notip/crypto-sdk');
+    const ApiErrorCtor = ApiError as unknown as new (...args: unknown[]) => Error;
+
+    streamMeasuresMock.mockReturnValue(
+      (async function* () {
+        await Promise.resolve();
+        for (const row of [] as TestPlaintextMeasure[]) {
+          yield row;
+        }
+        throw new ApiErrorCtor('sdk api error');
+      })(),
+    );
+
+    await expect(firstValueFrom(service.openStream({}))).rejects.toThrow('sdk api error');
+  });
+
+  it('propagates native Error from stream generator', async () => {
+    streamMeasuresMock.mockReturnValue(
+      (async function* () {
+        await Promise.resolve();
+        for (const row of [] as TestPlaintextMeasure[]) {
+          yield row;
+        }
+        throw new Error('native stream error');
+      })(),
+    );
+
+    await expect(firstValueFrom(service.openStream({}))).rejects.toThrow('native stream error');
   });
 
   it('aborts previous stream when opening a new one', () => {
