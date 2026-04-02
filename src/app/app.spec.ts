@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { IMPERSONATION_STATUS, SESSION_LIFECYCLE } from './core/auth/contracts';
@@ -24,6 +25,7 @@ describe('App', () => {
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
+        provideRouter([]),
         { provide: SESSION_LIFECYCLE, useValue: sessionMock },
         {
           provide: IMPERSONATION_STATUS,

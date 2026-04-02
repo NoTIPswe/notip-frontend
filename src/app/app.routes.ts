@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
-import { RoleGuard } from './core/guards/role.guard';
+import { HomeRedirectGuard, RoleGuard } from './core/guards/role.guard';
 import { UserRole } from './core/models/enums';
 import { TenantManagerPageComponent } from './features/admin/pages/tenant-manager/tenant-manager.page';
 import { TenantDetailPageComponent } from './features/admin/pages/tenant-detail/tenant-detail.page';
@@ -112,7 +112,12 @@ export const routes: Routes = [
     canActivate: [AuthGuard, RoleGuard],
     data: { title: 'Admin Gateways', roles: [UserRole.system_admin] },
   },
+  {
+    path: '',
+    pathMatch: 'full',
+    canActivate: [AuthGuard, HomeRedirectGuard],
+    component: ErrorPageComponent,
+  },
   { path: 'error', component: ErrorPageComponent },
-  { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   { path: '**', redirectTo: 'error?reason=not-found' },
 ];

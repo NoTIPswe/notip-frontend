@@ -3,17 +3,24 @@ import { ActivatedRouteSnapshot, Router, UrlTree } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UserRole } from '../models/enums';
 import { AuthService } from '../services/auth.service';
-import { RoleGuard } from './role.guard';
+import { HomeRedirectGuard, RoleGuard } from './role.guard';
 
 describe('RoleGuard', () => {
   let guard: RoleGuard;
 
-  const unauthorizedTree = {} as UrlTree;
+  const dashboardTree = {} as UrlTree;
+  const adminTenantsTree = {} as UrlTree;
   const authMock = {
     getRole: vi.fn(),
   };
   const routerMock = {
-    parseUrl: vi.fn(() => unauthorizedTree),
+    parseUrl: vi.fn((url: string) => {
+      if (url === '/admin/tenants') {
+        return adminTenantsTree;
+      }
+
+      return dashboardTree;
+    }),
   };
 
   beforeEach(async () => {
@@ -49,13 +56,77 @@ describe('RoleGuard', () => {
     expect(routerMock.parseUrl).not.toHaveBeenCalled();
   });
 
-  it('returns unauthorized UrlTree when user role is not allowed', () => {
+  it('redirects tenant user to dashboard when route role is not allowed', () => {
     authMock.getRole.mockReturnValue(UserRole.tenant_user);
     const route = {
       data: { roles: [UserRole.system_admin] },
     } as ActivatedRouteSnapshot;
 
-    expect(guard.canActivate(route)).toBe(unauthorizedTree);
-    expect(routerMock.parseUrl).toHaveBeenCalledWith('/error?reason=unauthorized');
+    expect(guard.canActivate(route)).toBe(dashboardTree);
+    expect(routerMock.parseUrl).toHaveBeenCalledWith('/dashboard');
+  });
+
+  it('redirects system admin to tenant list when route role is not allowed', () => {
+    authMock.getRole.mockReturnValue(UserRole.system_admin);
+    const route = {
+      data: { roles: [UserRole.tenant_user, UserRole.tenant_admin] },
+    } as ActivatedRouteSnapshot;
+
+    expect(guard.canActivate(route)).toBe(adminTenantsTree);
+    expect(routerMock.parseUrl).toHaveBeenCalledWith('/admin/tenants');
+  });
+});
+
+describe('HomeRedirectGuard', () => {
+  let guard: HomeRedirectGuard;
+
+  const dashboardTree = {} as UrlTree;
+  const adminTenantsTree = {} as UrlTree;
+  const authMock = {
+    getRole: vi.fn(),
+  };
+  const routerMock = {
+    parseUrl: vi.fn((url: string) => {
+      if (url === '/admin/tenants') {
+        return adminTenantsTree;
+      }
+
+      return dashboardTree;
+    }),
+  };
+
+  beforeEach(async () => {
+    authMock.getRole.mockReset();
+    routerMock.parseUrl.mockClear();
+
+    await TestBed.configureTestingModule({
+      providers: [
+        HomeRedirectGuard,
+        { provide: AuthService, useValue: authMock },
+        { provide: Router, useValue: routerMock },
+      ],
+    }).compileComponents();
+
+    guard = TestBed.inject(HomeRedirectGuard);
+  });
+
+  it('redirects system_admin to tenant manager', () => {
+    authMock.getRole.mockReturnValue(UserRole.system_admin);
+
+    expect(guard.canActivate()).toBe(adminTenantsTree);
+    expect(routerMock.parseUrl).toHaveBeenCalledWith('/admin/tenants');
+  });
+
+  it('redirects tenant roles to dashboard', () => {
+    authMock.getRole.mockReturnValue(UserRole.tenant_admin);
+
+    expect(guard.canActivate()).toBe(dashboardTree);
+    expect(routerMock.parseUrl).toHaveBeenCalledWith('/dashboard');
+
+    routerMock.parseUrl.mockClear();
+    authMock.getRole.mockReturnValue(UserRole.tenant_user);
+
+    expect(guard.canActivate()).toBe(dashboardTree);
+    expect(routerMock.parseUrl).toHaveBeenCalledWith('/dashboard');
   });
 });

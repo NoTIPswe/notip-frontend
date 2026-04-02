@@ -3,6 +3,18 @@
     <h1>NoTIP</h1>
   </header>
 
+  <nav class="menu" aria-label="Menu principale">
+    @for (item of menuItems(); track item.path) {
+      <a
+        [routerLink]="item.path"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+      >
+        {{ item.label }}
+      </a>
+    }
+  </nav>
+
   <section class="account">
     @if (isImpersonating()) {
       <app-impersonation-tag />
