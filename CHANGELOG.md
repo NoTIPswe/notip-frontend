@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/NoTIPswe/notip-frontend/compare/v1.2.0...v1.3.0) (2026-04-02)
+
+
+### Features
+
+* introduction of token JWT management ([0f61e7d](https://github.com/NoTIPswe/notip-frontend/commit/0f61e7d5acc298309dcdd9b3891534b743743d80))
+
 # [1.2.0](https://github.com/NoTIPswe/notip-frontend/compare/v1.1.0...v1.2.0) (2026-04-02)
 
 
