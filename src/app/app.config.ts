@@ -26,7 +26,7 @@ const bearerTokenCondition = createInterceptorCondition<IncludeBearerTokenCondit
 const keycloakConfig = {
   url: '/auth',
   realm: 'notip',
-  clientId: 'web-app',
+  clientId: 'notip-frontend',
 };
 
 export const appConfig: ApplicationConfig = {
