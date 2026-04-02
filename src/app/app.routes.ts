@@ -101,7 +101,7 @@ export const routes: Routes = [
     data: { title: 'Tenants', roles: [UserRole.system_admin] },
   },
   {
-    path: 'admin/tenants/:id',
+    path: 'admin/tenants/:id/users',
     component: TenantDetailPageComponent,
     canActivate: [AuthGuard, RoleGuard],
     data: { title: 'Tenant Detail', roles: [UserRole.system_admin] },

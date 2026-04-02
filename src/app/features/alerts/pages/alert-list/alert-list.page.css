@@ -4,9 +4,33 @@
   max-width: 1200px;
 }
 
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
 h2 {
   margin: 0;
   font-size: 1.2rem;
+}
+
+.config-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 0.45rem 0.8rem;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.config-link:hover {
+  background: #111827;
 }
 
 .meta {
@@ -35,4 +59,11 @@ td {
   padding: 0.6rem;
   border-bottom: 1px solid #e5e7eb;
   font-size: 0.88rem;
+}
+
+@media (max-width: 640px) {
+  .header-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

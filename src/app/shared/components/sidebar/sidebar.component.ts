@@ -19,7 +19,6 @@ const TENANT_USER_MENU: ReadonlyArray<MenuItem> = [
 
 const TENANT_ADMIN_EXTRA_MENU: ReadonlyArray<MenuItem> = [
   { label: 'Alerts', path: '/alerts' },
-  { label: 'Alerts Config', path: '/alerts/config' },
   { label: 'Users Management', path: '/mgmt/users' },
   { label: 'Threshold Settings', path: '/mgmt/limits' },
   { label: 'API Clients', path: '/mgmt/api' },
@@ -29,7 +28,7 @@ const TENANT_ADMIN_EXTRA_MENU: ReadonlyArray<MenuItem> = [
 
 const SYSTEM_ADMIN_MENU: ReadonlyArray<MenuItem> = [
   { label: 'Tenants', path: '/admin/tenants', exact: true },
-  { label: 'Admin Gateways', path: '/admin/gateways' },
+  { label: 'Gateways', path: '/admin/gateways' },
 ];
 
 @Component({

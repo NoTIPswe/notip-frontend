@@ -134,13 +134,15 @@ describe('AuthService', () => {
 
   it('maps identity and role from JWT payload', async () => {
     keycloakMock.tokenParsed = {
+      given_name: 'Alice',
+      family_name: 'Rossi',
       preferred_username: 'alice',
       tenant_id: 'tenant-1',
       sub: 'user-1',
       role: 'tenant_admin',
     };
 
-    await expect(service.getUsername()).resolves.toBe('alice');
+    await expect(service.getUsername()).resolves.toBe('Alice Rossi');
     expect(service.getTenantId()).toBe('tenant-1');
     expect(service.getUserId()).toBe('user-1');
     expect(service.getRole()).toBe(UserRole.tenant_admin);
@@ -171,6 +173,21 @@ describe('AuthService', () => {
     expect(service.getRole()).toBe(UserRole.tenant_user);
   });
 
+  it('falls back to name and preferred_username when first and last name are missing', async () => {
+    keycloakMock.tokenParsed = {
+      name: 'Mario Bianchi',
+      preferred_username: 'mario.bianchi',
+    };
+
+    await expect(service.getUsername()).resolves.toBe('Mario Bianchi');
+
+    keycloakMock.tokenParsed = {
+      preferred_username: 'legacy.username',
+    };
+
+    await expect(service.getUsername()).resolves.toBe('legacy.username');
+  });
+
   it('returns empty identity fields when JWT payload is missing', async () => {
     keycloakMock.tokenParsed = undefined;
 
@@ -182,6 +199,8 @@ describe('AuthService', () => {
   it('starts impersonation and returns issued access token', async () => {
     const impersonatedToken = createUnsignedJwt({
       sub: 'impersonated-user',
+      given_name: 'Impersonated',
+      family_name: 'User',
       preferred_username: 'impersonated.name',
       tenant_id: 'tenant-77',
       realm_access: { roles: ['tenant_admin'] },
@@ -195,7 +214,7 @@ describe('AuthService', () => {
     expect(authApiMock.authControllerImpersonate).toHaveBeenCalledWith({ user_id: 'target-1' });
     expect(service.isImpersonating()).toBe(true);
     await expect(service.getToken()).resolves.toBe(impersonatedToken);
-    await expect(service.getUsername()).resolves.toBe('impersonated.name');
+    await expect(service.getUsername()).resolves.toBe('Impersonated User');
     expect(service.getTenantId()).toBe('tenant-77');
     expect(service.getUserId()).toBe('impersonated-user');
     expect(service.getRole()).toBe(UserRole.tenant_admin);
