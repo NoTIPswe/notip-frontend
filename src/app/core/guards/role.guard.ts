@@ -16,6 +16,26 @@ export class RoleGuard implements CanActivate {
       return true;
     }
 
-    return this.router.parseUrl('/error?reason=unauthorized');
+    if (role === UserRole.system_admin) {
+      return this.router.parseUrl('/admin/tenants');
+    }
+
+    return this.router.parseUrl('/dashboard');
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class HomeRedirectGuard implements CanActivate {
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+
+  canActivate(): UrlTree {
+    const role = this.auth.getRole();
+
+    if (role === UserRole.system_admin) {
+      return this.router.parseUrl('/admin/tenants');
+    }
+
+    return this.router.parseUrl('/dashboard');
   }
 }
