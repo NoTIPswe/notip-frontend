@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/NoTIPswe/notip-frontend/compare/v1.0.0...v1.1.0) (2026-04-02)
+
+
+### Features
+
+* add badges to README ([db1b24a](https://github.com/NoTIPswe/notip-frontend/commit/db1b24a1bf7aec5304362bf1fa52025b587fd151))
+
 # 1.0.0 (2026-04-02)
 
 
