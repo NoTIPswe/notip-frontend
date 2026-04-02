@@ -47,6 +47,12 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "mock": {
+              "browser": "src/mocks/main.ts",
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
             }
           },
           "defaultConfiguration": "production"
@@ -59,6 +65,9 @@
             },
             "development": {
               "buildTarget": "notip-frontend:build:development"
+            },
+            "mock": {
+              "buildTarget": "notip-frontend:build:mock"
             }
           },
           "defaultConfiguration": "development"
