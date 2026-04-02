@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
   selector: 'app-placeholder-page',
   standalone: true,
   templateUrl: `./placeholder-page.component.html`,
+  styleUrl: `./placeholder-page.component.css`,
 })
 export class PlaceholderPageComponent {
   private readonly route = inject(ActivatedRoute);
