@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/NoTIPswe/notip-frontend/compare/v1.3.1...v1.4.0) (2026-04-02)
+
+
+### Features
+
+* implemented unauthorized, forbidden, not found and unknown error pages; update page button ([c642179](https://github.com/NoTIPswe/notip-frontend/commit/c64217941ab1fe67365a23462e737f3c49799158))
+
 ## [1.3.1](https://github.com/NoTIPswe/notip-frontend/compare/v1.3.0...v1.3.1) (2026-04-02)
 
 
