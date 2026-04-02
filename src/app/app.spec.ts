@@ -16,6 +16,7 @@ describe('App', () => {
     };
     const authMock = {
       getRole: () => UserRole.tenant_user,
+      getToken: () => Promise.resolve('token'),
       getUsername: () => Promise.resolve('tester'),
       logout: () => undefined,
     };

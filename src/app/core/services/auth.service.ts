@@ -14,6 +14,7 @@ interface JwtPayload {
   realm_access?: {
     roles?: string[];
   };
+  resource_access?: Record<string, { roles?: string[] }>;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -24,6 +25,8 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
 
   private readonly logoutSubject = new Subject<void>();
   private readonly impersonatingSignal = signal(false);
+  private readonly impersonationTokenSignal = signal<string | null>(null);
+  private readonly impersonationPayloadSignal = signal<JwtPayload | null>(null);
 
   readonly logout$: Observable<void> = this.logoutSubject.asObservable();
   readonly isImpersonating = this.impersonatingSignal.asReadonly();
@@ -32,6 +35,7 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
     effect(() => {
       const event = this.keycloakEventSignal();
       if (event.type === KeycloakEventType.AuthLogout) {
+        this.clearImpersonationContext();
         this.impersonatingSignal.set(false);
         this.logoutSubject.next();
       }
@@ -47,12 +51,18 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
   }
 
   logout(): void {
+    this.clearImpersonationContext();
     this.impersonatingSignal.set(false);
     this.logoutSubject.next();
     void this.keycloak.logout({ redirectUri: globalThis.location.origin });
   }
 
   async getToken(): Promise<string> {
+    const impersonationToken = this.impersonationTokenSignal();
+    if (impersonationToken) {
+      return impersonationToken;
+    }
+
     if (!this.keycloak.authenticated) {
       return '';
     }
@@ -72,16 +82,12 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
 
   getRole(): UserRole {
     const payload = this.decodeJwtPayload();
-    const role = payload.role;
-    if (role === UserRole.system_admin || role === UserRole.tenant_admin) {
-      return role as UserRole;
-    }
+    const roles = this.collectRoles(payload);
 
-    const realmRoles = payload.realm_access?.roles ?? [];
-    if (realmRoles.includes(UserRole.system_admin)) {
+    if (roles.has(UserRole.system_admin)) {
       return UserRole.system_admin;
     }
-    if (realmRoles.includes(UserRole.tenant_admin)) {
+    if (roles.has(UserRole.tenant_admin)) {
       return UserRole.tenant_admin;
     }
 
@@ -97,16 +103,91 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
   }
 
   setImpersonating(value: boolean): void {
+    if (!value) {
+      this.clearImpersonationContext();
+    }
+
     this.impersonatingSignal.set(value);
   }
 
   startImpersonation(targetUserId: string): Observable<string> {
-    return this.authApi
-      .authControllerImpersonate({ user_id: targetUserId })
-      .pipe(map((res) => res.access_token ?? ''));
+    return this.authApi.authControllerImpersonate({ user_id: targetUserId }).pipe(
+      map((res) => {
+        const token = res.access_token ?? '';
+        if (!token) {
+          return '';
+        }
+
+        this.impersonationTokenSignal.set(token);
+        this.impersonationPayloadSignal.set(this.decodeTokenPayload(token));
+        this.impersonatingSignal.set(true);
+
+        return token;
+      }),
+    );
+  }
+
+  private collectRoles(payload: JwtPayload): Set<string> {
+    const roles = new Set<string>();
+
+    if (payload.role) {
+      roles.add(payload.role);
+    }
+
+    for (const role of payload.realm_access?.roles ?? []) {
+      roles.add(role);
+    }
+
+    for (const resource of Object.values(payload.resource_access ?? {})) {
+      for (const role of resource.roles ?? []) {
+        roles.add(role);
+      }
+    }
+
+    return roles;
+  }
+
+  private clearImpersonationContext(): void {
+    this.impersonationTokenSignal.set(null);
+    this.impersonationPayloadSignal.set(null);
+  }
+
+  private decodeTokenPayload(token: string): JwtPayload | null {
+    const segments = token.split('.');
+    if (segments.length < 2 || typeof globalThis.atob !== 'function') {
+      return null;
+    }
+
+    try {
+      const normalizedBase64 = this.normalizeBase64(segments[1]);
+      const decoded = globalThis.atob(normalizedBase64);
+      const parsed = JSON.parse(decoded) as unknown;
+      return this.asJwtPayload(parsed);
+    } catch {
+      return null;
+    }
+  }
+
+  private normalizeBase64(value: string): string {
+    const base64 = value.replaceAll('-', '+').replaceAll('_', '/');
+    const paddingLength = (4 - (base64.length % 4)) % 4;
+    return `${base64}${'='.repeat(paddingLength)}`;
+  }
+
+  private asJwtPayload(value: unknown): JwtPayload | null {
+    if (typeof value === 'object' && value !== null) {
+      return value as JwtPayload;
+    }
+
+    return null;
   }
 
   private decodeJwtPayload(): JwtPayload {
+    const impersonationPayload = this.impersonationPayloadSignal();
+    if (impersonationPayload) {
+      return impersonationPayload;
+    }
+
     const parsed = this.keycloak.tokenParsed as JwtPayload | undefined;
     return parsed ?? {};
   }

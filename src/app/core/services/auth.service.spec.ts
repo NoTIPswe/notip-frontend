@@ -12,6 +12,20 @@ interface EventLike {
   type: KeycloakEventType;
 }
 
+function createUnsignedJwt(payload: Record<string, unknown>): string {
+  const encode = (value: Record<string, unknown>) => {
+    const base64 = globalThis.btoa(JSON.stringify(value));
+    let base64url = base64.replaceAll('+', '-').replaceAll('/', '_');
+    while (base64url.endsWith('=')) {
+      base64url = base64url.slice(0, -1);
+    }
+
+    return base64url;
+  };
+
+  return `${encode({ alg: 'none', typ: 'JWT' })}.${encode(payload)}.`;
+}
+
 describe('AuthService', () => {
   let service: AuthService;
   const eventSignal = signal<EventLike>({ type: KeycloakEventType.KeycloakAngularNotInitialized });
@@ -146,6 +160,13 @@ describe('AuthService', () => {
     };
     expect(service.getRole()).toBe(UserRole.tenant_admin);
 
+    keycloakMock.tokenParsed = {
+      resource_access: {
+        'notip-mgmt-backend': { roles: ['system_admin'] },
+      },
+    };
+    expect(service.getRole()).toBe(UserRole.system_admin);
+
     keycloakMock.tokenParsed = {};
     expect(service.getRole()).toBe(UserRole.tenant_user);
   });
@@ -159,17 +180,31 @@ describe('AuthService', () => {
   });
 
   it('starts impersonation and returns issued access token', async () => {
-    authApiMock.authControllerImpersonate.mockReturnValue(of({ access_token: 'impersonated' }));
+    const impersonatedToken = createUnsignedJwt({
+      sub: 'impersonated-user',
+      preferred_username: 'impersonated.name',
+      tenant_id: 'tenant-77',
+      realm_access: { roles: ['tenant_admin'] },
+    });
+
+    authApiMock.authControllerImpersonate.mockReturnValue(of({ access_token: impersonatedToken }));
 
     await expect(firstValueFrom(service.startImpersonation('target-1'))).resolves.toBe(
-      'impersonated',
+      impersonatedToken,
     );
     expect(authApiMock.authControllerImpersonate).toHaveBeenCalledWith({ user_id: 'target-1' });
+    expect(service.isImpersonating()).toBe(true);
+    await expect(service.getToken()).resolves.toBe(impersonatedToken);
+    await expect(service.getUsername()).resolves.toBe('impersonated.name');
+    expect(service.getTenantId()).toBe('tenant-77');
+    expect(service.getUserId()).toBe('impersonated-user');
+    expect(service.getRole()).toBe(UserRole.tenant_admin);
   });
 
   it('returns empty token when impersonation response has no access token', async () => {
     authApiMock.authControllerImpersonate.mockReturnValue(of({}));
 
     await expect(firstValueFrom(service.startImpersonation('target-2'))).resolves.toBe('');
+    expect(service.isImpersonating()).toBe(false);
   });
 });
