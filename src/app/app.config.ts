@@ -11,7 +11,8 @@ import {
   provideKeycloak,
   withAutoRefreshToken,
 } from 'keycloak-angular';
-import { provideApi } from './generated/openapi/notip-management-api-openapi';
+import { provideApi as provideMgmtApi } from './generated/openapi/notip-management-api-openapi';
+import { provideApi as provideDataApi } from './generated/openapi/notip-data-api-openapi';
 import { IMPERSONATION_STATUS, SESSION_LIFECYCLE } from './core/auth/contracts';
 import { AuthService } from './core/services/auth.service';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
@@ -52,7 +53,8 @@ export const appConfig: ApplicationConfig = {
     },
     provideHttpClient(withInterceptors([includeBearerTokenInterceptor, errorInterceptor])),
     provideRouter(routes),
-    provideApi('/api/mgmt'),
+    provideMgmtApi('/api/mgmt'),
+    provideDataApi('/api/data'),
     { provide: SESSION_LIFECYCLE, useExisting: AuthService },
     { provide: IMPERSONATION_STATUS, useExisting: AuthService },
   ],
