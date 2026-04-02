@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { IMPERSONATION_STATUS, ImpersonationStatus } from './core/auth/contracts';
 import { UserRole } from './core/models/enums';
@@ -11,7 +11,7 @@ import { SidebarComponent } from './shared/components/sidebar/sidebar.component'
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
-export class App implements OnInit {
+export class App {
   private readonly auth = inject(AuthService);
   private readonly impersonationStatus = inject<ImpersonationStatus>(IMPERSONATION_STATUS);
 
@@ -19,10 +19,27 @@ export class App implements OnInit {
   readonly role = signal<UserRole>(this.auth.getRole());
   readonly isImpersonating = computed(() => this.impersonationStatus.isImpersonating());
 
-  ngOnInit(): void {
-    void this.auth.getUsername().then((name) => {
-      this.username.set(name || 'Utente');
+  constructor() {
+    effect(() => {
+      this.isImpersonating();
+      this.refreshIdentity();
     });
+  }
+
+  private refreshIdentity(): void {
+    void this.auth
+      .getToken()
+      .then(() => {
+        this.role.set(this.auth.getRole());
+        return this.auth.getUsername();
+      })
+      .then((name) => {
+        this.username.set(name || 'Utente');
+      })
+      .catch(() => {
+        this.role.set(this.auth.getRole());
+        this.username.set('Utente');
+      });
   }
 
   onLogout(): void {
