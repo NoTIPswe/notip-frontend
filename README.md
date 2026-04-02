@@ -1,4 +1,7 @@
 # NoTIP-Frontend
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=NoTIPswe_notip-frontend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=NoTIPswe_notip-frontend)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=NoTIPswe_notip-frontend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=NoTIPswe_notip-frontend)
+
 Applicazione web di frontend sviluppata in Angular per il sistema NoTIP.
 
 ## Comandi principali
