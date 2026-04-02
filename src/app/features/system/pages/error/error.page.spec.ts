@@ -45,4 +45,37 @@ describe('ErrorPageComponent', () => {
 
     expect(component.retryUrl).toBe('/');
   });
+
+  it('shows forbidden message', () => {
+    routeMock.snapshot.queryParamMap = convertToParamMap({ reason: 'forbidden' });
+
+    const fixture = TestBed.createComponent(ErrorPageComponent);
+    fixture.detectChanges();
+
+    const html = fixture.nativeElement as HTMLElement;
+    expect(html.textContent).toContain('Accesso non consentito');
+    expect(html.textContent).toContain('Non hai i permessi necessari per visualizzare questa risorsa.');
+  });
+
+  it('shows not-found message', () => {
+    routeMock.snapshot.queryParamMap = convertToParamMap({ reason: 'not-found' });
+
+    const fixture = TestBed.createComponent(ErrorPageComponent);
+    fixture.detectChanges();
+
+    const html = fixture.nativeElement as HTMLElement;
+    expect(html.textContent).toContain('Pagina non trovata');
+    expect(html.textContent).toContain('La risorsa richiesta non esiste o è stata spostata.');
+  });
+
+  it('shows unknown error message as default fallback', () => {
+    routeMock.snapshot.queryParamMap = convertToParamMap({ reason: 'some-unexpected-reason' });
+
+    const fixture = TestBed.createComponent(ErrorPageComponent);
+    fixture.detectChanges();
+
+    const html = fixture.nativeElement as HTMLElement;
+    expect(html.textContent).toContain('Errore applicativo');
+    expect(html.textContent).toContain('Si è verificato un errore imprevisto.');
+  });
 });
