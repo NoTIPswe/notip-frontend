@@ -1,14 +1,14 @@
 <section class="error-card">
-  <h2>{{ content.title }}</h2>
-  <p class="message">{{ content.message }}</p>
+  <h2>{{ content().title }}</h2>
+  <p class="message">{{ content().message }}</p>
 
-  @if (reason === 'unauthorized') {
-    <p class="hint">Percorso da ricaricare: {{ retryUrl }}</p>
+  @if (reason() === 'unauthorized') {
+    <p class="hint">Percorso da ricaricare: {{ retryUrl() }}</p>
   }
 
   <div class="actions">
     <button type="button" (click)="reload()">Ricarica pagina</button>
   </div>
 
-  <p class="reason">Reason: {{ reason }}</p>
+  <p class="reason">Reason: {{ reason() }}</p>
 </section>

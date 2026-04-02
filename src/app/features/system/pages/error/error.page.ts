@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 
 type ErrorReason = 'unauthorized' | 'forbidden' | 'not-found' | 'unknown';
@@ -36,13 +37,16 @@ const ERROR_COPY: Record<ErrorReason, ErrorCopy> = {
 })
 export class ErrorPageComponent {
   private readonly route = inject(ActivatedRoute);
+  private readonly queryParamMap = toSignal(this.route.queryParamMap, {
+    initialValue: this.route.snapshot.queryParamMap,
+  });
 
-  readonly reason = this.route.snapshot.queryParamMap.get('reason') ?? 'unknown';
-  readonly retryUrl = this.resolveRetryUrl(this.route.snapshot.queryParamMap.get('retryUrl'));
-  readonly content = this.resolveContent(this.reason);
+  readonly reason = computed(() => this.queryParamMap().get('reason') ?? 'unknown');
+  readonly retryUrl = computed(() => this.resolveRetryUrl(this.queryParamMap().get('retryUrl')));
+  readonly content = computed(() => this.resolveContent(this.reason()));
 
   reload(): void {
-    globalThis.location.assign(this.retryUrl);
+    globalThis.location.assign(this.retryUrl());
   }
 
   private resolveRetryUrl(retryUrl: string | null): string {
