@@ -20,11 +20,11 @@ const ERROR_COPY: Record<ErrorReason, ErrorCopy> = {
   },
   'not-found': {
     title: 'Pagina non trovata',
-    message: 'La risorsa richiesta non esiste o e stata spostata.',
+    message: 'La risorsa richiesta non esiste o è stata spostata.',
   },
   unknown: {
     title: 'Errore applicativo',
-    message: 'Si e verificato un errore imprevisto.',
+    message: 'Si è verificato un errore imprevisto.',
   },
 };
 
