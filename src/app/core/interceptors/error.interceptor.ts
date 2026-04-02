@@ -15,7 +15,17 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       }
 
       if (error.status === 401) {
-        auth.login();
+        const currentUrl = router.url || '/';
+        const isErrorRoute =
+          currentUrl === '/error' ||
+          currentUrl.startsWith('/error/') ||
+          currentUrl.startsWith('/error?');
+        if (!isErrorRoute) {
+          const retryUrl = currentUrl.startsWith('/') ? currentUrl : '/';
+          void router.navigateByUrl(
+            `/error?reason=unauthorized&retryUrl=${encodeURIComponent(retryUrl)}`,
+          );
+        }
         return throwError(() => error);
       }
 

@@ -1,4 +1,14 @@
-<section>
-  <h2>Errore applicativo</h2>
-  <p>Reason: {{ reason }}</p>
+<section class="error-card">
+  <h2>{{ content().title }}</h2>
+  <p class="message">{{ content().message }}</p>
+
+  @if (reason() === 'unauthorized') {
+    <p class="hint">Percorso da ricaricare: {{ retryUrl() }}</p>
+  }
+
+  <div class="actions">
+    <button type="button" (click)="reload()">Ricarica pagina</button>
+  </div>
+
+  <p class="reason">Reason: {{ reason() }}</p>
 </section>

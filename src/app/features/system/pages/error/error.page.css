@@ -2,10 +2,10 @@
   display: block;
 }
 
-section {
+.error-card {
   max-width: 720px;
-  margin: 1rem auto;
-  padding: 1rem 1.25rem;
+  margin: 2rem auto;
+  padding: 1.25rem 1.5rem;
   border: 1px solid #e5e7eb;
   border-left: 4px solid #b91c1c;
   border-radius: 0.5rem;
@@ -21,4 +21,37 @@ h2 {
 p {
   margin: 0;
   color: #374151;
+}
+
+.message {
+  margin-bottom: 0.75rem;
+}
+
+.hint {
+  margin-bottom: 0.75rem;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.actions {
+  margin-bottom: 0.75rem;
+}
+
+button {
+  border: 0;
+  border-radius: 0.375rem;
+  background: #b91c1c;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #991b1b;
+}
+
+.reason {
+  font-size: 0.85rem;
+  color: #6b7280;
 }

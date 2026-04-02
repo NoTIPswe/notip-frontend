@@ -1,5 +1,33 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
+
+type ErrorReason = 'unauthorized' | 'forbidden' | 'not-found' | 'unknown';
+
+interface ErrorCopy {
+  title: string;
+  message: string;
+}
+
+const ERROR_COPY: Record<ErrorReason, ErrorCopy> = {
+  unauthorized: {
+    title: 'Sessione non autorizzata',
+    message:
+      'Il backend ha rifiutato la richiesta con errore 401. Puoi provare a ricaricare la pagina.',
+  },
+  forbidden: {
+    title: 'Accesso non consentito',
+    message: 'Non hai i permessi necessari per visualizzare questa risorsa.',
+  },
+  'not-found': {
+    title: 'Pagina non trovata',
+    message: 'La risorsa richiesta non esiste o è stata spostata.',
+  },
+  unknown: {
+    title: 'Errore applicativo',
+    message: 'Si è verificato un errore imprevisto.',
+  },
+};
 
 @Component({
   selector: 'app-error-page',
@@ -9,5 +37,36 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class ErrorPageComponent {
   private readonly route = inject(ActivatedRoute);
-  readonly reason = this.route.snapshot.queryParamMap.get('reason') ?? 'unknown';
+  private readonly queryParamMap = toSignal(this.route.queryParamMap, {
+    initialValue: this.route.snapshot.queryParamMap,
+  });
+
+  readonly reason = computed(() => this.queryParamMap().get('reason') ?? 'unknown');
+  readonly retryUrl = computed(() => this.resolveRetryUrl(this.queryParamMap().get('retryUrl')));
+  readonly content = computed(() => this.resolveContent(this.reason()));
+
+  reload(): void {
+    globalThis.location.assign(this.retryUrl());
+  }
+
+  private resolveRetryUrl(retryUrl: string | null): string {
+    if (!retryUrl || !retryUrl.startsWith('/') || retryUrl.startsWith('/error')) {
+      return '/';
+    }
+
+    return retryUrl;
+  }
+
+  private resolveContent(reason: string): ErrorCopy {
+    switch (reason) {
+      case 'unauthorized':
+        return ERROR_COPY.unauthorized;
+      case 'forbidden':
+        return ERROR_COPY.forbidden;
+      case 'not-found':
+        return ERROR_COPY['not-found'];
+      default:
+        return ERROR_COPY.unknown;
+    }
+  }
 }

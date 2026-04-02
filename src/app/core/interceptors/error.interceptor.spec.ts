@@ -8,18 +8,18 @@ import { errorInterceptor } from './error.interceptor';
 
 describe('errorInterceptor', () => {
   const authMock = {
-    login: vi.fn(),
     setImpersonating: vi.fn(),
   };
 
   const routerMock = {
+    url: '/dashboard',
     navigateByUrl: vi.fn().mockResolvedValue(true),
   };
 
   beforeEach(async () => {
-    authMock.login.mockReset();
     authMock.setImpersonating.mockReset();
     routerMock.navigateByUrl.mockClear();
+    routerMock.url = '/dashboard';
 
     await TestBed.configureTestingModule({
       providers: [
@@ -29,7 +29,7 @@ describe('errorInterceptor', () => {
     }).compileComponents();
   });
 
-  it('triggers login on 401 and rethrows error', async () => {
+  it('redirects to unauthorized error page on 401 and rethrows error', async () => {
     const req = new HttpRequest('GET', '/api/data');
     const error = new HttpErrorResponse({ status: 401, url: req.url });
     const next = vi.fn(() => throwError(() => error));
@@ -38,9 +38,24 @@ describe('errorInterceptor', () => {
       firstValueFrom(TestBed.runInInjectionContext(() => errorInterceptor(req, next))),
     ).rejects.toBe(error);
 
-    expect(authMock.login).toHaveBeenCalledOnce();
+    expect(routerMock.navigateByUrl).toHaveBeenCalledWith(
+      '/error?reason=unauthorized&retryUrl=%2Fdashboard',
+    );
     expect(authMock.setImpersonating).not.toHaveBeenCalled();
+  });
+
+  it('does not redirect again on 401 when already on error page', async () => {
+    routerMock.url = '/error?reason=unauthorized&retryUrl=%2Fdashboard';
+    const req = new HttpRequest('GET', '/api/data');
+    const error = new HttpErrorResponse({ status: 401, url: req.url });
+    const next = vi.fn(() => throwError(() => error));
+
+    await expect(
+      firstValueFrom(TestBed.runInInjectionContext(() => errorInterceptor(req, next))),
+    ).rejects.toBe(error);
+
     expect(routerMock.navigateByUrl).not.toHaveBeenCalled();
+    expect(authMock.setImpersonating).not.toHaveBeenCalled();
   });
 
   it('sets impersonation on 403 from mgmt keys endpoint and rethrows error', async () => {
@@ -54,7 +69,6 @@ describe('errorInterceptor', () => {
 
     expect(authMock.setImpersonating).toHaveBeenCalledWith(true);
     expect(routerMock.navigateByUrl).not.toHaveBeenCalled();
-    expect(authMock.login).not.toHaveBeenCalled();
   });
 
   it('redirects to forbidden page on generic 403 and rethrows error', async () => {
@@ -67,7 +81,6 @@ describe('errorInterceptor', () => {
     ).rejects.toBe(error);
 
     expect(routerMock.navigateByUrl).toHaveBeenCalledWith('/error?reason=forbidden');
-    expect(authMock.login).not.toHaveBeenCalled();
     expect(authMock.setImpersonating).not.toHaveBeenCalled();
   });
 
@@ -80,7 +93,6 @@ describe('errorInterceptor', () => {
       firstValueFrom(TestBed.runInInjectionContext(() => errorInterceptor(req, next))),
     ).rejects.toBe(error);
 
-    expect(authMock.login).not.toHaveBeenCalled();
     expect(authMock.setImpersonating).not.toHaveBeenCalled();
     expect(routerMock.navigateByUrl).not.toHaveBeenCalled();
   });
