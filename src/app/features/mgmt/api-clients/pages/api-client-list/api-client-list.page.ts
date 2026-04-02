@@ -15,6 +15,7 @@ export class ApiClientListPageComponent implements OnInit {
 
   readonly clients = signal<SecretClient[]>([]);
   readonly lastCreated = signal<SecretClient | null>(null);
+  readonly showCreateForm = signal<boolean>(false);
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
@@ -22,6 +23,14 @@ export class ApiClientListPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadClients();
+  }
+
+  toggleCreateForm(): void {
+    this.showCreateForm.set(!this.showCreateForm());
+  }
+
+  closeCreateForm(): void {
+    this.showCreateForm.set(false);
   }
 
   createClient(name: string): void {
@@ -37,6 +46,7 @@ export class ApiClientListPageComponent implements OnInit {
     this.clientsService.createClient(cleanName).subscribe({
       next: (client) => {
         this.isSaving.set(false);
+        this.showCreateForm.set(false);
         this.lastCreated.set(client);
         this.infoMessage.set(`Client creato: ${client.clientId}`);
         this.loadClients();

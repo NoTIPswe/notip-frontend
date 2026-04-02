@@ -1,23 +1,37 @@
 :host {
   display: block;
   min-height: 100dvh;
+  height: 100dvh;
   color: #111827;
   background: #ffffff;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
 }
 
 .shell-layout {
   display: flex;
-  min-height: 100dvh;
+  height: 100%;
 }
 
 .content-layout {
   flex: 1;
   padding: 1.25rem;
+  min-height: 0;
+  overflow: auto;
 }
 
 @media (max-width: 900px) {
   .shell-layout {
     flex-direction: column;
+  }
+
+  :host {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .content-layout {
+    overflow: visible;
   }
 }
