@@ -1,0 +1,14 @@
+<article class="gateway-card" [class.selected]="selected()">
+  <div class="header-row">
+    <h3>{{ gateway().name }}</h3>
+    <app-status-badge [status]="gateway().status"></app-status-badge>
+  </div>
+
+  <p class="meta">ID: {{ gateway().gatewayId }}</p>
+  <p class="meta">Firmware: {{ gateway().firmwareVersion ?? '-' }}</p>
+  <p class="meta">Frequenza: {{ gateway().sendFrequencyMs }} ms</p>
+
+  <div class="actions">
+    <button type="button" (click)="onOpenDetail()">Apri dettaglio</button>
+  </div>
+</article>

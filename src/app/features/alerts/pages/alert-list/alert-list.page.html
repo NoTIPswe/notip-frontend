@@ -1,0 +1,48 @@
+<section class="alert-list-page">
+  <h2>Lista Alert</h2>
+  <app-alert-filter-panel
+    [from]="from()"
+    [to]="to()"
+    [gatewayId]="gatewayId()"
+    [isLoading]="isLoading()"
+    (filterSubmitted)="applyFilter($event)"
+    (resetRequested)="resetFilter()"
+  ></app-alert-filter-panel>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  @if (isLoading()) {
+    <p class="meta">Caricamento alert...</p>
+  }
+
+  @if (!isLoading() && alerts().length === 0) {
+    <p class="meta">Nessun alert trovato nel periodo selezionato.</p>
+  }
+
+  @if (alerts().length > 0) {
+    <table>
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Type</th>
+          <th>Gateway</th>
+          <th>Tenant</th>
+          <th>Dettagli</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of alerts(); track row.createdAt + row.gatewayId + row.type) {
+          <tr>
+            <td>{{ row.createdAt }}</td>
+            <td>{{ row.type }}</td>
+            <td>{{ row.gatewayId }}</td>
+            <td>{{ row.tenantId }}</td>
+            <td>{{ row.details }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>

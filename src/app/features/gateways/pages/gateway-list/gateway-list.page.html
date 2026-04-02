@@ -1,0 +1,25 @@
+<section class="gateway-list-page">
+  <h2>Lista Gateway</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  @if (isLoading()) {
+    <p class="meta">Caricamento gateway...</p>
+  }
+
+  @if (!isLoading() && gateways().length === 0) {
+    <p class="meta">Nessun gateway disponibile.</p>
+  }
+
+  <div class="cards">
+    @for (gateway of gateways(); track gateway.gatewayId) {
+      <app-gateway-card
+        [gateway]="gateway"
+        [selected]="selectedGatewayId() === gateway.gatewayId"
+        (selectedGateway)="onGatewaySelected($event)"
+      ></app-gateway-card>
+    }
+  </div>
+</section>

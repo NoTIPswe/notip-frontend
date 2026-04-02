@@ -1,0 +1,20 @@
+<section class="tenant-detail">
+  <h2>Dettaglio Tenant</h2>
+
+  <p class="tenant-id">Tenant ID: {{ tenantId() }}</p>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  @if (feedbackMessage()) {
+    <p class="info">{{ feedbackMessage() }}</p>
+  }
+
+  <app-tenant-user-list
+    [users]="users()"
+    [isLoading]="isLoading()"
+    (impersonationStarted)="onImpersonationStarted($event)"
+    (impersonationFailed)="onImpersonationFailed($event)"
+  ></app-tenant-user-list>
+</section>

@@ -1,0 +1,55 @@
+<section class="tenant-form">
+  @if (tenantId()) {
+    <h3>Modifica tenant</h3>
+    <form (submit)="onUpdateSubmit($event, editName.value)">
+      <label>
+        Nome tenant
+        <input #editName type="text" [value]="initialName()" required minlength="3" />
+      </label>
+
+      <div class="actions">
+        <button type="submit" [disabled]="isSaving()">Salva</button>
+        <button type="button" class="ghost" (click)="onCancel()" [disabled]="isSaving()">
+          Annulla
+        </button>
+      </div>
+    </form>
+  } @else {
+    <h3>Crea tenant</h3>
+    <form
+      (submit)="
+        onCreateSubmit(
+          $event,
+          createName.value,
+          createEmail.value,
+          createAdmin.value,
+          createPassword.value
+        )
+      "
+    >
+      <label>
+        Nome tenant
+        <input #createName type="text" required minlength="3" />
+      </label>
+
+      <label>
+        Email admin
+        <input #createEmail type="email" required />
+      </label>
+
+      <label>
+        Nome admin
+        <input #createAdmin type="text" required minlength="2" />
+      </label>
+
+      <label>
+        Password admin
+        <input #createPassword type="password" required minlength="8" />
+      </label>
+
+      <div class="actions">
+        <button type="submit" [disabled]="isSaving()">Crea tenant</button>
+      </div>
+    </form>
+  }
+</section>

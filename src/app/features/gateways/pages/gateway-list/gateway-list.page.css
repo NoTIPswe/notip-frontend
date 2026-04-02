@@ -1,0 +1,32 @@
+.gateway-list-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  max-width: 1200px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.meta {
+  margin: 0;
+  color: #576074;
+  font-size: 0.92rem;
+}
+
+.error {
+  margin: 0;
+  color: #b91c1c;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 0.7rem;
+}

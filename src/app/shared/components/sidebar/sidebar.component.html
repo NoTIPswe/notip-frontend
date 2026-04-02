@@ -1,0 +1,19 @@
+<aside class="sidebar">
+  <header>
+    <h1>NoTIP</h1>
+  </header>
+
+  <section class="account">
+    @if (isImpersonating()) {
+      <app-impersonation-tag />
+    }
+
+    <app-profile-section
+      [username]="username()"
+      [role]="role()"
+      [showProfileLink]="!isImpersonating()"
+    />
+
+    <app-logout-button (clicked)="emitLogout()" />
+  </section>
+</aside>

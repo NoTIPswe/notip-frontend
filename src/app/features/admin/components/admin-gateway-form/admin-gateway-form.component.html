@@ -1,0 +1,31 @@
+<section class="admin-gateway-form">
+  <h3>Aggiungi gateway</h3>
+
+  <form
+    (submit)="onSubmit($event, factoryId.value, tenantId.value, factoryKeyHash.value, model.value)"
+  >
+    <label>
+      Factory ID
+      <input #factoryId type="text" required minlength="3" />
+    </label>
+
+    <label>
+      Tenant ID
+      <input #tenantId type="text" required minlength="3" />
+    </label>
+
+    <label>
+      Factory Key Hash
+      <input #factoryKeyHash type="text" required minlength="12" />
+    </label>
+
+    <label>
+      Model
+      <input #model type="text" required minlength="2" />
+    </label>
+
+    <div class="actions">
+      <button type="submit" [disabled]="isSaving()">Aggiungi</button>
+    </div>
+  </form>
+</section>

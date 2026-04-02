@@ -1,0 +1,22 @@
+<section class="gateway-actions">
+  <h3>Azioni gateway</h3>
+
+  @if (!canManage()) {
+    <p class="hint">Permessi insufficienti: richiesto tenant_admin.</p>
+  }
+
+  <div class="actions">
+    <button type="button" (click)="onRename()" [disabled]="!canManage() || isBusy()">
+      Rinomina
+    </button>
+    <button type="button" (click)="onConfigure()" [disabled]="!canManage() || isBusy()">
+      Configure
+    </button>
+    <button type="button" (click)="onFirmware()" [disabled]="!canManage() || isBusy()">
+      Firmware
+    </button>
+    <button type="button" class="danger" (click)="onDelete()" [disabled]="!canManage() || isBusy()">
+      Elimina
+    </button>
+  </div>
+</section>

@@ -1,0 +1,51 @@
+<section class="alert-config-form">
+  <h3>Configurazione Alert</h3>
+
+  <form class="default-form" (submit)="submitDefault($event, defaultTimeout.value)">
+    <label>
+      Timeout default tenant (ms)
+      <input #defaultTimeout type="number" min="1000" step="500" [value]="defaultTimeoutMs()" />
+    </label>
+    <button type="submit" [disabled]="isSaving()">Salva default</button>
+  </form>
+
+  <form
+    class="gateway-form"
+    (submit)="submitGateway($event, gatewayId.value, gatewayTimeout.value)"
+  >
+    <label>
+      Gateway ID
+      <input #gatewayId type="text" required minlength="2" />
+    </label>
+    <label>
+      Timeout gateway (ms)
+      <input #gatewayTimeout type="number" min="1000" step="500" required />
+    </label>
+    <button type="submit" [disabled]="isSaving()">Salva override gateway</button>
+  </form>
+
+  <section class="overrides">
+    <h4>Override attivi</h4>
+    @if (gatewayOverrides().length === 0) {
+      <p class="meta">Nessun override configurato.</p>
+    }
+
+    @if (gatewayOverrides().length > 0) {
+      <ul>
+        @for (row of gatewayOverrides(); track row.gatewayId) {
+          <li>
+            <span>{{ row.gatewayId }}: {{ row.timeoutMs }} ms</span>
+            <button
+              type="button"
+              class="danger"
+              (click)="deleteGatewayOverride(row.gatewayId)"
+              [disabled]="isSaving()"
+            >
+              Rimuovi
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</section>

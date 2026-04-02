@@ -1,0 +1,13 @@
+@if (open()) {
+  <section class="delete-modal">
+    <h3>{{ title() }}</h3>
+    <p>{{ message() }}</p>
+
+    <div class="actions">
+      <button type="button" class="ghost" (click)="onCancel()" [disabled]="busy()">Annulla</button>
+      <button type="button" class="danger" (click)="onConfirm()" [disabled]="busy()">
+        Conferma
+      </button>
+    </div>
+  </section>
+}

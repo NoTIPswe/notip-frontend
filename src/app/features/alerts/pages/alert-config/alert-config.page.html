@@ -1,0 +1,31 @@
+<section class="alert-config-page">
+  <h2>Configurazione Alert</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  @if (infoMessage()) {
+    <p class="info">{{ infoMessage() }}</p>
+  }
+
+  @if (isLoading()) {
+    <p class="meta">Caricamento configurazione...</p>
+  }
+
+  @if (config()) {
+    <p class="meta">
+      Timeout default attuale: {{ config()!.default.timeoutMs }} ms (aggiornato:
+      {{ config()!.default.updatedAt || '-' }})
+    </p>
+
+    <app-alert-config-form
+      [defaultTimeoutMs]="config()!.default.timeoutMs"
+      [gatewayOverrides]="config()!.gatewayOverrides ?? []"
+      [isSaving]="isSaving()"
+      (defaultSubmitted)="saveDefault($event)"
+      (gatewaySubmitted)="saveGateway($event)"
+      (gatewayDeleteRequested)="deleteGateway($event)"
+    ></app-alert-config-form>
+  }
+</section>
