@@ -99,7 +99,7 @@ describe('AuthService', () => {
 
     service.setImpersonating(true);
     eventSignal.set({ type: KeycloakEventType.AuthLogout });
-    TestBed.flushEffects();
+    TestBed.tick();
 
     expect(service.isImpersonating()).toBe(false);
     expect(logoutEvents.length).toBe(1);

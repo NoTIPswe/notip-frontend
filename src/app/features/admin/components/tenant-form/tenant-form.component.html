@@ -1,10 +1,40 @@
 <section class="tenant-form">
   @if (tenantId()) {
     <h3>Modifica tenant</h3>
-    <form (submit)="onUpdateSubmit($event, editName.value)">
+    <form
+      (submit)="
+        onUpdateSubmit(
+          $event,
+          editName.value,
+          editStatus.value,
+          editSuspensionIntervalDays.valueAsNumber
+        )
+      "
+    >
       <label>
         Nome tenant
         <input #editName type="text" [value]="initialName()" required minlength="3" />
+      </label>
+
+      <label>
+        Stato
+        <select #editStatus [value]="initialStatus()" required>
+          @for (option of tenantStatusOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        Intervallo sospensione (giorni)
+        <input
+          #editSuspensionIntervalDays
+          type="number"
+          min="0"
+          step="1"
+          [value]="initialSuspensionIntervalDays()"
+          required
+        />
       </label>
 
       <div class="actions">

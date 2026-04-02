@@ -36,7 +36,7 @@ describe('TenantFormComponent', () => {
     const event = { preventDefault } as unknown as Event;
     const emitSpy = vi.spyOn(component.updateRequested, 'emit');
 
-    component.onUpdateSubmit(event, 'Tenant Updated');
+    component.onUpdateSubmit(event, 'Tenant Updated', 'suspended', 10);
 
     expect(preventDefault).toHaveBeenCalledOnce();
     expect(emitSpy).not.toHaveBeenCalled();
@@ -48,11 +48,29 @@ describe('TenantFormComponent', () => {
     const emitSpy = vi.spyOn(component.updateRequested, 'emit');
     fixture.componentRef.setInput('tenantId', 'tenant-1');
 
-    component.onUpdateSubmit(event, ' Tenant Updated ');
+    component.onUpdateSubmit(event, ' Tenant Updated ', 'suspended', 15);
 
     expect(emitSpy).toHaveBeenCalledWith({
       tenantId: 'tenant-1',
       name: 'Tenant Updated',
+      status: 'suspended',
+      suspensionIntervalDays: 15,
+    });
+  });
+
+  it('normalizes invalid update status and suspension interval', () => {
+    const preventDefault = vi.fn();
+    const event = { preventDefault } as unknown as Event;
+    const emitSpy = vi.spyOn(component.updateRequested, 'emit');
+    fixture.componentRef.setInput('tenantId', 'tenant-2');
+
+    component.onUpdateSubmit(event, ' Tenant Updated ', 'not-valid', -5);
+
+    expect(emitSpy).toHaveBeenCalledWith({
+      tenantId: 'tenant-2',
+      name: 'Tenant Updated',
+      status: 'active',
+      suspensionIntervalDays: 0,
     });
   });
 

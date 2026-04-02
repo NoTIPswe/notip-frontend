@@ -15,6 +15,8 @@ type CreateTenantRequestPayload = {
 type UpdateTenantRequestPayload = {
   tenantId: string;
   name: string;
+  status: string;
+  suspensionIntervalDays: number;
 };
 
 @Component({
@@ -103,6 +105,8 @@ export class TenantManagerPageComponent implements OnInit {
     this.tenantService
       .updateTenant(payload.tenantId, {
         name: payload.name,
+        status: payload.status,
+        suspensionIntervalDays: payload.suspensionIntervalDays,
       })
       .subscribe({
         next: () => {

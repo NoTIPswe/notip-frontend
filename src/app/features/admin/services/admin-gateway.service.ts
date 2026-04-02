@@ -39,6 +39,7 @@ export class AdminGatewayService {
       factory_id: gp.factoryId,
       tenant_id: gp.tenantId,
       factory_key_hash: gp.factoryKeyHash,
+      model: gp.model,
     };
 
     return this.adminGatewaysApi

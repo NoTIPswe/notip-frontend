@@ -85,6 +85,26 @@ describe('TenantService', () => {
     });
   });
 
+  it('updates tenant with provided status and suspension interval', async () => {
+    apiMock.tenantsControllerUpdateTenant.mockReturnValue(
+      of({ id: 't-1', name: 'Tenant Suspended', status: 'suspended', created_at: '2026-03-31' }),
+    );
+
+    await firstValueFrom(
+      service.updateTenant('t-1', {
+        name: 'Tenant Suspended',
+        status: 'suspended',
+        suspensionIntervalDays: 30,
+      }),
+    );
+
+    expect(apiMock.tenantsControllerUpdateTenant).toHaveBeenCalledWith('t-1', {
+      name: 'Tenant Suspended',
+      status: 'suspended',
+      suspension_interval_days: 30,
+    });
+  });
+
   it('deletes tenant', async () => {
     apiMock.tenantsControllerDeleteTenant.mockReturnValue(of({}));
 

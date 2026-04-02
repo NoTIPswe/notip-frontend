@@ -9,15 +9,6 @@ paths:
           description: ''
       tags:
         - App
-  /health:
-    get:
-      operationId: AppController_getHealth
-      parameters: []
-      responses:
-        '200':
-          description: ''
-      tags:
-        - App
   /admin/gateways:
     get:
       operationId: GatewaysController_getAdminGateways
@@ -747,7 +738,7 @@ paths:
 info:
   title: NoTIP Management API
   description: NoTIP Management API OpenAPI specification
-  version: 1.2.0
+  version: 1.3.2
   contact: {}
 tags: []
 servers: []
@@ -767,10 +758,13 @@ components:
           type: string
         factory_key_hash:
           type: string
+        model:
+          type: string
       required:
         - factory_id
         - tenant_id
         - factory_key_hash
+        - model
     TenantsResponseDto:
       type: object
       properties:

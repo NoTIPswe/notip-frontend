@@ -48,10 +48,13 @@ export class TenantService {
   }
 
   updateTenant(tenantId: string, u: UpdateTenantParameters): Observable<Tenant> {
+    const status = this.normalizeUpdateStatus(u.status);
+    const suspensionIntervalDays = this.normalizeSuspensionIntervalDays(u.suspensionIntervalDays);
+
     const body: UpdateTenantRequestDto = {
       name: u.name ?? '',
-      status: (u.status ?? 'active') as UpdateTenantRequestDtoStatusEnum,
-      suspension_interval_days: 0,
+      status,
+      suspension_interval_days: suspensionIntervalDays,
     };
 
     return this.tenantsApi.tenantsControllerUpdateTenant(tenantId, body).pipe(
@@ -59,6 +62,7 @@ export class TenantService {
         tenantId: res.id,
         name: res.name,
         status: res.status,
+        suspensionIntervalDays,
         createdAt: res.created_at,
       })),
     );
@@ -66,5 +70,21 @@ export class TenantService {
 
   deleteTenant(tenantId: string): Observable<void> {
     return this.tenantsApi.tenantsControllerDeleteTenant(tenantId).pipe(map(() => void 0));
+  }
+
+  private normalizeUpdateStatus(status: string | undefined): UpdateTenantRequestDtoStatusEnum {
+    if (status === UpdateTenantRequestDtoStatusEnum.Suspended) {
+      return UpdateTenantRequestDtoStatusEnum.Suspended;
+    }
+
+    return UpdateTenantRequestDtoStatusEnum.Active;
+  }
+
+  private normalizeSuspensionIntervalDays(value: number | undefined): number {
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+      return 0;
+    }
+
+    return Math.trunc(value);
   }
 }

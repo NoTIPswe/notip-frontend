@@ -2,6 +2,7 @@ export interface Tenant {
   tenantId: string;
   name: string;
   status: string;
+  suspensionIntervalDays?: number;
   createdAt: string;
 }
 
