@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/NoTIPswe/notip-frontend/compare/v1.3.0...v1.3.1) (2026-04-02)
+
+
+### Bug Fixes
+
+* redirecting to correct page based on role ([186bfce](https://github.com/NoTIPswe/notip-frontend/commit/186bfcef5c9721d0d8e50bc67993fd38c6393e54))
+
 # [1.3.0](https://github.com/NoTIPswe/notip-frontend/compare/v1.2.0...v1.3.0) (2026-04-02)
 
 
