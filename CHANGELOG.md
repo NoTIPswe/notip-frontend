@@ -1,3 +1,15 @@
+# [1.2.0](https://github.com/NoTIPswe/notip-frontend/compare/v1.1.0...v1.2.0) (2026-04-02)
+
+
+### Bug Fixes
+
+* change of clientId ([e4f7fbe](https://github.com/NoTIPswe/notip-frontend/commit/e4f7fbe5bb0fec4a096f7a242d46882abfceea49))
+
+
+### Features
+
+* introduction of data-api and changing clientId ([c0a1498](https://github.com/NoTIPswe/notip-frontend/commit/c0a14984265c3f3d2c5d3481ed71714a31d6be2a))
+
 # [1.1.0](https://github.com/NoTIPswe/notip-frontend/compare/v1.0.0...v1.1.0) (2026-04-02)
 
 
