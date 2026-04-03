@@ -78,6 +78,7 @@ describe('AdminGatewayService', () => {
       factory_id: 'factory-1',
       tenant_id: 'tenant-1',
       factory_key_hash: 'hash-1',
+      model: 'ignored-by-api',
     });
   });
 });
