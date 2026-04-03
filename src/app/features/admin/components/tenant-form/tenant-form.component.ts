@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, effect, input, output, signal } from '@angular/core';
 import { TenantStatus } from '../../../../core/models/enums';
 
 export interface CreateTenantPayload {
@@ -28,6 +28,14 @@ export class TenantFormComponent {
   readonly initialSuspensionIntervalDays = input<number>(0);
   readonly isSaving = input<boolean>(false);
   readonly tenantStatusSuspended = TenantStatus.suspended;
+
+  readonly currentStatus = signal<TenantStatus>(TenantStatus.active);
+
+  constructor() {
+    effect(() => {
+      this.currentStatus.set(this.initialStatus());
+    });
+  }
 
   readonly tenantStatusOptions: ReadonlyArray<{ value: TenantStatus; label: string }> = [
     { value: TenantStatus.active, label: 'Attivo' },
@@ -91,6 +99,10 @@ export class TenantFormComponent {
     }
 
     return TenantStatus.active;
+  }
+
+  onStatusChange(statusRaw: string): void {
+    this.currentStatus.set(this.normalizeStatus(statusRaw));
   }
 
   private normalizeSuspensionIntervalDays(value: number, status: TenantStatus): number {

@@ -18,7 +18,12 @@
 
       <label>
         Stato
-        <select #editStatus [value]="initialStatus()" required>
+        <select
+          #editStatus
+          [value]="currentStatus()"
+          (change)="onStatusChange(editStatus.value)"
+          required
+        >
           @for (option of tenantStatusOptions; track option.value) {
             <option [value]="option.value">{{ option.label }}</option>
           }
@@ -33,7 +38,7 @@
           min="0"
           step="1"
           [value]="initialSuspensionIntervalDays()"
-          [disabled]="editStatus.value !== tenantStatusSuspended"
+          [disabled]="currentStatus() !== tenantStatusSuspended"
           required
         />
       </label>

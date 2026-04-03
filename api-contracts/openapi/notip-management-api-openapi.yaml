@@ -754,7 +754,7 @@ paths:
 info:
   title: NoTIP Management API
   description: NoTIP Management API OpenAPI specification
-  version: 1.4.1
+  version: 1.4.2
   contact: {}
 tags: []
 servers: []

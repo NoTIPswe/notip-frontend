@@ -36,7 +36,7 @@ export class AdminGatewayService {
     const body: AddGatewayRequestDto = {
       factory_id: gp.factoryId,
       tenant_id: gp.tenantId,
-      factory_key_hash: gp.factoryKey,
+      factory_key: gp.factoryKey,
       model: gp.model,
     };
 
