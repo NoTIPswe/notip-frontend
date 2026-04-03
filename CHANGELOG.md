@@ -1,3 +1,16 @@
+# [1.5.0](https://github.com/NoTIPswe/notip-frontend/compare/v1.4.0...v1.5.0) (2026-04-03)
+
+
+### Bug Fixes
+
+* aggiorna service/component ai DTO OpenAPI rigenerati ([b22bd3c](https://github.com/NoTIPswe/notip-frontend/commit/b22bd3ccb7ba202d7f3918a5e65c7b338e90074f))
+* corrected tenant update values, inserted gateway model on creation ([5da0ac9](https://github.com/NoTIPswe/notip-frontend/commit/5da0ac930d7aebb842b0d08e66061b49c1bfb3c6))
+
+
+### Features
+
+* refactoring creation and update form ([af9fee3](https://github.com/NoTIPswe/notip-frontend/commit/af9fee3a1217d26ba6a69446b9275932b83a030f))
+
 # [1.4.0](https://github.com/NoTIPswe/notip-frontend/compare/v1.3.1...v1.4.0) (2026-04-02)
 
 
