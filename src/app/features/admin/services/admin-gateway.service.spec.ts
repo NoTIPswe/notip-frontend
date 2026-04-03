@@ -68,7 +68,7 @@ describe('AdminGatewayService', () => {
         service.addGateway({
           factoryId: 'factory-1',
           tenantId: 'tenant-1',
-          factoryKeyHash: 'hash-1',
+          factoryKey: 'hash-1',
           model: 'ignored-by-api',
         }),
       ),

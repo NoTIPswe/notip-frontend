@@ -28,11 +28,11 @@
           <tr>
             <td>{{ gateway.gatewayId }}</td>
             <td>{{ gateway.tenantId }}</td>
-            <td>{{ gateway.model || '-' }}</td>
+            <td>{{ gateway.model }}</td>
             <td>{{ gateway.firmware ?? '-' }}</td>
             <td>{{ gateway.provisioned ? 'yes' : 'no' }}</td>
-            <td>{{ gateway.factoryId || '-' }}</td>
-            <td>{{ gateway.createdAt ?? '-' }}</td>
+            <td>{{ gateway.factoryId }}</td>
+            <td>{{ gateway.createdAt }}</td>
           </tr>
         }
       </tbody>

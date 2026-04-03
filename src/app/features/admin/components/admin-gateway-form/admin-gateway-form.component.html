@@ -1,9 +1,7 @@
 <section class="admin-gateway-form">
   <h3>Aggiungi gateway</h3>
 
-  <form
-    (submit)="onSubmit($event, factoryId.value, tenantId.value, factoryKeyHash.value, model.value)"
-  >
+  <form (submit)="onSubmit($event, factoryId.value, tenantId.value, factoryKey.value, model.value)">
     <label>
       Factory ID
       <input #factoryId type="text" required minlength="3" />
@@ -15,8 +13,8 @@
     </label>
 
     <label>
-      Factory Key Hash
-      <input #factoryKeyHash type="text" required minlength="12" />
+      Factory Key
+      <input #factoryKey type="text" required minlength="32" />
     </label>
 
     <label>

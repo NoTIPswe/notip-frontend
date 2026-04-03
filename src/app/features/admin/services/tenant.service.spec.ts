@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AdminTenantsService as AdminTenantsApiService } from '../../../generated/openapi/notip-management-api-openapi';
+import { TenantStatus } from '../../../core/models/enums';
 import { TenantService } from './tenant.service';
 
 describe('TenantService', () => {
@@ -44,7 +45,7 @@ describe('TenantService', () => {
       {
         tenantId: 't-1',
         name: 'Tenant 1',
-        status: 'active',
+        status: TenantStatus.active,
         suspensionIntervalDays: 7,
         createdAt: '2026-03-31',
       },
@@ -74,7 +75,7 @@ describe('TenantService', () => {
     ).resolves.toEqual({
       tenantId: 't-2',
       name: 'Tenant 2',
-      status: 'active',
+      status: TenantStatus.active,
       suspensionIntervalDays: 0,
       createdAt: '2026-03-31',
     });
@@ -102,7 +103,7 @@ describe('TenantService', () => {
 
     expect(apiMock.tenantsControllerUpdateTenant).toHaveBeenCalledWith('t-1', {
       name: '',
-      status: 'active',
+      status: TenantStatus.active,
       suspension_interval_days: 0,
     });
   });
@@ -121,14 +122,14 @@ describe('TenantService', () => {
     await firstValueFrom(
       service.updateTenant('t-1', {
         name: 'Tenant Suspended',
-        status: 'suspended',
+        status: TenantStatus.suspended,
         suspensionIntervalDays: 30,
       }),
     );
 
     expect(apiMock.tenantsControllerUpdateTenant).toHaveBeenCalledWith('t-1', {
       name: 'Tenant Suspended',
-      status: 'suspended',
+      status: TenantStatus.suspended,
       suspension_interval_days: 30,
     });
   });
@@ -147,14 +148,14 @@ describe('TenantService', () => {
     await firstValueFrom(
       service.updateTenant('t-1', {
         name: 'Tenant Active',
-        status: 'active',
+        status: TenantStatus.active,
         suspensionIntervalDays: 30,
       }),
     );
 
     expect(apiMock.tenantsControllerUpdateTenant).toHaveBeenCalledWith('t-1', {
       name: 'Tenant Active',
-      status: 'active',
+      status: TenantStatus.active,
       suspension_interval_days: 0,
     });
   });

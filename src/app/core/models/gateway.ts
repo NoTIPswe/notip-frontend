@@ -22,14 +22,14 @@ export interface ObfuscatedGateway {
   tenantId: string;
   model: string;
   firmware?: string;
-  provisioned?: boolean;
+  provisioned: boolean;
   factoryId: string;
-  createdAt?: string;
+  createdAt: string;
 }
 
 export interface AddGatewayParameters {
   factoryId: string;
   tenantId: string;
-  factoryKeyHash: string;
+  factoryKey: string;
   model: string;
 }

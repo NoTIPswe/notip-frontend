@@ -3,7 +3,7 @@ import { Component, input, output } from '@angular/core';
 export type CreateAdminGatewayPayload = {
   factoryId: string;
   tenantId: string;
-  factoryKeyHash: string;
+  factoryKey: string;
   model: string;
 };
 
@@ -21,7 +21,7 @@ export class AdminGatewayFormComponent {
     event: Event,
     factoryId: string,
     tenantId: string,
-    factoryKeyHash: string,
+    factoryKey: string,
     model: string,
   ): void {
     event.preventDefault();
@@ -29,7 +29,7 @@ export class AdminGatewayFormComponent {
     this.createRequested.emit({
       factoryId: factoryId.trim(),
       tenantId: tenantId.trim(),
-      factoryKeyHash: factoryKeyHash.trim(),
+      factoryKey: factoryKey.trim(),
       model: model.trim(),
     });
   }

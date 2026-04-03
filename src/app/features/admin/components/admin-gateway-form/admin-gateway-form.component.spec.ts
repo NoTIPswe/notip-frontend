@@ -24,7 +24,7 @@ describe('AdminGatewayFormComponent', () => {
     expect(emitSpy).toHaveBeenCalledWith({
       factoryId: 'factory',
       tenantId: 'tenant',
-      factoryKeyHash: 'hash',
+      factoryKey: 'hash',
       model: 'model',
     });
   });

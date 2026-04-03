@@ -52,7 +52,7 @@ export class AdminGatewayListPageComponent implements OnInit {
       .addGateway({
         factoryId: payload.factoryId,
         tenantId: payload.tenantId,
-        factoryKeyHash: payload.factoryKeyHash,
+        factoryKey: payload.factoryKey,
         model: payload.model,
       })
       .subscribe({

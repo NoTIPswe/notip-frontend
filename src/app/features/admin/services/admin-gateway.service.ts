@@ -20,12 +20,10 @@ export class AdminGatewayService {
             provisioned: Boolean(row['provisioned']),
             model: this.asString(row['model']),
             factoryId: this.asString(row['factory_id']),
+            createdAt: this.asString(row['created_at']),
           };
           if (row['firmware']) {
             mapped.firmware = this.asString(row['firmware']);
-          }
-          if (row['created_at']) {
-            mapped.createdAt = this.asString(row['created_at']);
           }
 
           return mapped;
@@ -38,7 +36,7 @@ export class AdminGatewayService {
     const body: AddGatewayRequestDto = {
       factory_id: gp.factoryId,
       tenant_id: gp.tenantId,
-      factory_key_hash: gp.factoryKeyHash,
+      factory_key_hash: gp.factoryKey,
       model: gp.model,
     };
 
