@@ -6,7 +6,7 @@ export interface ObfuscatedUser {
 }
 
 export interface BaseUser extends ObfuscatedUser {
-  name: string;
+  username: string;
   email: string;
 }
 
@@ -23,14 +23,14 @@ export interface UpdatedUser extends BaseUser {
 }
 
 export interface UserParameters {
-  name: string;
+  username: string;
   email: string;
   role: UserRole;
   password: string;
 }
 
 export interface UpdateUserParameters {
-  name?: string;
+  username?: string;
   email?: string;
   role?: UserRole;
 }

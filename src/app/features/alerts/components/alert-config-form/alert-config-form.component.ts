@@ -24,6 +24,7 @@ export class AlertConfigFormComponent {
   readonly defaultSubmitted = output<DefaultTimeoutPayload>();
   readonly gatewaySubmitted = output<GatewayTimeoutPayload>();
   readonly gatewayDeleteRequested = output<string>();
+  readonly cancelRequested = output<void>();
 
   submitDefault(event: Event, timeoutRaw: string): void {
     event.preventDefault();
@@ -52,5 +53,9 @@ export class AlertConfigFormComponent {
 
   deleteGatewayOverride(gatewayId: string): void {
     this.gatewayDeleteRequested.emit(gatewayId);
+  }
+
+  cancel(): void {
+    this.cancelRequested.emit();
   }
 }

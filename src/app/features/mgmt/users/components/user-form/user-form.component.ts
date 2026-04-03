@@ -3,7 +3,7 @@ import { UserRole } from '../../../../../core/models/enums';
 import { ViewUser } from '../../../../../core/models/user';
 
 export type CreateUserPayload = {
-  name: string;
+  username: string;
   email: string;
   role: UserRole;
   password: string;
@@ -11,7 +11,7 @@ export type CreateUserPayload = {
 
 export type UpdateUserPayload = {
   userId: string;
-  name: string;
+  username: string;
   email: string;
   role: UserRole;
 };
@@ -32,17 +32,17 @@ export class UserFormComponent {
   readonly updateRequested = output<UpdateUserPayload>();
   readonly cancelRequested = output<void>();
 
-  create(event: Event, name: string, email: string, role: string, password: string): void {
+  create(event: Event, username: string, email: string, role: string, password: string): void {
     event.preventDefault();
     this.createRequested.emit({
-      name: name.trim(),
+      username: username.trim(),
       email: email.trim(),
       role: this.toRole(role),
       password,
     });
   }
 
-  update(event: Event, name: string, email: string, role: string): void {
+  update(event: Event, username: string, email: string, role: string): void {
     event.preventDefault();
 
     const target = this.editUser();
@@ -52,7 +52,7 @@ export class UserFormComponent {
 
     this.updateRequested.emit({
       userId: target.userId,
-      name: name.trim(),
+      username: username.trim(),
       email: email.trim(),
       role: this.toRole(role),
     });

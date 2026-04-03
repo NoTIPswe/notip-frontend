@@ -10,7 +10,7 @@ describe('UserFormComponent', () => {
 
   const editUser: ViewUser = {
     userId: 'user-1',
-    name: 'Mario',
+    username: 'Mario',
     email: 'mario@test.dev',
     role: UserRole.tenant_admin,
     lastAccess: null,
@@ -34,7 +34,7 @@ describe('UserFormComponent', () => {
 
     expect(preventDefault).toHaveBeenCalledOnce();
     expect(emitSpy).toHaveBeenCalledWith({
-      name: 'Alice',
+      username: 'Alice',
       email: 'alice@test.dev',
       role: UserRole.system_admin,
       password: 'pwd-1',
@@ -62,7 +62,7 @@ describe('UserFormComponent', () => {
 
     expect(emitSpy).toHaveBeenCalledWith({
       userId: 'user-1',
-      name: 'Alice Updated',
+      username: 'Alice Updated',
       email: 'alice-updated@test.dev',
       role: UserRole.tenant_user,
     });

@@ -11,29 +11,31 @@
   }
 
   @if (users().length > 0) {
-    <table>
-      <thead>
-        <tr>
-          <th>User ID</th>
-          <th>Ruolo</th>
-          <th>Azioni</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (user of users(); track user.userId) {
+    <div class="table-scroll">
+      <table>
+        <thead>
           <tr>
-            <td>{{ user.userId }}</td>
-            <td>{{ user.role }}</td>
-            <td>
-              <app-impersonate-button
-                [userId]="user.userId"
-                (started)="onStarted($event)"
-                (failed)="onFailed($event)"
-              ></app-impersonate-button>
-            </td>
+            <th>User ID</th>
+            <th>Ruolo</th>
+            <th>Azioni</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.userId) {
+            <tr>
+              <td>{{ user.userId }}</td>
+              <td>{{ user.role }}</td>
+              <td>
+                <app-impersonate-button
+                  [userId]="user.userId"
+                  (started)="onStarted($event)"
+                  (failed)="onFailed($event)"
+                ></app-impersonate-button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </section>

@@ -3,6 +3,24 @@
 
   <p class="tenant-id">Tenant ID: {{ tenantId() }}</p>
 
+  @if (isTenantLoading()) {
+    <p class="meta">Caricamento informazioni tenant...</p>
+  }
+
+  @if (tenant()) {
+    <section class="summary">
+      <h3>Informazioni tenant</h3>
+      <p><strong>ID:</strong> {{ tenant()!.tenantId }}</p>
+      <p><strong>Nome:</strong> {{ tenant()!.name }}</p>
+      <p><strong>Stato:</strong> {{ tenant()!.status }}</p>
+      <p><strong>Creato il:</strong> {{ tenant()!.createdAt }}</p>
+      <p>
+        <strong>Intervallo sospensione:</strong>
+        {{ tenant()!.suspensionIntervalDays ?? 0 }} giorni
+      </p>
+    </section>
+  }
+
   @if (errorMessage()) {
     <p class="error">{{ errorMessage() }}</p>
   }

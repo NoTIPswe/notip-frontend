@@ -10,7 +10,7 @@
 
 export interface CreateUserResponseDto {
   id: string;
-  name: string;
+  username: string;
   email: string;
   role: CreateUserResponseDtoRoleEnum;
   created_at: string;

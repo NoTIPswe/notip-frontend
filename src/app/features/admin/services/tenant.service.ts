@@ -28,7 +28,7 @@ export class TenantService {
     const body: CreateTenantRequestDto = {
       name: c.name,
       admin_email: c.adminEmail,
-      admin_name: c.adminName,
+      admin_username: c.adminName,
       admin_password: c.adminPassword,
     };
 

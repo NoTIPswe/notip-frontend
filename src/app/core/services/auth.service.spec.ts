@@ -142,7 +142,7 @@ describe('AuthService', () => {
       role: 'tenant_admin',
     };
 
-    await expect(service.getUsername()).resolves.toBe('Alice Rossi');
+    await expect(service.getUsername()).resolves.toBe('alice');
     expect(service.getTenantId()).toBe('tenant-1');
     expect(service.getUserId()).toBe('user-1');
     expect(service.getRole()).toBe(UserRole.tenant_admin);
@@ -173,19 +173,31 @@ describe('AuthService', () => {
     expect(service.getRole()).toBe(UserRole.tenant_user);
   });
 
-  it('falls back to name and preferred_username when first and last name are missing', async () => {
+  it('uses preferred_username and falls back to username/name when missing', async () => {
     keycloakMock.tokenParsed = {
       name: 'Mario Bianchi',
       preferred_username: 'mario.bianchi',
     };
 
+    await expect(service.getUsername()).resolves.toBe('mario.bianchi');
+
+    keycloakMock.tokenParsed = {
+      name: 'Mario Bianchi',
+    };
+
     await expect(service.getUsername()).resolves.toBe('Mario Bianchi');
 
     keycloakMock.tokenParsed = {
-      preferred_username: 'legacy.username',
+      username: 'legacy.username',
     };
 
     await expect(service.getUsername()).resolves.toBe('legacy.username');
+
+    keycloakMock.tokenParsed = {
+      name: 'Fallback Name',
+    };
+
+    await expect(service.getUsername()).resolves.toBe('Fallback Name');
   });
 
   it('returns empty identity fields when JWT payload is missing', async () => {
@@ -214,7 +226,7 @@ describe('AuthService', () => {
     expect(authApiMock.authControllerImpersonate).toHaveBeenCalledWith({ user_id: 'target-1' });
     expect(service.isImpersonating()).toBe(true);
     await expect(service.getToken()).resolves.toBe(impersonatedToken);
-    await expect(service.getUsername()).resolves.toBe('Impersonated User');
+    await expect(service.getUsername()).resolves.toBe('impersonated.name');
     expect(service.getTenantId()).toBe('tenant-77');
     expect(service.getUserId()).toBe('impersonated-user');
     expect(service.getRole()).toBe(UserRole.tenant_admin);

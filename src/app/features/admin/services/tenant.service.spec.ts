@@ -83,7 +83,7 @@ describe('TenantService', () => {
     expect(apiMock.tenantsControllerCreateTenant).toHaveBeenCalledWith({
       name: 'Tenant 2',
       admin_email: 'admin@x.test',
-      admin_name: 'Admin',
+      admin_username: 'Admin',
       admin_password: 'Secret123',
     });
   });

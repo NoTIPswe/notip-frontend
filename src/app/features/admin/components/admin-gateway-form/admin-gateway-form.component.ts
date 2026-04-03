@@ -16,6 +16,7 @@ export type CreateAdminGatewayPayload = {
 export class AdminGatewayFormComponent {
   readonly isSaving = input<boolean>(false);
   readonly createRequested = output<CreateAdminGatewayPayload>();
+  readonly cancelRequested = output<void>();
 
   onSubmit(
     event: Event,
@@ -32,5 +33,9 @@ export class AdminGatewayFormComponent {
       factoryKey: factoryKey.trim(),
       model: model.trim(),
     });
+  }
+
+  onCancel(): void {
+    this.cancelRequested.emit();
   }
 }

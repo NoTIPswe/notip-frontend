@@ -55,6 +55,7 @@ describe('AdminGatewayService', () => {
         provisioned: false,
         model: 'M2',
         factoryId: 'f-2',
+        createdAt: '',
       },
     ]);
     expect(apiMock.gatewaysControllerGetAdminGateways).toHaveBeenCalledWith('t-1');
@@ -77,7 +78,7 @@ describe('AdminGatewayService', () => {
     expect(apiMock.gatewaysControllerAddGateway).toHaveBeenCalledWith({
       factory_id: 'factory-1',
       tenant_id: 'tenant-1',
-      factory_key_hash: 'hash-1',
+      factory_key: 'hash-1',
       model: 'ignored-by-api',
     });
   });

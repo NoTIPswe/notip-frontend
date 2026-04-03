@@ -87,4 +87,23 @@ button.ghost {
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .create-toggle {
+    width: 100%;
+  }
+
+  .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-row input {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }

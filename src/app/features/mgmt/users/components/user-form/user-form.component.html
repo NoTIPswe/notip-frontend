@@ -1,10 +1,10 @@
 <section class="user-form">
   @if (editUser()) {
     <h3>Modifica utente</h3>
-    <form (submit)="update($event, updateName.value, updateEmail.value, updateRole.value)">
+    <form (submit)="update($event, updateUsername.value, updateEmail.value, updateRole.value)">
       <label>
-        Nome
-        <input #updateName type="text" [value]="editUser()!.name" required minlength="2" />
+        Username
+        <input #updateUsername type="text" [value]="editUser()!.username" required minlength="2" />
       </label>
 
       <label>
@@ -32,12 +32,18 @@
     <h3>Crea utente</h3>
     <form
       (submit)="
-        create($event, createName.value, createEmail.value, createRole.value, createPassword.value)
+        create(
+          $event,
+          createUsername.value,
+          createEmail.value,
+          createRole.value,
+          createPassword.value
+        )
       "
     >
       <label>
-        Nome
-        <input #createName type="text" required minlength="2" />
+        Username
+        <input #createUsername type="text" required minlength="2" />
       </label>
 
       <label>

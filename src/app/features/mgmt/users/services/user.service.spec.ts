@@ -37,14 +37,14 @@ describe('UserService', () => {
       of([
         {
           id: 'u-1',
-          name: 'Alice',
+          username: 'Alice',
           email: 'a@test.dev',
           role: 'system_admin',
           last_access: '2026-03-31',
         },
         {
           id: 'u-2',
-          name: 'Bob',
+          username: 'Bob',
           email: 'b@test.dev',
           role: 'invalid',
           last_access: null,
@@ -55,14 +55,14 @@ describe('UserService', () => {
     await expect(firstValueFrom(service.getUsers())).resolves.toEqual([
       {
         userId: 'u-1',
-        name: 'Alice',
+        username: 'Alice',
         email: 'a@test.dev',
         role: UserRole.system_admin,
         lastAccess: '2026-03-31',
       },
       {
         userId: 'u-2',
-        name: 'Bob',
+        username: 'Bob',
         email: 'b@test.dev',
         role: UserRole.tenant_user,
         lastAccess: null,
@@ -74,7 +74,7 @@ describe('UserService', () => {
     apiMock.usersControllerCreateUser.mockReturnValue(
       of({
         id: 'u-3',
-        name: 'Carol',
+        username: 'Carol',
         email: 'c@test.dev',
         role: 'tenant_admin',
         created_at: '2026-03-31',
@@ -83,7 +83,7 @@ describe('UserService', () => {
 
     await firstValueFrom(
       service.createUser({
-        name: 'Carol',
+        username: 'Carol',
         email: 'c@test.dev',
         password: 'Strong123',
         role: UserRole.system_admin,
@@ -91,7 +91,7 @@ describe('UserService', () => {
     );
 
     expect(apiMock.usersControllerCreateUser).toHaveBeenCalledWith({
-      name: 'Carol',
+      username: 'Carol',
       email: 'c@test.dev',
       role: CreateUserRequestDtoRoleEnum.SystemAdmin,
       password: 'Strong123',
@@ -100,13 +100,13 @@ describe('UserService', () => {
 
   it('updates user using default fallbacks when fields are missing', async () => {
     apiMock.usersControllerUpdateUser.mockReturnValue(
-      of({ id: 'u-4', name: '', email: '', role: 'tenant_user', updated_at: '2026-03-31' }),
+      of({ id: 'u-4', username: '', email: '', role: 'tenant_user', updated_at: '2026-03-31' }),
     );
 
     await firstValueFrom(service.updateUser('u-4', {}));
 
     expect(apiMock.usersControllerUpdateUser).toHaveBeenCalledWith('u-4', {
-      name: '',
+      username: '',
       email: '',
       role: UpdateUserRequestDtoRoleEnum.TenantUser,
       permissions: [],
@@ -127,7 +127,7 @@ describe('UserService', () => {
     apiMock.usersControllerUpdateUser.mockReturnValue(
       of({
         id: 'u-5',
-        name: 'X',
+        username: 'X',
         email: 'x@test.dev',
         role: 'tenant_admin',
         updated_at: '2026-03-31',
@@ -137,7 +137,7 @@ describe('UserService', () => {
     await firstValueFrom(service.updateUser('u-5', { role: UserRole.tenant_admin }));
 
     expect(apiMock.usersControllerUpdateUser).toHaveBeenCalledWith('u-5', {
-      name: '',
+      username: '',
       email: '',
       role: UpdateUserRequestDtoRoleEnum.TenantAdmin,
       permissions: [],

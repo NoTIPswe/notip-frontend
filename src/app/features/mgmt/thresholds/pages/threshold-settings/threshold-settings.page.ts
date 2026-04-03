@@ -22,6 +22,7 @@ export class ThresholdSettingsPageComponent implements OnInit {
   private readonly thresholdService = inject(ThresholdService);
 
   readonly thresholds = signal<ThresholdConfig[]>([]);
+  readonly showForm = signal<boolean>(false);
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
@@ -29,6 +30,14 @@ export class ThresholdSettingsPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadThresholds();
+  }
+
+  toggleForm(): void {
+    this.showForm.set(!this.showForm());
+  }
+
+  closeForm(): void {
+    this.showForm.set(false);
   }
 
   saveTypeThreshold(payload: TypeThresholdPayload): void {
@@ -41,6 +50,7 @@ export class ThresholdSettingsPageComponent implements OnInit {
       .subscribe({
         next: () => {
           this.isSaving.set(false);
+          this.showForm.set(false);
           this.infoMessage.set(`Soglia per type ${payload.sensorType} salvata.`);
           this.loadThresholds();
         },
@@ -61,6 +71,7 @@ export class ThresholdSettingsPageComponent implements OnInit {
       .subscribe({
         next: () => {
           this.isSaving.set(false);
+          this.showForm.set(false);
           this.infoMessage.set(`Soglia per sensore ${payload.sensorId} salvata.`);
           this.loadThresholds();
         },

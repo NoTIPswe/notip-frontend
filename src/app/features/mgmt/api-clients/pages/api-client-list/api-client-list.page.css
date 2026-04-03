@@ -1,5 +1,6 @@
 .api-client-page {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.9rem;
   max-width: 1100px;
 }
@@ -80,7 +81,8 @@ button.ghost {
   border-radius: 10px;
   background: #fffbeb;
   padding: 0.8rem;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.35rem;
 }
 
@@ -99,8 +101,17 @@ button.ghost {
     align-items: flex-start;
   }
 
+  .create-toggle {
+    width: 100%;
+  }
+
   .create-form {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  input {
+    min-width: 0;
+    width: 100%;
   }
 }

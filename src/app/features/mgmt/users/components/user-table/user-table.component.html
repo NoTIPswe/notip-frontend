@@ -11,36 +11,38 @@
   }
 
   @if (users().length > 0) {
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nome</th>
-          <th>Email</th>
-          <th>Ruolo</th>
-          <th>Ultimo accesso</th>
-          <th>Azioni</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (user of users(); track user.userId) {
-          <tr [class.is-selected]="selectedUserId() === user.userId">
-            <td>{{ user.userId }}</td>
-            <td>{{ user.name }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.role }}</td>
-            <td>{{ user.lastAccess || '-' }}</td>
-            <td class="actions-cell">
-              <button type="button" class="ghost" (click)="requestEdit(user.userId)">
-                Modifica
-              </button>
-              <button type="button" class="danger" (click)="requestDelete(user.userId)">
-                Elimina
-              </button>
-            </td>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Ruolo</th>
+            <th>Ultimo accesso</th>
+            <th>Azioni</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.userId) {
+            <tr [class.is-selected]="selectedUserId() === user.userId">
+              <td>{{ user.userId }}</td>
+              <td>{{ user.username }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.role }}</td>
+              <td>{{ user.lastAccess || '-' }}</td>
+              <td class="actions-cell">
+                <button type="button" class="ghost" (click)="requestEdit(user.userId)">
+                  Modifica
+                </button>
+                <button type="button" class="danger" (click)="requestDelete(user.userId)">
+                  Elimina
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </section>

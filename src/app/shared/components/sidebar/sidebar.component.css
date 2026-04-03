@@ -17,15 +17,21 @@ h1 {
 }
 
 .menu {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   flex: 1;
   gap: 0.4rem;
   margin-top: 1rem;
   min-height: 0;
   overflow: auto;
+  align-content: flex-start;
 }
 
 .menu a {
+  display: flex;
+  align-items: center;
+  min-height: 2.2rem;
   text-decoration: none;
   color: #1f2937;
   border: 1px solid transparent;

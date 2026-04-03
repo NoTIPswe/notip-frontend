@@ -8,8 +8,7 @@ import { UserRole } from '../models/enums';
 
 interface JwtPayload {
   sub?: string;
-  given_name?: string;
-  family_name?: string;
+  username?: string;
   name?: string;
   preferred_username?: string;
   tenant_id?: string;
@@ -81,20 +80,17 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
 
   getUsername(): Promise<string> {
     const payload = this.decodeJwtPayload();
-    const firstName = payload.given_name?.trim() ?? '';
-    const lastName = payload.family_name?.trim() ?? '';
-    const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
-
-    if (fullName) {
-      return Promise.resolve(fullName);
+    const preferredUsername = payload.preferred_username?.trim();
+    if (preferredUsername) {
+      return Promise.resolve(preferredUsername);
     }
 
-    const displayName = payload.name?.trim();
-    if (displayName) {
-      return Promise.resolve(displayName);
+    const username = payload.username?.trim();
+    if (username) {
+      return Promise.resolve(username);
     }
 
-    return Promise.resolve(payload.preferred_username?.trim() ?? '');
+    return Promise.resolve(payload.name?.trim() ?? '');
   }
 
   getRole(): UserRole {

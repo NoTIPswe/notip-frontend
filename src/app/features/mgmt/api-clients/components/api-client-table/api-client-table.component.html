@@ -11,29 +11,31 @@
   }
 
   @if (clients().length > 0) {
-    <table>
-      <thead>
-        <tr>
-          <th>Client ID</th>
-          <th>Nome</th>
-          <th>Creato</th>
-          <th>Azioni</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (client of clients(); track client.id) {
+    <div class="table-scroll">
+      <table>
+        <thead>
           <tr>
-            <td>{{ client.clientId }}</td>
-            <td>{{ client.name }}</td>
-            <td>{{ client.createdAt }}</td>
-            <td>
-              <button type="button" class="danger" (click)="requestDelete(client.id)">
-                Elimina
-              </button>
-            </td>
+            <th>Client ID</th>
+            <th>Nome</th>
+            <th>Creato</th>
+            <th>Azioni</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (client of clients(); track client.id) {
+            <tr>
+              <td>{{ client.clientId }}</td>
+              <td>{{ client.name }}</td>
+              <td>{{ client.createdAt }}</td>
+              <td>
+                <button type="button" class="danger" (click)="requestDelete(client.id)">
+                  Elimina
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </section>

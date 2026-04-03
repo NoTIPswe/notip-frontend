@@ -24,6 +24,9 @@
 
     <div class="actions">
       <button type="submit" [disabled]="isSaving()">Aggiungi</button>
+      <button type="button" class="ghost" (click)="onCancel()" [disabled]="isSaving()">
+        Annulla
+      </button>
     </div>
   </form>
 </section>

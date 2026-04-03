@@ -10,7 +10,7 @@
 
 export interface UpdateUserResponseDto {
   id: string;
-  name: string;
+  username: string;
   email: string;
   role: UpdateUserResponseDtoRoleEnum;
   updated_at: string;

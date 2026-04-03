@@ -23,6 +23,7 @@ export class ThresholdFormComponent {
 
   readonly typeSubmitted = output<TypeThresholdPayload>();
   readonly sensorSubmitted = output<SensorThresholdPayload>();
+  readonly cancelRequested = output<void>();
 
   submitType(event: Event, sensorType: string, minRaw: string, maxRaw: string): void {
     event.preventDefault();
@@ -58,6 +59,10 @@ export class ThresholdFormComponent {
       ...(minValue === undefined ? {} : { minValue }),
       ...(maxValue === undefined ? {} : { maxValue }),
     });
+  }
+
+  cancel(): void {
+    this.cancelRequested.emit();
   }
 
   private parseNumber(value: string): number | undefined {

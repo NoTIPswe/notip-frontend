@@ -1,14 +1,11 @@
 <section class="user-list-page">
   <div class="header-row">
     <h2>Gestione Utenti</h2>
-    <button
-      type="button"
-      class="create-toggle"
-      [class.ghost]="showCreateForm()"
-      (click)="openCreateUserForm()"
-    >
-      {{ showCreateForm() && !editingUser() ? 'Chiudi creazione' : '+ Nuovo utente' }}
-    </button>
+    @if (!(showCreateForm() || editingUser())) {
+      <button type="button" class="create-toggle" (click)="openCreateUserForm()">
+        + Nuovo utente
+      </button>
+    }
   </div>
 
   @if (errorMessage()) {
@@ -19,13 +16,15 @@
     <p class="info">{{ infoMessage() }}</p>
   }
 
-  <app-user-table
-    [users]="users()"
-    [isLoading]="isLoading()"
-    [selectedUserId]="editingUserId()"
-    (editRequested)="requestEdit($event)"
-    (deleteRequested)="requestDelete($event)"
-  ></app-user-table>
+  @if (!(showCreateForm() || editingUser())) {
+    <app-user-table
+      [users]="users()"
+      [isLoading]="isLoading()"
+      [selectedUserId]="editingUserId()"
+      (editRequested)="requestEdit($event)"
+      (deleteRequested)="requestDelete($event)"
+    ></app-user-table>
+  }
 
   @if (showCreateForm() || editingUser()) {
     <app-user-form

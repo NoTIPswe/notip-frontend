@@ -46,7 +46,7 @@ export class TenantManagerPageComponent implements OnInit {
 
   onTenantSelected(tenantId: string): void {
     this.selectedTenantId.set(tenantId);
-    void this.router.navigate(['/admin/tenants', tenantId]);
+    void this.router.navigate(['/admin/tenants', tenantId, 'users']);
   }
 
   onEditTenantRequested(tenantId: string): void {

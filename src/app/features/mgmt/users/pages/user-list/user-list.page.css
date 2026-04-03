@@ -1,5 +1,6 @@
 .user-list-page {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.9rem;
   max-width: 1200px;
 }
@@ -59,5 +60,9 @@ h2 {
   .header-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .create-toggle {
+    width: 100%;
   }
 }

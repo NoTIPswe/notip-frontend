@@ -1,14 +1,11 @@
 <section class="api-client-page">
   <div class="header-row">
     <h2>Client API</h2>
-    <button
-      type="button"
-      class="create-toggle"
-      [class.ghost]="showCreateForm()"
-      (click)="toggleCreateForm()"
-    >
-      {{ showCreateForm() ? 'Chiudi creazione' : '+ Nuovo client API' }}
-    </button>
+    @if (!showCreateForm()) {
+      <button type="button" class="create-toggle" (click)="toggleCreateForm()">
+        + Nuovo client API
+      </button>
+    }
   </div>
 
   @if (showCreateForm()) {
@@ -35,7 +32,7 @@
     <p class="info">{{ infoMessage() }}</p>
   }
 
-  @if (lastCreated()) {
+  @if (!showCreateForm() && lastCreated()) {
     <section class="secret-box">
       <h3>Nuovo client creato</h3>
       <p><strong>Client ID:</strong> {{ lastCreated()!.clientId }}</p>
@@ -44,9 +41,11 @@
     </section>
   }
 
-  <app-api-client-table
-    [clients]="clients()"
-    [isLoading]="isLoading()"
-    (deleteRequested)="requestDelete($event)"
-  ></app-api-client-table>
+  @if (!showCreateForm()) {
+    <app-api-client-table
+      [clients]="clients()"
+      [isLoading]="isLoading()"
+      (deleteRequested)="requestDelete($event)"
+    ></app-api-client-table>
+  }
 </section>

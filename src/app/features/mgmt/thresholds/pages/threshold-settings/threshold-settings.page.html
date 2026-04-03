@@ -1,5 +1,10 @@
 <section class="threshold-settings-page">
-  <h2>Soglie</h2>
+  <div class="header-row">
+    <h2>Soglie</h2>
+    @if (!showForm()) {
+      <button type="button" class="create-toggle" (click)="toggleForm()">+ Nuova soglia</button>
+    }
+  </div>
 
   @if (errorMessage()) {
     <p class="error">{{ errorMessage() }}</p>
@@ -9,15 +14,20 @@
     <p class="info">{{ infoMessage() }}</p>
   }
 
-  <app-threshold-table
-    [thresholds]="thresholds()"
-    [isLoading]="isLoading()"
-    (deleteRequested)="deleteThreshold($event)"
-  ></app-threshold-table>
+  @if (!showForm()) {
+    <app-threshold-table
+      [thresholds]="thresholds()"
+      [isLoading]="isLoading()"
+      (deleteRequested)="deleteThreshold($event)"
+    ></app-threshold-table>
+  }
 
-  <app-threshold-form
-    [isSaving]="isSaving()"
-    (typeSubmitted)="saveTypeThreshold($event)"
-    (sensorSubmitted)="saveSensorThreshold($event)"
-  ></app-threshold-form>
+  @if (showForm()) {
+    <app-threshold-form
+      [isSaving]="isSaving()"
+      (typeSubmitted)="saveTypeThreshold($event)"
+      (sensorSubmitted)="saveSensorThreshold($event)"
+      (cancelRequested)="closeForm()"
+    ></app-threshold-form>
+  }
 </section>

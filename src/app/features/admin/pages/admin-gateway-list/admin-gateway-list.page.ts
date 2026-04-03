@@ -43,6 +43,10 @@ export class AdminGatewayListPageComponent implements OnInit {
     this.showCreateForm.set(!this.showCreateForm());
   }
 
+  onCreateCancelled(): void {
+    this.showCreateForm.set(false);
+  }
+
   onCreateGateway(payload: CreateAdminGatewayPayload): void {
     this.errorMessage.set(null);
     this.infoMessage.set(null);

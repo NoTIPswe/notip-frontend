@@ -754,7 +754,7 @@ paths:
 info:
   title: NoTIP Management API
   description: NoTIP Management API OpenAPI specification
-  version: 1.4.2
+  version: 1.4.4
   contact: {}
 tags: []
 servers: []
@@ -810,7 +810,7 @@ components:
           type: string
         admin_email:
           type: string
-        admin_name:
+        admin_username:
           type: string
         admin_password:
           type: string
@@ -818,7 +818,7 @@ components:
       required:
         - name
         - admin_email
-        - admin_name
+        - admin_username
         - admin_password
     UpdateTenantRequestDto:
       type: object
@@ -1044,7 +1044,7 @@ components:
       properties:
         id:
           type: string
-        name:
+        username:
           type: string
         email:
           type: string
@@ -1060,14 +1060,14 @@ components:
           nullable: true
       required:
         - id
-        - name
+        - username
         - email
         - role
         - last_access
     CreateUserRequestDto:
       type: object
       properties:
-        name:
+        username:
           type: string
         email:
           type: string
@@ -1080,7 +1080,7 @@ components:
         password:
           type: string
       required:
-        - name
+        - username
         - email
         - role
         - password
@@ -1089,7 +1089,7 @@ components:
       properties:
         id:
           type: string
-        name:
+        username:
           type: string
         email:
           type: string
@@ -1104,14 +1104,14 @@ components:
           format: date-time
       required:
         - id
-        - name
+        - username
         - email
         - role
         - created_at
     UpdateUserRequestDto:
       type: object
       properties:
-        name:
+        username:
           type: string
         email:
           type: string
@@ -1126,7 +1126,7 @@ components:
           items:
             type: string
       required:
-        - name
+        - username
         - email
         - role
         - permissions
@@ -1135,7 +1135,7 @@ components:
       properties:
         id:
           type: string
-        name:
+        username:
           type: string
         email:
           type: string
@@ -1150,7 +1150,7 @@ components:
           format: date-time
       required:
         - id
-        - name
+        - username
         - email
         - role
         - updated_at

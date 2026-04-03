@@ -114,7 +114,7 @@ export class UserListPageComponent implements OnInit {
 
     this.userService
       .updateUser(payload.userId, {
-        name: payload.name,
+        username: payload.username,
         email: payload.email,
         role: payload.role,
       })

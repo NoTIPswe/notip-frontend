@@ -9,7 +9,7 @@
  */
 
 export interface CreateUserRequestDto {
-  name: string;
+  username: string;
   email: string;
   role: CreateUserRequestDtoRoleEnum;
   password: string;

@@ -1,5 +1,17 @@
 <section class="alert-config-page">
-  <h2>Configurazione Alert</h2>
+  <div class="header-row">
+    <h2>Configurazione Alert</h2>
+    @if (!showForm()) {
+      <button
+        type="button"
+        class="create-toggle"
+        [disabled]="isLoading() || !config()"
+        (click)="toggleForm()"
+      >
+        Modifica configurazione
+      </button>
+    }
+  </div>
 
   @if (errorMessage()) {
     <p class="error">{{ errorMessage() }}</p>
@@ -13,12 +25,14 @@
     <p class="meta">Caricamento configurazione...</p>
   }
 
-  @if (config()) {
+  @if (config() && !showForm()) {
     <p class="meta">
       Timeout default attuale: {{ config()!.default.timeoutMs }} ms (aggiornato:
       {{ config()!.default.updatedAt || '-' }})
     </p>
+  }
 
+  @if (config() && showForm()) {
     <app-alert-config-form
       [defaultTimeoutMs]="config()!.default.timeoutMs"
       [gatewayOverrides]="config()!.gatewayOverrides ?? []"
@@ -26,6 +40,7 @@
       (defaultSubmitted)="saveDefault($event)"
       (gatewaySubmitted)="saveGateway($event)"
       (gatewayDeleteRequested)="deleteGateway($event)"
+      (cancelRequested)="closeForm()"
     ></app-alert-config-form>
   }
 </section>

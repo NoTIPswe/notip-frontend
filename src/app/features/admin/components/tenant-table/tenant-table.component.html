@@ -11,35 +11,39 @@
   }
 
   @if (tenants().length > 0) {
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nome</th>
-          <th>Stato</th>
-          <th>Creato</th>
-          <th>Azioni</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (tenant of tenants(); track tenant.tenantId) {
-          <tr [class.is-selected]="selectedTenantId() === tenant.tenantId">
-            <td>{{ tenant.tenantId }}</td>
-            <td>{{ tenant.name }}</td>
-            <td>{{ tenant.status }}</td>
-            <td>{{ tenant.createdAt }}</td>
-            <td class="actions-cell">
-              <button type="button" class="ghost" (click)="onSelect(tenant.tenantId)">Apri</button>
-              <button type="button" class="ghost" (click)="onEdit(tenant.tenantId, $event)">
-                Modifica
-              </button>
-              <button type="button" class="danger" (click)="onDelete(tenant.tenantId, $event)">
-                Elimina
-              </button>
-            </td>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Stato</th>
+            <th>Creato</th>
+            <th>Azioni</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (tenant of tenants(); track tenant.tenantId) {
+            <tr [class.is-selected]="selectedTenantId() === tenant.tenantId">
+              <td>{{ tenant.tenantId }}</td>
+              <td>{{ tenant.name }}</td>
+              <td>{{ tenant.status }}</td>
+              <td>{{ tenant.createdAt }}</td>
+              <td class="actions-cell">
+                <button type="button" class="ghost" (click)="onSelect(tenant.tenantId)">
+                  Apri
+                </button>
+                <button type="button" class="ghost" (click)="onEdit(tenant.tenantId, $event)">
+                  Modifica
+                </button>
+                <button type="button" class="danger" (click)="onDelete(tenant.tenantId, $event)">
+                  Elimina
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </section>

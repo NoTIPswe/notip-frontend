@@ -34,4 +34,8 @@
     </label>
     <button type="submit" [disabled]="isSaving()">Salva sensor threshold</button>
   </form>
+
+  <div class="actions">
+    <button type="button" class="ghost" (click)="cancel()" [disabled]="isSaving()">Annulla</button>
+  </div>
 </section>

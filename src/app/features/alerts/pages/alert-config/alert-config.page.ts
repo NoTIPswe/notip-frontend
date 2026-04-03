@@ -18,6 +18,7 @@ export class AlertConfigPageComponent implements OnInit {
   private readonly alertService = inject(AlertService);
 
   readonly config = signal<AlertsConfig | null>(null);
+  readonly showForm = signal<boolean>(false);
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
@@ -25,6 +26,14 @@ export class AlertConfigPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadConfig();
+  }
+
+  toggleForm(): void {
+    this.showForm.set(!this.showForm());
+  }
+
+  closeForm(): void {
+    this.showForm.set(false);
   }
 
   saveDefault(payload: DefaultTimeoutPayload): void {
@@ -35,6 +44,7 @@ export class AlertConfigPageComponent implements OnInit {
     this.alertService.setDefaultConfig(payload.timeoutMs).subscribe({
       next: () => {
         this.isSaving.set(false);
+        this.showForm.set(false);
         this.infoMessage.set('Timeout default aggiornato.');
         this.loadConfig();
       },
@@ -53,6 +63,7 @@ export class AlertConfigPageComponent implements OnInit {
     this.alertService.sendGatewayConfig(payload.gatewayId, payload.timeoutMs).subscribe({
       next: () => {
         this.isSaving.set(false);
+        this.showForm.set(false);
         this.infoMessage.set(`Override salvato per gateway ${payload.gatewayId}.`);
         this.loadConfig();
       },
@@ -71,6 +82,7 @@ export class AlertConfigPageComponent implements OnInit {
     this.alertService.deleteGatewayConfig(gatewayId).subscribe({
       next: () => {
         this.isSaving.set(false);
+        this.showForm.set(false);
         this.infoMessage.set(`Override eliminato per gateway ${gatewayId}.`);
         this.loadConfig();
       },
