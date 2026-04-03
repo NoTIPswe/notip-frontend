@@ -1,5 +1,15 @@
 <section class="tenant-manager">
-  <h2>Tenant Manager</h2>
+  <div class="header-row">
+    <h2>Tenant Manager</h2>
+    <button
+      type="button"
+      class="create-toggle"
+      [class.ghost]="showCreateForm()"
+      (click)="openCreateTenantForm()"
+    >
+      {{ showCreateForm() && !editingTenant() ? 'Chiudi creazione' : '+ Nuovo tenant' }}
+    </button>
+  </div>
 
   @if (errorMessage()) {
     <p class="error">{{ errorMessage() }}</p>
@@ -14,12 +24,16 @@
     (deleteRequested)="onDeleteTenantRequested($event)"
   ></app-tenant-table>
 
-  <app-tenant-form
-    [tenantId]="editingTenant()?.tenantId ?? null"
-    [initialName]="editingTenant()?.name ?? ''"
-    [isSaving]="isSaving()"
-    (createRequested)="onCreateRequested($event)"
-    (updateRequested)="onUpdateRequested($event)"
-    (cancelRequested)="onCancelEdit()"
-  ></app-tenant-form>
+  @if (showCreateForm() || editingTenant()) {
+    <app-tenant-form
+      [tenantId]="editingTenant()?.tenantId ?? null"
+      [initialName]="editingTenant()?.name ?? ''"
+      [initialStatus]="editingTenant()?.status ?? tenantStatusActive"
+      [initialSuspensionIntervalDays]="editingTenant()?.suspensionIntervalDays ?? 0"
+      [isSaving]="isSaving()"
+      (createRequested)="onCreateRequested($event)"
+      (updateRequested)="onUpdateRequested($event)"
+      (cancelRequested)="onCancelEdit()"
+    ></app-tenant-form>
+  }
 </section>

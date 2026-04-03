@@ -1,16 +1,31 @@
 <section class="api-client-page">
-  <h2>Client API</h2>
+  <div class="header-row">
+    <h2>Client API</h2>
+    <button
+      type="button"
+      class="create-toggle"
+      [class.ghost]="showCreateForm()"
+      (click)="toggleCreateForm()"
+    >
+      {{ showCreateForm() ? 'Chiudi creazione' : '+ Nuovo client API' }}
+    </button>
+  </div>
 
-  <form
-    class="create-form"
-    (submit)="$event.preventDefault(); createClient(name.value); name.value = ''"
-  >
-    <label>
-      Nome client
-      <input #name type="text" required minlength="2" placeholder="Backoffice integration" />
-    </label>
-    <button type="submit" [disabled]="isSaving()">Crea client</button>
-  </form>
+  @if (showCreateForm()) {
+    <form
+      class="create-form"
+      (submit)="$event.preventDefault(); createClient(name.value); name.value = ''"
+    >
+      <label>
+        Nome client
+        <input #name type="text" required minlength="2" placeholder="Backoffice integration" />
+      </label>
+      <button type="submit" [disabled]="isSaving()">Crea client</button>
+      <button type="button" class="ghost" [disabled]="isSaving()" (click)="closeCreateForm()">
+        Annulla
+      </button>
+    </form>
+  }
 
   @if (errorMessage()) {
     <p class="error">{{ errorMessage() }}</p>

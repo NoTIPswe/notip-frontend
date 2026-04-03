@@ -1,5 +1,9 @@
 <section class="alert-list-page">
-  <h2>Lista Alert</h2>
+  <div class="header-row">
+    <h2>Lista Alert</h2>
+    <a class="config-link" [routerLink]="'/alerts/config'">+ Configura Alert</a>
+  </div>
+
   <app-alert-filter-panel
     [from]="from()"
     [to]="to()"

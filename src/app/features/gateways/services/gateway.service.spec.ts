@@ -57,7 +57,7 @@ describe('GatewayService', () => {
       {
         id: 'gw-1',
         name: 'Gateway 1',
-        status: 'online',
+        status: 'gateway_online',
         last_seen_at: '2026-03-31',
         provisioned: true,
         firmware_version: '1.2.3',
@@ -97,7 +97,7 @@ describe('GatewayService', () => {
       of({
         id: 'gw-9',
         name: 'Gateway 9',
-        status: 'paused',
+        status: 'gateway_suspended',
         last_seen_at: '2026-03-31',
         provisioned: false,
         firmware_version: '2.0.0',
@@ -117,7 +117,7 @@ describe('GatewayService', () => {
 
   it('updates gateway name and returns mapped result', async () => {
     apiMock.gatewaysControllerUpdateGateway.mockReturnValue(
-      of({ id: 'gw-1', name: 'New Name', status: 'online', updated_at: '2026-03-31' }),
+      of({ id: 'gw-1', name: 'New Name', status: 'gateway_online', updated_at: '2026-03-31' }),
     );
 
     await expect(firstValueFrom(service.updateGatewayName('gw-1', 'New Name'))).resolves.toEqual({

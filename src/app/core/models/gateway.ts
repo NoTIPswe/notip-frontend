@@ -1,7 +1,9 @@
+import { GatewayStatus } from './enums';
+
 export interface Gateway {
   gatewayId: string;
   name: string;
-  status: string;
+  status: GatewayStatus;
   lastSeenAt?: string;
   provisioned: boolean;
   firmwareVersion?: string;
@@ -11,7 +13,7 @@ export interface Gateway {
 export interface GatewayUpdateResult {
   gatewayId: string;
   name: string;
-  status: string;
+  status: GatewayStatus;
   updatedAt: string;
 }
 

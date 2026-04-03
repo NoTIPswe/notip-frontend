@@ -20,6 +20,7 @@ export class UserListPageComponent implements OnInit {
   private readonly userService = inject(UserService);
 
   readonly users = signal<ViewUser[]>([]);
+  readonly showCreateForm = signal<boolean>(false);
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
@@ -37,7 +38,20 @@ export class UserListPageComponent implements OnInit {
   }
 
   requestEdit(userId: string): void {
+    this.showCreateForm.set(false);
     this.editingUserId.set(userId);
+    this.infoMessage.set(null);
+  }
+
+  openCreateUserForm(): void {
+    if (this.editingUser()) {
+      this.editingUserId.set(null);
+      this.showCreateForm.set(true);
+      this.infoMessage.set(null);
+      return;
+    }
+
+    this.showCreateForm.set(!this.showCreateForm());
     this.infoMessage.set(null);
   }
 
@@ -82,6 +96,7 @@ export class UserListPageComponent implements OnInit {
     this.userService.createUser(payload).subscribe({
       next: (created) => {
         this.isSaving.set(false);
+        this.showCreateForm.set(false);
         this.infoMessage.set(`Utente creato: ${created.userId}.`);
         this.loadUsers();
       },
@@ -106,6 +121,7 @@ export class UserListPageComponent implements OnInit {
       .subscribe({
         next: (updated) => {
           this.isSaving.set(false);
+          this.showCreateForm.set(false);
           this.editingUserId.set(null);
           this.infoMessage.set(`Utente aggiornato: ${updated.userId}.`);
           this.loadUsers();
@@ -119,6 +135,7 @@ export class UserListPageComponent implements OnInit {
 
   cancelEdit(): void {
     this.editingUserId.set(null);
+    this.showCreateForm.set(false);
   }
 
   private loadUsers(): void {

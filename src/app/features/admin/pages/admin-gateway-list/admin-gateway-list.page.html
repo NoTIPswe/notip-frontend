@@ -1,5 +1,15 @@
 <section class="admin-gateway-list">
-  <h2>Admin Gateway</h2>
+  <div class="header-row">
+    <h2>Admin Gateway</h2>
+    <button
+      type="button"
+      class="create-toggle"
+      [class.ghost]="showCreateForm()"
+      (click)="toggleCreateForm()"
+    >
+      {{ showCreateForm() ? 'Chiudi creazione' : '+ Nuovo gateway' }}
+    </button>
+  </div>
 
   <form class="filter-row" (submit)="onApplyFilter(tenantFilterInput.value)">
     <label>
@@ -24,8 +34,11 @@
     [gateways]="gateways()"
     [isLoading]="isLoading()"
   ></app-admin-gateway-table>
-  <app-admin-gateway-form
-    [isSaving]="isSaving()"
-    (createRequested)="onCreateGateway($event)"
-  ></app-admin-gateway-form>
+
+  @if (showCreateForm()) {
+    <app-admin-gateway-form
+      [isSaving]="isSaving()"
+      (createRequested)="onCreateGateway($event)"
+    ></app-admin-gateway-form>
+  }
 </section>

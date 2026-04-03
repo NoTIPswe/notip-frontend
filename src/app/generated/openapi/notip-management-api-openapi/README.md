@@ -2,7 +2,7 @@
 
 NoTIP Management API OpenAPI specification
 
-The version of the OpenAPI document: 1.2.0
+The version of the OpenAPI document: 1.3.3
 
 ## Building
 

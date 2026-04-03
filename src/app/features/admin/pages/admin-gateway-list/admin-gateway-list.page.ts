@@ -19,6 +19,7 @@ export class AdminGatewayListPageComponent implements OnInit {
 
   readonly gateways = signal<ObfuscatedGateway[]>([]);
   readonly tenantFilter = signal<string>('');
+  readonly showCreateForm = signal<boolean>(false);
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
@@ -38,6 +39,10 @@ export class AdminGatewayListPageComponent implements OnInit {
     this.loadGateways();
   }
 
+  toggleCreateForm(): void {
+    this.showCreateForm.set(!this.showCreateForm());
+  }
+
   onCreateGateway(payload: CreateAdminGatewayPayload): void {
     this.errorMessage.set(null);
     this.infoMessage.set(null);
@@ -53,6 +58,7 @@ export class AdminGatewayListPageComponent implements OnInit {
       .subscribe({
         next: (id) => {
           this.isSaving.set(false);
+          this.showCreateForm.set(false);
           this.infoMessage.set(`Gateway creato con id ${id}.`);
           this.loadGateways();
         },

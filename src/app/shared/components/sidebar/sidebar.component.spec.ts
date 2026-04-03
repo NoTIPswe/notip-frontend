@@ -51,6 +51,7 @@ describe('SidebarComponent', () => {
     expect(links).toContain('Dashboard');
     expect(links).toContain('Gateways');
     expect(links).toContain('Alerts');
+    expect(links).not.toContain('Alerts Config');
     expect(links).toContain('Users Management');
   });
 
@@ -63,7 +64,7 @@ describe('SidebarComponent', () => {
     );
 
     expect(links).toContain('Tenants');
-    expect(links).toContain('Admin Gateways');
+    expect(links).toContain('Gateways');
     expect(links).not.toContain('Dashboard');
   });
 });

@@ -1,12 +1,14 @@
 .sidebar {
   width: 280px;
-  min-height: 100dvh;
+  height: 100%;
+  min-height: 0;
   border-right: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 1rem;
   background: #f9fafb;
+  overflow: hidden;
 }
 
 h1 {
@@ -16,8 +18,11 @@ h1 {
 
 .menu {
   display: grid;
+  flex: 1;
   gap: 0.4rem;
   margin-top: 1rem;
+  min-height: 0;
+  overflow: auto;
 }
 
 .menu a {
@@ -43,4 +48,20 @@ h1 {
 .account {
   display: grid;
   gap: 0.75rem;
+  margin-top: 1rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid #e5e7eb;
+    overflow: visible;
+  }
+
+  .menu {
+    overflow: visible;
+  }
 }

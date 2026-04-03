@@ -13,6 +13,7 @@ export interface TenantsResponseDto {
   name: string;
   status: TenantsResponseDtoStatusEnum;
   created_at: string;
+  suspension_interval_days?: object;
 }
 export enum TenantsResponseDtoStatusEnum {
   Active = 'active',

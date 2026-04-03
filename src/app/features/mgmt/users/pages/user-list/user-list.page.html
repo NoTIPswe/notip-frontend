@@ -1,5 +1,15 @@
 <section class="user-list-page">
-  <h2>Gestione Utenti</h2>
+  <div class="header-row">
+    <h2>Gestione Utenti</h2>
+    <button
+      type="button"
+      class="create-toggle"
+      [class.ghost]="showCreateForm()"
+      (click)="openCreateUserForm()"
+    >
+      {{ showCreateForm() && !editingUser() ? 'Chiudi creazione' : '+ Nuovo utente' }}
+    </button>
+  </div>
 
   @if (errorMessage()) {
     <p class="error">{{ errorMessage() }}</p>
@@ -17,13 +27,15 @@
     (deleteRequested)="requestDelete($event)"
   ></app-user-table>
 
-  <app-user-form
-    [editUser]="editingUser()"
-    [isSaving]="isSaving()"
-    (createRequested)="createUser($event)"
-    (updateRequested)="updateUser($event)"
-    (cancelRequested)="cancelEdit()"
-  ></app-user-form>
+  @if (showCreateForm() || editingUser()) {
+    <app-user-form
+      [editUser]="editingUser()"
+      [isSaving]="isSaving()"
+      (createRequested)="createUser($event)"
+      (updateRequested)="updateUser($event)"
+      (cancelRequested)="cancelEdit()"
+    ></app-user-form>
+  }
 
   <app-delete-confirm-modal
     [open]="!!deletingUserId()"

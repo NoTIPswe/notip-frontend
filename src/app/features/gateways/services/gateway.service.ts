@@ -4,8 +4,10 @@ import {
   GatewayResponseDto,
   GatewaysService as GatewaysApiService,
   UpdateGatewayRequestDto,
+  UpdateGatewayResponseDto,
 } from '../../../generated/openapi/notip-management-api-openapi';
 import { Gateway, GatewayUpdateResult } from '../../../core/models/gateway';
+import { GatewayStatus } from '../../../core/models/enums';
 import { IMPERSONATION_STATUS, ImpersonationStatus } from '../../../core/auth/contracts';
 
 @Injectable({ providedIn: 'root' })
@@ -48,7 +50,7 @@ export class GatewayService {
       map((dto) => ({
         gatewayId: dto.id,
         name: dto.name,
-        status: dto.status,
+        status: this.toGatewayStatus(dto.status),
         updatedAt: dto.updated_at,
       })),
     );
@@ -78,11 +80,25 @@ export class GatewayService {
     return {
       gatewayId: dto.id,
       name: dto.name,
-      status: dto.status,
+      status: this.toGatewayStatus(dto.status),
       lastSeenAt: dto.last_seen_at,
       provisioned: dto.provisioned,
       firmwareVersion: dto.firmware_version,
       sendFrequencyMs: dto.send_frequency_ms,
     };
+  }
+
+  private toGatewayStatus(
+    status: GatewayResponseDto['status'] | UpdateGatewayResponseDto['status'],
+  ): GatewayStatus {
+    switch (String(status)) {
+      case 'gateway_online':
+        return GatewayStatus.online;
+      case 'gateway_suspended':
+        return GatewayStatus.paused;
+      case 'gateway_offline':
+      default:
+        return GatewayStatus.offline;
+    }
   }
 }

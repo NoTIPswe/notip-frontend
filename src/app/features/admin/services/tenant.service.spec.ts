@@ -29,7 +29,15 @@ describe('TenantService', () => {
 
   it('maps tenants list', async () => {
     apiMock.tenantsControllerGetTenants.mockReturnValue(
-      of([{ id: 't-1', name: 'Tenant 1', status: 'active', created_at: '2026-03-31' }]),
+      of([
+        {
+          id: 't-1',
+          name: 'Tenant 1',
+          status: 'active',
+          created_at: '2026-03-31',
+          suspension_interval_days: 7,
+        },
+      ]),
     );
 
     await expect(firstValueFrom(service.getTenants())).resolves.toEqual([
@@ -37,6 +45,7 @@ describe('TenantService', () => {
         tenantId: 't-1',
         name: 'Tenant 1',
         status: 'active',
+        suspensionIntervalDays: 7,
         createdAt: '2026-03-31',
       },
     ]);
@@ -44,7 +53,13 @@ describe('TenantService', () => {
 
   it('creates tenant with correct payload', async () => {
     apiMock.tenantsControllerCreateTenant.mockReturnValue(
-      of({ id: 't-2', name: 'Tenant 2', status: 'active', created_at: '2026-03-31' }),
+      of({
+        id: 't-2',
+        name: 'Tenant 2',
+        status: 'active',
+        created_at: '2026-03-31',
+        suspension_interval_days: 0,
+      }),
     );
 
     await expect(
@@ -60,6 +75,7 @@ describe('TenantService', () => {
       tenantId: 't-2',
       name: 'Tenant 2',
       status: 'active',
+      suspensionIntervalDays: 0,
       createdAt: '2026-03-31',
     });
 
@@ -73,13 +89,71 @@ describe('TenantService', () => {
 
   it('updates tenant with fallback values', async () => {
     apiMock.tenantsControllerUpdateTenant.mockReturnValue(
-      of({ id: 't-1', name: '', status: 'active', created_at: '2026-03-31' }),
+      of({
+        id: 't-1',
+        name: '',
+        status: 'active',
+        created_at: '2026-03-31',
+        suspension_interval_days: 0,
+      }),
     );
 
     await firstValueFrom(service.updateTenant('t-1', {}));
 
     expect(apiMock.tenantsControllerUpdateTenant).toHaveBeenCalledWith('t-1', {
       name: '',
+      status: 'active',
+      suspension_interval_days: 0,
+    });
+  });
+
+  it('updates tenant with provided status and suspension interval', async () => {
+    apiMock.tenantsControllerUpdateTenant.mockReturnValue(
+      of({
+        id: 't-1',
+        name: 'Tenant Suspended',
+        status: 'suspended',
+        created_at: '2026-03-31',
+        suspension_interval_days: 30,
+      }),
+    );
+
+    await firstValueFrom(
+      service.updateTenant('t-1', {
+        name: 'Tenant Suspended',
+        status: 'suspended',
+        suspensionIntervalDays: 30,
+      }),
+    );
+
+    expect(apiMock.tenantsControllerUpdateTenant).toHaveBeenCalledWith('t-1', {
+      name: 'Tenant Suspended',
+      status: 'suspended',
+      suspension_interval_days: 30,
+    });
+  });
+
+  it('forces suspension interval to zero when status is active', async () => {
+    apiMock.tenantsControllerUpdateTenant.mockReturnValue(
+      of({
+        id: 't-1',
+        name: 'Tenant Active',
+        status: 'active',
+        created_at: '2026-03-31',
+        suspension_interval_days: 0,
+      }),
+    );
+
+    await firstValueFrom(
+      service.updateTenant('t-1', {
+        name: 'Tenant Active',
+        status: 'active',
+        suspensionIntervalDays: 30,
+      }),
+    );
+
+    expect(apiMock.tenantsControllerUpdateTenant).toHaveBeenCalledWith('t-1', {
+      name: 'Tenant Active',
       status: 'active',
       suspension_interval_days: 0,
     });

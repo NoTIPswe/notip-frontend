@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import {
   AlertFilterFormValue,
   AlertFilterPanelComponent,
@@ -9,7 +10,7 @@ import { AlertService } from '../../services/alert.service';
 @Component({
   selector: 'app-alert-list-page',
   standalone: true,
-  imports: [AlertFilterPanelComponent],
+  imports: [AlertFilterPanelComponent, RouterLink],
   templateUrl: './alert-list.page.html',
   styleUrl: './alert-list.page.css',
 })

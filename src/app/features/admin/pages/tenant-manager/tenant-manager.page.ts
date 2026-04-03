@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { TenantStatus } from '../../../../core/models/enums';
 import { Tenant } from '../../../../core/models/tenant';
 import { TenantFormComponent } from '../../components/tenant-form/tenant-form.component';
 import { TenantTableComponent } from '../../components/tenant-table/tenant-table.component';
@@ -15,6 +16,8 @@ type CreateTenantRequestPayload = {
 type UpdateTenantRequestPayload = {
   tenantId: string;
   name: string;
+  status: TenantStatus;
+  suspensionIntervalDays: number;
 };
 
 @Component({
@@ -29,11 +32,13 @@ export class TenantManagerPageComponent implements OnInit {
   private readonly router = inject(Router);
 
   readonly tenants = signal<Tenant[]>([]);
+  readonly showCreateForm = signal<boolean>(false);
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
   readonly selectedTenantId = signal<string | null>(null);
   readonly editingTenant = signal<Tenant | null>(null);
   readonly errorMessage = signal<string | null>(null);
+  readonly tenantStatusActive = TenantStatus.active;
 
   ngOnInit(): void {
     this.loadTenants();
@@ -46,7 +51,18 @@ export class TenantManagerPageComponent implements OnInit {
 
   onEditTenantRequested(tenantId: string): void {
     const tenant = this.tenants().find((item) => item.tenantId === tenantId) ?? null;
+    this.showCreateForm.set(false);
     this.editingTenant.set(tenant);
+  }
+
+  openCreateTenantForm(): void {
+    if (this.editingTenant()) {
+      this.editingTenant.set(null);
+      this.showCreateForm.set(true);
+      return;
+    }
+
+    this.showCreateForm.set(!this.showCreateForm());
   }
 
   onDeleteTenantRequested(tenantId: string): void {
@@ -87,6 +103,7 @@ export class TenantManagerPageComponent implements OnInit {
       .subscribe({
         next: () => {
           this.isSaving.set(false);
+          this.showCreateForm.set(false);
           this.loadTenants();
         },
         error: () => {
@@ -103,10 +120,13 @@ export class TenantManagerPageComponent implements OnInit {
     this.tenantService
       .updateTenant(payload.tenantId, {
         name: payload.name,
+        status: payload.status,
+        suspensionIntervalDays: payload.suspensionIntervalDays,
       })
       .subscribe({
         next: () => {
           this.isSaving.set(false);
+          this.showCreateForm.set(false);
           this.editingTenant.set(null);
           this.loadTenants();
         },
@@ -119,6 +139,7 @@ export class TenantManagerPageComponent implements OnInit {
 
   onCancelEdit(): void {
     this.editingTenant.set(null);
+    this.showCreateForm.set(false);
   }
 
   private loadTenants(): void {
