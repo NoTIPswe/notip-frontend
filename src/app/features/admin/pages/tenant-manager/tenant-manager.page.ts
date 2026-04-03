@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { TenantStatus } from '../../../../core/models/enums';
 import { Tenant } from '../../../../core/models/tenant';
 import { TenantFormComponent } from '../../components/tenant-form/tenant-form.component';
 import { TenantTableComponent } from '../../components/tenant-table/tenant-table.component';
@@ -15,7 +16,7 @@ type CreateTenantRequestPayload = {
 type UpdateTenantRequestPayload = {
   tenantId: string;
   name: string;
-  status: string;
+  status: TenantStatus;
   suspensionIntervalDays: number;
 };
 
@@ -37,6 +38,7 @@ export class TenantManagerPageComponent implements OnInit {
   readonly selectedTenantId = signal<string | null>(null);
   readonly editingTenant = signal<Tenant | null>(null);
   readonly errorMessage = signal<string | null>(null);
+  readonly tenantStatusActive = TenantStatus.active;
 
   ngOnInit(): void {
     this.loadTenants();

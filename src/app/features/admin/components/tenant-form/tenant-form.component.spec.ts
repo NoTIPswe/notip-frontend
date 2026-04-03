@@ -74,6 +74,22 @@ describe('TenantFormComponent', () => {
     });
   });
 
+  it('forces suspension interval to zero when status is active', () => {
+    const preventDefault = vi.fn();
+    const event = { preventDefault } as unknown as Event;
+    const emitSpy = vi.spyOn(component.updateRequested, 'emit');
+    fixture.componentRef.setInput('tenantId', 'tenant-3');
+
+    component.onUpdateSubmit(event, ' Tenant Updated ', 'active', 45);
+
+    expect(emitSpy).toHaveBeenCalledWith({
+      tenantId: 'tenant-3',
+      name: 'Tenant Updated',
+      status: 'active',
+      suspensionIntervalDays: 0,
+    });
+  });
+
   it('emits cancel request', () => {
     const emitSpy = vi.spyOn(component.cancelRequested, 'emit');
 

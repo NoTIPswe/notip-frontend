@@ -23,9 +23,9 @@ export class AdminUserService {
 
   private toUserRole(role: string | undefined): UserRole {
     switch (role) {
-      case 'system_admin':
+      case UserRole.system_admin:
         return UserRole.system_admin;
-      case 'tenant_admin':
+      case UserRole.tenant_admin:
         return UserRole.tenant_admin;
       default:
         return UserRole.tenant_user;

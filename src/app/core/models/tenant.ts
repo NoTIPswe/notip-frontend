@@ -1,7 +1,9 @@
+import { TenantStatus } from './enums';
+
 export interface Tenant {
   tenantId: string;
   name: string;
-  status: string;
+  status: TenantStatus;
   suspensionIntervalDays?: number;
   createdAt: string;
 }
@@ -15,6 +17,6 @@ export interface CreateTenantParameters {
 
 export interface UpdateTenantParameters {
   name?: string;
-  status?: string;
+  status?: TenantStatus;
   suspensionIntervalDays?: number;
 }

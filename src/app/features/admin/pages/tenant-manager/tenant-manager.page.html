@@ -28,7 +28,7 @@
     <app-tenant-form
       [tenantId]="editingTenant()?.tenantId ?? null"
       [initialName]="editingTenant()?.name ?? ''"
-      [initialStatus]="editingTenant()?.status === 'suspended' ? 'suspended' : 'active'"
+      [initialStatus]="editingTenant()?.status ?? tenantStatusActive"
       [initialSuspensionIntervalDays]="editingTenant()?.suspensionIntervalDays ?? 0"
       [isSaving]="isSaving()"
       (createRequested)="onCreateRequested($event)"

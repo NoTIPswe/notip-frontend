@@ -24,9 +24,10 @@ export interface UpdateTenantPayload {
 export class TenantFormComponent {
   readonly tenantId = input<string | null>(null);
   readonly initialName = input<string>('');
-  readonly initialStatus = input<string>(TenantStatus.active);
+  readonly initialStatus = input<TenantStatus>(TenantStatus.active);
   readonly initialSuspensionIntervalDays = input<number>(0);
   readonly isSaving = input<boolean>(false);
+  readonly tenantStatusSuspended = TenantStatus.suspended;
 
   readonly tenantStatusOptions: ReadonlyArray<{ value: TenantStatus; label: string }> = [
     { value: TenantStatus.active, label: 'Attivo' },
@@ -67,11 +68,16 @@ export class TenantFormComponent {
       return;
     }
 
+    const status = this.normalizeStatus(statusRaw);
+
     this.updateRequested.emit({
       tenantId: id,
       name: name.trim(),
-      status: this.normalizeStatus(statusRaw),
-      suspensionIntervalDays: this.normalizeSuspensionIntervalDays(suspensionIntervalDaysRaw),
+      status,
+      suspensionIntervalDays: this.normalizeSuspensionIntervalDays(
+        suspensionIntervalDaysRaw,
+        status,
+      ),
     });
   }
 
@@ -80,14 +86,18 @@ export class TenantFormComponent {
   }
 
   private normalizeStatus(statusRaw: string): TenantStatus {
-    if (statusRaw === String(TenantStatus.suspended)) {
+    if (statusRaw === 'suspended') {
       return TenantStatus.suspended;
     }
 
     return TenantStatus.active;
   }
 
-  private normalizeSuspensionIntervalDays(value: number): number {
+  private normalizeSuspensionIntervalDays(value: number, status: TenantStatus): number {
+    if (status !== TenantStatus.suspended) {
+      return 0;
+    }
+
     if (!Number.isFinite(value) || value < 0) {
       return 0;
     }

@@ -352,6 +352,22 @@ paths:
       summary: Return authenticated user claims mapped by JwtStrategy
       tags:
         - auth
+  /auth/tenant-status:
+    get:
+      operationId: AuthController_getTenantStatus
+      parameters: []
+      responses:
+        '200':
+          description: Tenant status information
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Tenant not found
+      summary: Resolve tenant status for the authenticated user context
+      tags:
+        - auth
   /auth/impersonate:
     post:
       operationId: AuthController_impersonate
@@ -738,7 +754,7 @@ paths:
 info:
   title: NoTIP Management API
   description: NoTIP Management API OpenAPI specification
-  version: 1.3.2
+  version: 1.3.3
   contact: {}
 tags: []
 servers: []
@@ -780,6 +796,8 @@ components:
         created_at:
           format: date-time
           type: string
+        suspension_interval_days:
+          type: object
       required:
         - id
         - name
