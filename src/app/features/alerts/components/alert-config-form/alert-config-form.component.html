@@ -9,13 +9,20 @@
     <button type="submit" [disabled]="isSaving()">Salva default</button>
   </form>
 
-  <form class="gateway-form" (submit)="submitGateway($event, gatewayId.value, gatewayTimeout.value)">
+  <form
+    class="gateway-form"
+    (submit)="submitGateway($event, gatewayId.value, gatewayTimeout.value)"
+  >
     <label>
       Gateway ID
-      <select #gatewayId required (change)="onGatewaySelectionChanged(gatewayId.value, gatewayTimeout)">
+      <select
+        #gatewayId
+        required
+        (change)="onGatewaySelectionChanged(gatewayId.value, gatewayTimeout)"
+      >
         <option value="" selected>Seleziona gateway</option>
         @for (id of availableGatewayIds(); track id) {
-        <option [value]="id">{{ id }}</option>
+          <option [value]="id">{{ id }}</option>
         }
       </select>
     </label>
@@ -24,7 +31,9 @@
       <input #gatewayTimeout type="number" min="1000" step="500" required />
     </label>
     @if (selectedGatewayCurrentTimeoutMs() !== null) {
-    <p class="meta">Timeout attuale gateway selezionato: {{ selectedGatewayCurrentTimeoutMs() }} ms</p>
+      <p class="meta">
+        Timeout attuale gateway selezionato: {{ selectedGatewayCurrentTimeoutMs() }} ms
+      </p>
     }
     <button type="submit" [disabled]="isSaving() || availableGatewayIds().length === 0">
       Salva override gateway
@@ -32,26 +41,31 @@
   </form>
 
   @if (availableGatewayIds().length === 0) {
-  <p class="meta">Nessun gateway disponibile per questo tenant.</p>
+    <p class="meta">Nessun gateway disponibile per questo tenant.</p>
   }
 
   <section class="overrides">
     <h4>Override attivi</h4>
     @if (gatewayOverrides().length === 0) {
-    <p class="meta">Nessun override configurato.</p>
+      <p class="meta">Nessun override configurato.</p>
     }
 
     @if (gatewayOverrides().length > 0) {
-    <ul>
-      @for (row of gatewayOverrides(); track row.gatewayId) {
-      <li>
-        <span>{{ row.gatewayId }}: {{ row.timeoutMs }} ms</span>
-        <button type="button" class="danger" (click)="deleteGatewayOverride(row.gatewayId)" [disabled]="isSaving()">
-          Rimuovi
-        </button>
-      </li>
-      }
-    </ul>
+      <ul>
+        @for (row of gatewayOverrides(); track row.gatewayId) {
+          <li>
+            <span>{{ row.gatewayId }}: {{ row.timeoutMs }} ms</span>
+            <button
+              type="button"
+              class="danger"
+              (click)="deleteGatewayOverride(row.gatewayId)"
+              [disabled]="isSaving()"
+            >
+              Rimuovi
+            </button>
+          </li>
+        }
+      </ul>
     }
   </section>
 

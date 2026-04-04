@@ -3,6 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { of, Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CheckedEnvelope, ObfuscatedEnvelope } from '../../../../core/models/measure';
+import { GatewayService } from '../../../gateways/services/gateway.service';
+import { SensorService } from '../../../sensors/services/sensor.service';
 import { ObfuscatedMeasureService } from '../../services/obfuscated-measure.service';
 import { ValidatedMeasureFacadeService } from '../../services/validated-measure-facade.service';
 import { DataDashboardPageComponent } from './data-dashboard.page';
@@ -17,7 +19,16 @@ describe('DataDashboardPageComponent', () => {
   const validatedMeasureFacadeServiceMock = {
     openStream: vi.fn(),
     query: vi.fn(),
+    export: vi.fn(),
     closeStream: vi.fn(),
+  };
+
+  const gatewayServiceMock = {
+    getGateways: vi.fn(),
+  };
+
+  const sensorServiceMock = {
+    getAllSensors: vi.fn(),
   };
 
   const routeMock: {
@@ -36,24 +47,11 @@ describe('DataDashboardPageComponent', () => {
     isOutofBounds: false,
   };
 
-  const checkedStreamRow: CheckedEnvelope = {
-    ...checkedRow,
-    sensorId: 's-2',
-    timestamp: '2026-04-03T10:01:00.000Z',
-  };
-
-  const obfuscatedRow1: ObfuscatedEnvelope = {
+  const obfuscatedRow: ObfuscatedEnvelope = {
     gatewayId: 'gw-1',
     sensorId: 's-1',
     sensorType: 'temperature',
     timestamp: '2026-04-03T08:00:00.000Z',
-  };
-
-  const obfuscatedRow2: ObfuscatedEnvelope = {
-    gatewayId: 'gw-2',
-    sensorId: 's-2',
-    sensorType: 'humidity',
-    timestamp: '2026-04-03T09:00:00.000Z',
   };
 
   const flushPromises = async (): Promise<void> => {
@@ -68,10 +66,6 @@ describe('DataDashboardPageComponent', () => {
     await flushPromises();
   };
 
-  const hoursDiff = (from: string, to: string): number => {
-    return (new Date(to).getTime() - new Date(from).getTime()) / (60 * 60 * 1000);
-  };
-
   beforeEach(async () => {
     obfuscatedMeasureServiceMock.openStream.mockReset();
     obfuscatedMeasureServiceMock.query.mockReset();
@@ -79,9 +73,23 @@ describe('DataDashboardPageComponent', () => {
 
     validatedMeasureFacadeServiceMock.openStream.mockReset();
     validatedMeasureFacadeServiceMock.query.mockReset();
+    validatedMeasureFacadeServiceMock.export.mockReset();
     validatedMeasureFacadeServiceMock.closeStream.mockReset();
 
+    gatewayServiceMock.getGateways.mockReset();
+    sensorServiceMock.getAllSensors.mockReset();
+
     routeMock.snapshot.data = { dataMode: 'clear' };
+
+    gatewayServiceMock.getGateways.mockReturnValue(
+      of([{ gatewayId: 'gw-1' }, { gatewayId: 'gw-2' }]),
+    );
+    sensorServiceMock.getAllSensors.mockReturnValue(
+      of([
+        { sensorId: 's-1', sensorType: 'temperature' },
+        { sensorId: 's-2', sensorType: 'humidity' },
+      ]),
+    );
 
     await TestBed.configureTestingModule({
       imports: [DataDashboardPageComponent],
@@ -89,115 +97,129 @@ describe('DataDashboardPageComponent', () => {
         { provide: ActivatedRoute, useValue: routeMock },
         { provide: ObfuscatedMeasureService, useValue: obfuscatedMeasureServiceMock },
         { provide: ValidatedMeasureFacadeService, useValue: validatedMeasureFacadeServiceMock },
+        { provide: GatewayService, useValue: gatewayServiceMock },
+        { provide: SensorService, useValue: sensorServiceMock },
       ],
     }).compileComponents();
   });
 
-  it('loads historical clear data before appending stream data', async () => {
+  it('starts clear stream and keeps only last 20 rows', async () => {
     const clearStream$ = new Subject<CheckedEnvelope>();
-    validatedMeasureFacadeServiceMock.query.mockReturnValue(
-      of({ data: [checkedRow], hasMore: false }),
-    );
     validatedMeasureFacadeServiceMock.openStream.mockReturnValue(clearStream$.asObservable());
 
-    const fixture = TestBed.createComponent(DataDashboardPageComponent);
-    const component = fixture.componentInstance;
+    const fixture: ComponentFixture<DataDashboardPageComponent> = TestBed.createComponent(
+      DataDashboardPageComponent,
+    );
+    const component: DataDashboardPageComponent = fixture.componentInstance;
 
     fixture.detectChanges();
     await flushAsyncWork(fixture);
 
-    expect(validatedMeasureFacadeServiceMock.query).toHaveBeenCalledOnce();
     expect(validatedMeasureFacadeServiceMock.openStream).toHaveBeenCalledOnce();
+    expect(component.streamMeasures()).toEqual([]);
 
-    const queryPayload = validatedMeasureFacadeServiceMock.query.mock.calls[0][0] as {
+    for (let index = 0; index < 25; index += 1) {
+      clearStream$.next({
+        ...checkedRow,
+        sensorId: `s-${index}`,
+        timestamp: `2026-04-03T10:${String(index).padStart(2, '0')}:00.000Z`,
+      });
+    }
+
+    expect(component.streamMeasures()).toHaveLength(20);
+    expect(component.streamMeasures()[0]).toMatchObject({ sensorId: 's-5' });
+    expect(component.streamMeasures()[19]).toMatchObject({ sensorId: 's-24' });
+  });
+
+  it('loads query mode with page size 20 and cursor navigation', async () => {
+    validatedMeasureFacadeServiceMock.openStream.mockReturnValue(
+      new Subject<CheckedEnvelope>().asObservable(),
+    );
+    validatedMeasureFacadeServiceMock.query
+      .mockReturnValueOnce(of({ data: [checkedRow], hasMore: true, nextCursor: 'cursor-1' }))
+      .mockReturnValueOnce(
+        of({
+          data: [{ ...checkedRow, sensorId: 's-2', timestamp: '2026-04-03T10:05:00.000Z' }],
+          hasMore: false,
+        }),
+      );
+
+    const fixture: ComponentFixture<DataDashboardPageComponent> = TestBed.createComponent(
+      DataDashboardPageComponent,
+    );
+    const component: DataDashboardPageComponent = fixture.componentInstance;
+
+    fixture.detectChanges();
+    await flushAsyncWork(fixture);
+
+    component.setActiveView('query');
+    await flushAsyncWork(fixture);
+    fixture.detectChanges();
+
+    expect(validatedMeasureFacadeServiceMock.query).toHaveBeenCalledOnce();
+
+    const host = fixture.nativeElement as HTMLElement;
+    const paginationButtons = Array.from(
+      host.querySelectorAll<HTMLButtonElement>('.query-pagination button'),
+    );
+
+    expect(paginationButtons).toHaveLength(1);
+    expect(paginationButtons[0]?.textContent?.trim()).toBe('Successiva');
+
+    const firstQueryPayload = validatedMeasureFacadeServiceMock.query.mock.calls[0][0] as {
       from: string;
       to: string;
       limit: number;
-    };
-
-    expect(queryPayload.limit).toBe(999);
-    expect(hoursDiff(queryPayload.from, queryPayload.to)).toBeGreaterThan(23.5);
-    expect(hoursDiff(queryPayload.from, queryPayload.to)).toBeLessThan(24.5);
-    expect(new Date(queryPayload.to).getTime()).toBeGreaterThan(
-      new Date(queryPayload.from).getTime(),
-    );
-    expect(component.measures()).toEqual([checkedRow]);
-    expect(component.isLoading()).toBe(false);
-
-    clearStream$.next(checkedStreamRow);
-    expect(component.measures()).toEqual([checkedRow, checkedStreamRow]);
-  });
-
-  it('loads obfuscated history with pagination and opens obfuscated stream', async () => {
-    routeMock.snapshot.data = { dataMode: 'obfuscated' };
-
-    const obfuscatedStream$ = new Subject<ObfuscatedEnvelope[]>();
-    obfuscatedMeasureServiceMock.query
-      .mockReturnValueOnce(of({ data: [obfuscatedRow1], hasMore: true, nextCursor: 'cursor-1' }))
-      .mockReturnValueOnce(of({ data: [obfuscatedRow2], hasMore: false }));
-    obfuscatedMeasureServiceMock.openStream.mockReturnValue(obfuscatedStream$.asObservable());
-
-    const fixture = TestBed.createComponent(DataDashboardPageComponent);
-    const component = fixture.componentInstance;
-
-    fixture.detectChanges();
-    await flushAsyncWork(fixture);
-
-    expect(obfuscatedMeasureServiceMock.query).toHaveBeenCalledTimes(2);
-    expect(obfuscatedMeasureServiceMock.openStream).toHaveBeenCalledOnce();
-    expect(validatedMeasureFacadeServiceMock.query).not.toHaveBeenCalled();
-
-    const firstQueryPayload = obfuscatedMeasureServiceMock.query.mock.calls[0][0] as {
-      cursor?: string;
-    };
-    const secondQueryPayload = obfuscatedMeasureServiceMock.query.mock.calls[1][0] as {
       cursor?: string;
     };
 
+    expect(firstQueryPayload.limit).toBe(20);
     expect(firstQueryPayload.cursor).toBeUndefined();
-    expect(secondQueryPayload.cursor).toBe('cursor-1');
-    expect(component.measures()).toEqual([obfuscatedRow1, obfuscatedRow2]);
+    expect(new Date(firstQueryPayload.to).getTime()).toBeGreaterThan(
+      new Date(firstQueryPayload.from).getTime(),
+    );
 
-    obfuscatedStream$.next([obfuscatedRow1]);
-    expect(component.measures()).toEqual([obfuscatedRow1, obfuscatedRow2, obfuscatedRow1]);
-  });
-
-  it('re-queries history when filters are applied', async () => {
-    const clearStream$ = new Subject<CheckedEnvelope>();
-    validatedMeasureFacadeServiceMock.query.mockReturnValue(of({ data: [], hasMore: false }));
-    validatedMeasureFacadeServiceMock.openStream.mockReturnValue(clearStream$.asObservable());
-
-    const fixture = TestBed.createComponent(DataDashboardPageComponent);
-    const component = fixture.componentInstance;
-
-    fixture.detectChanges();
-    await flushAsyncWork(fixture);
-
-    component.onFiltersApplied({
-      gatewayIds: ['gw-9'],
-      sensorIds: ['s-9'],
-      sensorTypes: ['temperature'],
-      historyWindowHours: 168,
-    });
+    component.onNextQueryPage();
     await flushAsyncWork(fixture);
 
     expect(validatedMeasureFacadeServiceMock.query).toHaveBeenCalledTimes(2);
 
-    const latestQueryPayload = validatedMeasureFacadeServiceMock.query.mock.calls[1][0] as {
-      from: string;
-      to: string;
-      gatewayIds?: string[];
-      sensorIds?: string[];
-      sensorTypes?: string[];
+    const secondQueryPayload = validatedMeasureFacadeServiceMock.query.mock.calls[1][0] as {
+      cursor?: string;
     };
 
-    expect(hoursDiff(latestQueryPayload.from, latestQueryPayload.to)).toBeGreaterThan(167.5);
-    expect(hoursDiff(latestQueryPayload.from, latestQueryPayload.to)).toBeLessThan(168.5);
-    expect(latestQueryPayload.gatewayIds).toEqual(['gw-9']);
-    expect(latestQueryPayload.sensorIds).toEqual(['s-9']);
-    expect(latestQueryPayload.sensorTypes).toEqual(['temperature']);
-    expect(validatedMeasureFacadeServiceMock.closeStream.mock.calls.length).toBeGreaterThanOrEqual(
-      2,
+    expect(secondQueryPayload.cursor).toBe('cursor-1');
+    expect(component.queryPage()).toBe(2);
+  });
+
+  it('uses obfuscated endpoints in impersonation and disables export', async () => {
+    routeMock.snapshot.data = { dataMode: 'obfuscated' };
+
+    const obfuscatedStream$ = new Subject<ObfuscatedEnvelope[]>();
+    obfuscatedMeasureServiceMock.openStream.mockReturnValue(obfuscatedStream$.asObservable());
+    obfuscatedMeasureServiceMock.query.mockReturnValue(
+      of({ data: [obfuscatedRow], hasMore: false }),
     );
+
+    const fixture: ComponentFixture<DataDashboardPageComponent> = TestBed.createComponent(
+      DataDashboardPageComponent,
+    );
+    const component: DataDashboardPageComponent = fixture.componentInstance;
+
+    fixture.detectChanges();
+    await flushAsyncWork(fixture);
+
+    expect(obfuscatedMeasureServiceMock.openStream).toHaveBeenCalledOnce();
+    expect(validatedMeasureFacadeServiceMock.openStream).not.toHaveBeenCalled();
+
+    component.setActiveView('query');
+    await flushAsyncWork(fixture);
+
+    expect(obfuscatedMeasureServiceMock.query).toHaveBeenCalledOnce();
+    expect(validatedMeasureFacadeServiceMock.query).not.toHaveBeenCalled();
+    expect(component.canExportQuery()).toBe(false);
+
+    await component.onExportQuery();
+    expect(validatedMeasureFacadeServiceMock.export).not.toHaveBeenCalled();
   });
 });

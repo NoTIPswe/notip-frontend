@@ -1,13 +1,14 @@
-import { Component, output } from '@angular/core';
-import { StreamParameters } from '../../../../core/models/measure';
+import { Component, input, output } from '@angular/core';
 
-export type HistoryWindowHours = 24 | 168 | 720;
+export type DashboardFilterMode = 'stream' | 'query';
 
-export interface DashboardFilters extends StreamParameters {
-  historyWindowHours: HistoryWindowHours;
+export interface DashboardFilters {
+  gatewayIds?: string[];
+  sensorTypes?: string[];
+  sensorIds?: string[];
+  from?: string;
+  to?: string;
 }
-
-const DEFAULT_HISTORY_WINDOW_HOURS: HistoryWindowHours = 24;
 
 @Component({
   selector: 'app-filter-panel',
@@ -16,59 +17,117 @@ const DEFAULT_HISTORY_WINDOW_HOURS: HistoryWindowHours = 24;
   styleUrl: './filter-panel.component.css',
 })
 export class FilterPanelComponent {
+  readonly mode = input<DashboardFilterMode>('stream');
+  readonly gatewayOptions = input<string[]>([]);
+  readonly sensorTypeOptions = input<string[]>([]);
+  readonly sensorOptions = input<string[]>([]);
+  readonly defaultFilters = input<DashboardFilters>({
+    gatewayIds: [],
+    sensorTypes: [],
+    sensorIds: [],
+  });
+
   readonly filtersApplied = output<DashboardFilters>();
   readonly clearRequested = output<void>();
 
   applyFilters(
     event: Event,
-    gatewayIdsRaw: string,
-    sensorIdsRaw: string,
-    sensorTypesRaw: string,
-    historyWindowRaw: string,
+    gatewaySelect: HTMLSelectElement,
+    sensorTypeSelect: HTMLSelectElement,
+    sensorSelect: HTMLSelectElement,
+    fromRaw?: string,
+    toRaw?: string,
   ): void {
     event.preventDefault();
 
-    const gatewayIds = this.parseCsv(gatewayIdsRaw);
-    const sensorIds = this.parseCsv(sensorIdsRaw);
-    const sensorTypes = this.parseCsv(sensorTypesRaw);
+    const filters: DashboardFilters = {
+      gatewayIds: this.selectedValues(gatewaySelect),
+      sensorTypes: this.selectedValues(sensorTypeSelect),
+      sensorIds: this.selectedValues(sensorSelect),
+    };
 
-    this.filtersApplied.emit({
-      gatewayIds,
-      sensorIds,
-      sensorTypes,
-      historyWindowHours: this.parseHistoryWindowHours(historyWindowRaw),
-    });
+    if (this.mode() === 'query') {
+      const from = this.normalizeDateTime(fromRaw);
+      const to = this.normalizeDateTime(toRaw);
+
+      if (from) {
+        filters.from = from;
+      }
+
+      if (to) {
+        filters.to = to;
+      }
+    }
+
+    this.filtersApplied.emit(filters);
   }
 
   clearFilters(
-    gatewayInput: HTMLInputElement,
-    sensorInput: HTMLInputElement,
-    typeInput: HTMLInputElement,
-    historyWindowInput: HTMLSelectElement,
+    gatewaySelect: HTMLSelectElement,
+    sensorTypeSelect: HTMLSelectElement,
+    sensorSelect: HTMLSelectElement,
+    fromInput?: HTMLInputElement,
+    toInput?: HTMLInputElement,
   ): void {
-    gatewayInput.value = '';
-    sensorInput.value = '';
-    typeInput.value = '';
-    historyWindowInput.value = String(DEFAULT_HISTORY_WINDOW_HOURS);
+    this.clearSelect(gatewaySelect);
+    this.clearSelect(sensorTypeSelect);
+    this.clearSelect(sensorSelect);
+
+    const defaults = this.defaultFilters();
+
+    if (fromInput) {
+      fromInput.value = this.toLocalDateTimeInput(defaults.from);
+    }
+
+    if (toInput) {
+      toInput.value = this.toLocalDateTimeInput(defaults.to);
+    }
+
     this.clearRequested.emit();
   }
 
-  private parseHistoryWindowHours(value: string): HistoryWindowHours {
-    if (value === '168') {
-      return 168;
-    }
-
-    if (value === '720') {
-      return 720;
-    }
-
-    return DEFAULT_HISTORY_WINDOW_HOURS;
+  isSelected(value: string, selectedValues?: string[]): boolean {
+    return Array.isArray(selectedValues) ? selectedValues.includes(value) : false;
   }
 
-  private parseCsv(value: string): string[] {
-    return value
-      .split(',')
-      .map((entry) => entry.trim())
-      .filter((entry) => entry.length > 0);
+  toLocalDateTimeInput(value?: string): string {
+    if (!value) {
+      return '';
+    }
+
+    const parsed = new Date(value);
+
+    if (Number.isNaN(parsed.getTime())) {
+      return '';
+    }
+
+    const offsetMs = parsed.getTimezoneOffset() * 60 * 1000;
+    return new Date(parsed.getTime() - offsetMs).toISOString().slice(0, 16);
+  }
+
+  private selectedValues(select: HTMLSelectElement): string[] {
+    return Array.from(select.selectedOptions)
+      .map((option) => option.value)
+      .filter((value) => value.length > 0);
+  }
+
+  private clearSelect(select: HTMLSelectElement): void {
+    Array.from(select.options).forEach((option) => {
+      option.selected = false;
+    });
+  }
+
+  private normalizeDateTime(value?: string): string | undefined {
+    if (!value) {
+      return undefined;
+    }
+
+    const parsed = new Date(value);
+
+    if (Number.isNaN(parsed.getTime())) {
+      return undefined;
+    }
+
+    return parsed.toISOString();
   }
 }

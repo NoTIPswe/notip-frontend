@@ -1,14 +1,79 @@
 <section class="dashboard-page">
-  <h2>Dashboard Dati</h2>
+  <header class="page-header">
+    <h2>Dashboard Dati</h2>
 
-  <p class="meta">Records: {{ measures().length }}</p>
+    <div class="view-switch" role="tablist" aria-label="Modalita dashboard">
+      <button
+        type="button"
+        role="tab"
+        [class.active]="activeView() === 'stream'"
+        [attr.aria-selected]="activeView() === 'stream'"
+        (click)="setActiveView('stream')"
+      >
+        Stream
+      </button>
+
+      <button
+        type="button"
+        role="tab"
+        [class.active]="activeView() === 'query'"
+        [attr.aria-selected]="activeView() === 'query'"
+        (click)="setActiveView('query')"
+      >
+        Query
+      </button>
+    </div>
+  </header>
 
   <app-filter-panel
+    [mode]="activeView()"
+    [gatewayOptions]="gatewayOptions()"
+    [sensorTypeOptions]="sensorTypeOptions()"
+    [sensorOptions]="sensorOptions()"
+    [defaultFilters]="activeView() === 'stream' ? streamFilters() : queryFilters()"
     (filtersApplied)="onFiltersApplied($event)"
     (clearRequested)="onFiltersCleared()"
   ></app-filter-panel>
 
-  <app-telemetry-table [measures]="measures()" [isLoading]="isLoading()"></app-telemetry-table>
+  @if (activeView() === 'stream') {
+    <p class="meta">Righe mostrate: {{ streamMeasures().length }} / 20</p>
 
-  <app-telemetry-chart [measures]="measures()"></app-telemetry-chart>
+    <app-telemetry-table
+      [measures]="streamMeasures()"
+      [isLoading]="isStreamLoading()"
+    ></app-telemetry-table>
+
+    <app-telemetry-chart [measures]="streamMeasures()"></app-telemetry-chart>
+  }
+
+  @if (activeView() === 'query') {
+    <div class="query-toolbar">
+      <p class="meta">Pagina {{ queryPage() }} - Righe: {{ queryMeasures().length }} / 20</p>
+
+      @if (canExportQuery()) {
+        <button
+          type="button"
+          [disabled]="isExporting() || isQueryLoading()"
+          (click)="onExportQuery()"
+        >
+          {{ isExporting() ? 'Export in corso...' : 'Export dati' }}
+        </button>
+      }
+    </div>
+
+    @if (!canExportQuery()) {
+      <p class="meta">In impersonazione l'export non e disponibile.</p>
+    }
+
+    <app-telemetry-table
+      [measures]="queryMeasures()"
+      [isLoading]="isQueryLoading()"
+    ></app-telemetry-table>
+
+    <div class="query-pagination">
+      <button type="button" [disabled]="!canGoToNextQueryPage()" (click)="onNextQueryPage()">
+        Successiva
+      </button>
+    </div>
+  }
 </section>

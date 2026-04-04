@@ -1,35 +1,36 @@
 <section class="user-form">
   @if (editUser()) {
-  <h3>Modifica utente</h3>
-  <form (submit)="update($event, updateUsername.value, updateEmail.value, updateRole.value)">
-    <label>
-      Username
-      <input #updateUsername type="text" [value]="editUser()!.username" required minlength="2" />
-    </label>
+    <h3>Modifica utente</h3>
+    <form (submit)="update($event, updateUsername.value, updateEmail.value, updateRole.value)">
+      <label>
+        Username
+        <input #updateUsername type="text" [value]="editUser()!.username" required minlength="2" />
+      </label>
 
-    <label>
-      Email
-      <input #updateEmail type="email" [value]="editUser()!.email" required />
-    </label>
+      <label>
+        Email
+        <input #updateEmail type="email" [value]="editUser()!.email" required />
+      </label>
 
-    <label>
-      Ruolo
-      <select #updateRole [value]="editUser()!.role">
-        <option [value]="UserRole.tenant_user">tenant_user</option>
-        <option [value]="UserRole.tenant_admin">tenant_admin</option>
-      </select>
-    </label>
+      <label>
+        Ruolo
+        <select #updateRole [value]="editUser()!.role">
+          <option [value]="UserRole.tenant_user">tenant_user</option>
+          <option [value]="UserRole.tenant_admin">tenant_admin</option>
+        </select>
+      </label>
 
-    <div class="actions">
-      <button type="submit" [disabled]="isSaving()">Salva</button>
-      <button type="button" class="ghost" (click)="cancel()" [disabled]="isSaving()">
-        Annulla
-      </button>
-    </div>
-  </form>
+      <div class="actions">
+        <button type="submit" [disabled]="isSaving()">Salva</button>
+        <button type="button" class="ghost" (click)="cancel()" [disabled]="isSaving()">
+          Annulla
+        </button>
+      </div>
+    </form>
   } @else {
-  <h3>Crea utente</h3>
-  <form (submit)="
+    <h3>Crea utente</h3>
+    <form
+      (submit)="
         create(
           $event,
           createUsername.value,
@@ -37,33 +38,34 @@
           createRole.value,
           createPassword.value
         )
-      ">
-    <label>
-      Username
-      <input #createUsername type="text" required minlength="2" />
-    </label>
+      "
+    >
+      <label>
+        Username
+        <input #createUsername type="text" required minlength="2" />
+      </label>
 
-    <label>
-      Email
-      <input #createEmail type="email" required />
-    </label>
+      <label>
+        Email
+        <input #createEmail type="email" required />
+      </label>
 
-    <label>
-      Ruolo
-      <select #createRole>
-        <option [value]="UserRole.tenant_user">tenant_user</option>
-        <option [value]="UserRole.tenant_admin">tenant_admin</option>
-      </select>
-    </label>
+      <label>
+        Ruolo
+        <select #createRole>
+          <option [value]="UserRole.tenant_user">tenant_user</option>
+          <option [value]="UserRole.tenant_admin">tenant_admin</option>
+        </select>
+      </label>
 
-    <label>
-      Password
-      <input #createPassword type="password" required minlength="8" />
-    </label>
+      <label>
+        Password
+        <input #createPassword type="password" required minlength="8" />
+      </label>
 
-    <div class="actions">
-      <button type="submit" [disabled]="isSaving()">Crea</button>
-    </div>
-  </form>
+      <div class="actions">
+        <button type="submit" [disabled]="isSaving()">Crea</button>
+      </div>
+    </form>
   }
 </section>

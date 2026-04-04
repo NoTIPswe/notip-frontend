@@ -8,7 +8,7 @@
       <select #typeSensorType required>
         <option value="">Seleziona sensor type</option>
         @for (sensorType of sensorTypes(); track sensorType) {
-        <option [value]="sensorType">{{ sensorType }}</option>
+          <option [value]="sensorType">{{ sensorType }}</option>
         }
       </select>
     </label>
@@ -32,7 +32,7 @@
       <select #sensorId required>
         <option value="">Seleziona sensor ID</option>
         @for (sensorIdOption of sensorIds(); track sensorIdOption) {
-        <option [value]="sensorIdOption">{{ sensorIdOption }}</option>
+          <option [value]="sensorIdOption">{{ sensorIdOption }}</option>
         }
       </select>
     </label>

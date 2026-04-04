@@ -1,39 +1,147 @@
 <section class="filter-panel">
-  <h3>Filtri stream</h3>
+  <h3>{{ mode() === 'stream' ? 'Filtri Stream' : 'Filtri Query' }}</h3>
 
-  <form (submit)="
-      applyFilters($event, gatewayIds.value, sensorIds.value, sensorTypes.value, historyWindowHours.value)
-    ">
-    <label>
-      Finestra storico
-      <select #historyWindowHours>
-        <option value="24">Ultime 24 ore</option>
-        <option value="168">Ultimi 7 giorni</option>
-        <option value="720">Ultimi 30 giorni</option>
-      </select>
-    </label>
+  @if (mode() === 'stream') {
+    <form (submit)="applyFilters($event, gatewayIds, sensorTypes, sensorIds)">
+      <div class="grid">
+        <label>
+          Gateway
+          <select #gatewayIds multiple size="8">
+            @for (gatewayId of gatewayOptions(); track gatewayId) {
+              <option
+                [value]="gatewayId"
+                [selected]="isSelected(gatewayId, defaultFilters().gatewayIds)"
+              >
+                {{ gatewayId }}
+              </option>
+            }
+          </select>
+        </label>
 
-    <label>
-      Gateway IDs (csv)
-      <input #gatewayIds type="text" placeholder="gw-1,gw-2" />
-    </label>
+        <label>
+          Tipo sensore
+          <select #sensorTypes multiple size="8">
+            @for (sensorType of sensorTypeOptions(); track sensorType) {
+              <option
+                [value]="sensorType"
+                [selected]="isSelected(sensorType, defaultFilters().sensorTypes)"
+              >
+                {{ sensorType }}
+              </option>
+            }
+          </select>
+        </label>
 
-    <label>
-      Sensor IDs (csv)
-      <input #sensorIds type="text" placeholder="s1,s2" />
-    </label>
+        <label>
+          Sensori
+          <select #sensorIds multiple size="8">
+            @for (sensorId of sensorOptions(); track sensorId) {
+              <option
+                [value]="sensorId"
+                [selected]="isSelected(sensorId, defaultFilters().sensorIds)"
+              >
+                {{ sensorId }}
+              </option>
+            }
+          </select>
+        </label>
+      </div>
 
-    <label>
-      Sensor Types (csv)
-      <input #sensorTypes type="text" placeholder="temperature,humidity" />
-    </label>
+      <p class="hint">Selezione multipla: usa Ctrl/Cmd + click.</p>
 
-    <div class="actions">
-      <button type="submit">Applica</button>
-      <button type="button" class="ghost"
-        (click)="clearFilters(gatewayIds, sensorIds, sensorTypes, historyWindowHours)">
-        Pulisci
-      </button>
-    </div>
-  </form>
+      <div class="actions">
+        <button type="submit">Applica</button>
+        <button
+          type="button"
+          class="ghost"
+          (click)="clearFilters(gatewayIds, sensorTypes, sensorIds)"
+        >
+          Pulisci
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (mode() === 'query') {
+    <form
+      (submit)="
+        applyFilters($event, gatewayIds, sensorTypes, sensorIds, fromInput.value, toInput.value)
+      "
+    >
+      <div class="grid">
+        <label>
+          Gateway
+          <select #gatewayIds multiple size="8">
+            @for (gatewayId of gatewayOptions(); track gatewayId) {
+              <option
+                [value]="gatewayId"
+                [selected]="isSelected(gatewayId, defaultFilters().gatewayIds)"
+              >
+                {{ gatewayId }}
+              </option>
+            }
+          </select>
+        </label>
+
+        <label>
+          Tipo sensore
+          <select #sensorTypes multiple size="8">
+            @for (sensorType of sensorTypeOptions(); track sensorType) {
+              <option
+                [value]="sensorType"
+                [selected]="isSelected(sensorType, defaultFilters().sensorTypes)"
+              >
+                {{ sensorType }}
+              </option>
+            }
+          </select>
+        </label>
+
+        <label>
+          Sensori
+          <select #sensorIds multiple size="8">
+            @for (sensorId of sensorOptions(); track sensorId) {
+              <option
+                [value]="sensorId"
+                [selected]="isSelected(sensorId, defaultFilters().sensorIds)"
+              >
+                {{ sensorId }}
+              </option>
+            }
+          </select>
+        </label>
+
+        <label>
+          Da
+          <input
+            #fromInput
+            type="datetime-local"
+            [value]="toLocalDateTimeInput(defaultFilters().from)"
+          />
+        </label>
+
+        <label>
+          A
+          <input
+            #toInput
+            type="datetime-local"
+            [value]="toLocalDateTimeInput(defaultFilters().to)"
+          />
+        </label>
+      </div>
+
+      <p class="hint">Selezione multipla: usa Ctrl/Cmd + click.</p>
+
+      <div class="actions">
+        <button type="submit">Applica</button>
+        <button
+          type="button"
+          class="ghost"
+          (click)="clearFilters(gatewayIds, sensorTypes, sensorIds, fromInput, toInput)"
+        >
+          Pulisci
+        </button>
+      </div>
+    </form>
+  }
 </section>

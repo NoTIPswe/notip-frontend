@@ -2,23 +2,23 @@
   <h3>Consumi Tenant</h3>
 
   @if (isLoading()) {
-  <p class="meta">Caricamento costi...</p>
+    <p class="meta">Caricamento costi...</p>
   }
 
   @if (costs()) {
-  <dl>
-    <div>
-      <dt>Storage</dt>
-      <dd>{{ storageGb().toFixed(2) }} GB</dd>
-    </div>
-    <div>
-      <dt>Bandwidth</dt>
-      <dd>{{ bandwidthGb().toFixed(2) }} GB</dd>
-    </div>
-    <div>
-      <dt>Totale</dt>
-      <dd>{{ totalGb().toFixed(2) }} GB</dd>
-    </div>
-  </dl>
+    <dl>
+      <div>
+        <dt>Storage</dt>
+        <dd>{{ storageGb().toFixed(2) }} GB</dd>
+      </div>
+      <div>
+        <dt>Bandwidth</dt>
+        <dd>{{ bandwidthGb().toFixed(2) }} GB</dd>
+      </div>
+      <div>
+        <dt>Totale</dt>
+        <dd>{{ totalGb().toFixed(2) }} GB</dd>
+      </div>
+    </dl>
   }
 </section>
