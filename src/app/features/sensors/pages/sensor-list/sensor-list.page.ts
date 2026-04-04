@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Sensor } from '../../../../core/models/sensor';
@@ -13,6 +13,7 @@ import { SensorService } from '../../services/sensor.service';
 export class SensorListPageComponent implements OnInit {
   private readonly sensorService = inject(SensorService);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly sensors = signal<Sensor[]>([]);
   readonly isLoading = signal<boolean>(false);
@@ -57,7 +58,7 @@ export class SensorListPageComponent implements OnInit {
 
     this.sensorService
       .getAllSensors()
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (rows) => {
           this.sensors.set(rows);

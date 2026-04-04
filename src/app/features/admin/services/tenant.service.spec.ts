@@ -52,6 +52,30 @@ describe('TenantService', () => {
     ]);
   });
 
+  it('maps tenants list when backend returns camelCase fields', async () => {
+    apiMock.tenantsControllerGetTenants.mockReturnValue(
+      of([
+        {
+          id: 't-1',
+          name: 'Tenant 1',
+          status: 'active',
+          createdAt: '2026-03-31T10:00:00.000Z',
+          suspensionIntervalDays: 7,
+        },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.getTenants())).resolves.toEqual([
+      {
+        tenantId: 't-1',
+        name: 'Tenant 1',
+        status: TenantStatus.active,
+        suspensionIntervalDays: 7,
+        createdAt: '2026-03-31T10:00:00.000Z',
+      },
+    ]);
+  });
+
   it('creates tenant with correct payload', async () => {
     apiMock.tenantsControllerCreateTenant.mockReturnValue(
       of({

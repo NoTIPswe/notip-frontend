@@ -6,6 +6,9 @@ import {
 } from '../../components/alert-config-form/alert-config-form.component';
 import { AlertsConfig } from '../../../../core/models/alert';
 import { AlertService } from '../../services/alert.service';
+import { GatewayService } from '../../../gateways/services/gateway.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { UserRole } from '../../../../core/models/enums';
 
 @Component({
   selector: 'app-alert-config-page',
@@ -16,19 +19,28 @@ import { AlertService } from '../../services/alert.service';
 })
 export class AlertConfigPageComponent implements OnInit {
   private readonly alertService = inject(AlertService);
+  private readonly gatewayService = inject(GatewayService);
+  private readonly authService = inject(AuthService);
 
   readonly config = signal<AlertsConfig | null>(null);
+  readonly availableGatewayIds = signal<string[]>([]);
   readonly showForm = signal<boolean>(false);
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
   readonly infoMessage = signal<string | null>(null);
+  readonly canEditConfig = this.authService.getRole() === UserRole.tenant_admin;
 
   ngOnInit(): void {
     this.loadConfig();
+    this.loadAvailableGatewayIds();
   }
 
   toggleForm(): void {
+    if (!this.canEditConfig) {
+      return;
+    }
+
     this.showForm.set(!this.showForm());
   }
 
@@ -37,6 +49,10 @@ export class AlertConfigPageComponent implements OnInit {
   }
 
   saveDefault(payload: DefaultTimeoutPayload): void {
+    if (!this.canEditConfig) {
+      return;
+    }
+
     this.errorMessage.set(null);
     this.infoMessage.set(null);
     this.isSaving.set(true);
@@ -56,6 +72,10 @@ export class AlertConfigPageComponent implements OnInit {
   }
 
   saveGateway(payload: GatewayTimeoutPayload): void {
+    if (!this.canEditConfig) {
+      return;
+    }
+
     this.errorMessage.set(null);
     this.infoMessage.set(null);
     this.isSaving.set(true);
@@ -75,6 +95,10 @@ export class AlertConfigPageComponent implements OnInit {
   }
 
   deleteGateway(gatewayId: string): void {
+    if (!this.canEditConfig) {
+      return;
+    }
+
     this.errorMessage.set(null);
     this.infoMessage.set(null);
     this.isSaving.set(true);
@@ -105,6 +129,21 @@ export class AlertConfigPageComponent implements OnInit {
       error: () => {
         this.isLoading.set(false);
         this.errorMessage.set('Impossibile caricare la configurazione alert.');
+      },
+    });
+  }
+
+  private loadAvailableGatewayIds(): void {
+    this.gatewayService.getGateways().subscribe({
+      next: (rows) => {
+        const ids = rows
+          .map((row) => row.gatewayId)
+          .filter((value): value is string => value.length > 0);
+
+        this.availableGatewayIds.set(Array.from(new Set(ids)));
+      },
+      error: () => {
+        this.availableGatewayIds.set([]);
       },
     });
   }

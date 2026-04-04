@@ -1,8 +1,9 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AlertConfigFormComponent } from './alert-config-form.component';
 
 describe('AlertConfigFormComponent', () => {
+  let fixture: ComponentFixture<AlertConfigFormComponent>;
   let component: AlertConfigFormComponent;
 
   beforeEach(async () => {
@@ -10,7 +11,10 @@ describe('AlertConfigFormComponent', () => {
       imports: [AlertConfigFormComponent],
     }).compileComponents();
 
-    component = TestBed.createComponent(AlertConfigFormComponent).componentInstance;
+    fixture = TestBed.createComponent(AlertConfigFormComponent);
+    component = fixture.componentInstance;
+    fixture.componentRef.setInput('availableGatewayIds', ['gw-1', 'gw-9']);
+    fixture.detectChanges();
   });
 
   it('emits default timeout when value is valid', () => {
@@ -57,6 +61,20 @@ describe('AlertConfigFormComponent', () => {
     component.submitGateway(event, ' ', '1500');
     component.submitGateway(event, 'gw-1', '0');
     component.submitGateway(event, 'gw-1', 'not-a-number');
+    component.submitGateway(event, 'gw-2', '1500');
+
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
+
+  it('does not emit gateway timeout when no gateway options are available', () => {
+    fixture.componentRef.setInput('availableGatewayIds', []);
+    fixture.detectChanges();
+
+    const preventDefault = vi.fn();
+    const event = { preventDefault } as unknown as Event;
+    const emitSpy = vi.spyOn(component.gatewaySubmitted, 'emit');
+
+    component.submitGateway(event, 'gw-1', '1500');
 
     expect(emitSpy).not.toHaveBeenCalled();
   });

@@ -28,7 +28,8 @@ label {
   color: #364152;
 }
 
-input {
+input,
+select {
   height: 2.1rem;
   border: 1px solid #d4dae3;
   border-radius: 8px;
@@ -87,7 +88,8 @@ li {
     align-items: stretch;
   }
 
-  input {
+  input,
+  select {
     min-width: 0;
     width: 100%;
   }

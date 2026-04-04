@@ -1,7 +1,18 @@
 <section class="filter-panel">
   <h3>Filtri stream</h3>
 
-  <form (submit)="applyFilters($event, gatewayIds.value, sensorIds.value, sensorTypes.value)">
+  <form (submit)="
+      applyFilters($event, gatewayIds.value, sensorIds.value, sensorTypes.value, historyWindowHours.value)
+    ">
+    <label>
+      Finestra storico
+      <select #historyWindowHours>
+        <option value="24">Ultime 24 ore</option>
+        <option value="168">Ultimi 7 giorni</option>
+        <option value="720">Ultimi 30 giorni</option>
+      </select>
+    </label>
+
     <label>
       Gateway IDs (csv)
       <input #gatewayIds type="text" placeholder="gw-1,gw-2" />
@@ -19,11 +30,8 @@
 
     <div class="actions">
       <button type="submit">Applica</button>
-      <button
-        type="button"
-        class="ghost"
-        (click)="clearFilters(gatewayIds, sensorIds, sensorTypes)"
-      >
+      <button type="button" class="ghost"
+        (click)="clearFilters(gatewayIds, sensorIds, sensorTypes, historyWindowHours)">
         Pulisci
       </button>
     </div>

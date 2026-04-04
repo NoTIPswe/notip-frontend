@@ -20,6 +20,8 @@ export type SensorThresholdPayload = {
 })
 export class ThresholdFormComponent {
   readonly isSaving = input<boolean>(false);
+  readonly sensorTypes = input<string[]>([]);
+  readonly sensorIds = input<string[]>([]);
 
   readonly typeSubmitted = output<TypeThresholdPayload>();
   readonly sensorSubmitted = output<SensorThresholdPayload>();

@@ -35,7 +35,7 @@ export class UserFormComponent {
   create(event: Event, username: string, email: string, role: string, password: string): void {
     event.preventDefault();
     this.createRequested.emit({
-      username: username.trim(),
+      username: this.normalizeUsername(username),
       email: email.trim(),
       role: this.toRole(role),
       password,
@@ -52,7 +52,7 @@ export class UserFormComponent {
 
     this.updateRequested.emit({
       userId: target.userId,
-      username: username.trim(),
+      username: this.normalizeUsername(username),
       email: email.trim(),
       role: this.toRole(role),
     });
@@ -63,14 +63,19 @@ export class UserFormComponent {
   }
 
   private toRole(value: string): UserRole {
-    if (value === 'system_admin') {
-      return UserRole.system_admin;
-    }
-
     if (value === 'tenant_admin') {
       return UserRole.tenant_admin;
     }
 
     return UserRole.tenant_user;
+  }
+
+  private normalizeUsername(value: string): string {
+    const lowered = value.trim().toLowerCase();
+    if (!lowered) {
+      return '';
+    }
+
+    return `${lowered[0].toUpperCase()}${lowered.slice(1)}`;
   }
 }

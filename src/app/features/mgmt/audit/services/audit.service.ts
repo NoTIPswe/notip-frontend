@@ -15,11 +15,11 @@ export class AuditService {
       map((rows) =>
         (rows as Record<string, unknown>[]).map((row) => ({
           id: this.asString(row['id']),
-          userId: this.asString(row['user_id']),
+          userId: this.asString(row['user_id'] ?? row['userId']),
           action: this.asString(row['action']),
           timestamp: this.asString(row['timestamp']),
           resource: this.asString(row['resource']),
-          details: this.asString(row['details']),
+          details: this.asDetails(row['details']),
         })),
       ),
     );
@@ -27,5 +27,21 @@ export class AuditService {
 
   private asString(value: unknown): string {
     return typeof value === 'string' ? value : '';
+  }
+
+  private asDetails(value: unknown): string {
+    if (typeof value === 'string') {
+      return value;
+    }
+
+    if (value && typeof value === 'object') {
+      try {
+        return JSON.stringify(value);
+      } catch {
+        return '';
+      }
+    }
+
+    return '';
   }
 }

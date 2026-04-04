@@ -6,6 +6,7 @@ import {
 import { AdminGatewayTableComponent } from '../../components/admin-gateway-table/admin-gateway-table.component';
 import { ObfuscatedGateway } from '../../../../core/models/gateway';
 import { AdminGatewayService } from '../../services/admin-gateway.service';
+import { TenantService } from '../../services/tenant.service';
 
 @Component({
   selector: 'app-admin-gateway-list-page',
@@ -16,8 +17,10 @@ import { AdminGatewayService } from '../../services/admin-gateway.service';
 })
 export class AdminGatewayListPageComponent implements OnInit {
   private readonly adminGatewayService = inject(AdminGatewayService);
+  private readonly tenantService = inject(TenantService);
 
   readonly gateways = signal<ObfuscatedGateway[]>([]);
+  readonly tenantOptions = signal<string[]>([]);
   readonly tenantFilter = signal<string>('');
   readonly showCreateForm = signal<boolean>(false);
   readonly isLoading = signal<boolean>(false);
@@ -27,9 +30,11 @@ export class AdminGatewayListPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadGateways();
+    this.loadTenantOptions();
   }
 
-  onApplyFilter(tenantId: string): void {
+  onApplyFilter(event: Event, tenantId: string): void {
+    event.preventDefault();
     this.tenantFilter.set(tenantId.trim());
     this.loadGateways();
   }
@@ -88,6 +93,22 @@ export class AdminGatewayListPageComponent implements OnInit {
       error: () => {
         this.isLoading.set(false);
         this.errorMessage.set('Impossibile caricare i gateways admin.');
+      },
+    });
+  }
+
+  private loadTenantOptions(): void {
+    this.tenantService.getTenants().subscribe({
+      next: (rows) => {
+        const tenantIds = rows
+          .map((row) => row.tenantId)
+          .filter((tenantId) => tenantId.length > 0)
+          .sort((a, b) => a.localeCompare(b));
+
+        this.tenantOptions.set(tenantIds);
+      },
+      error: () => {
+        this.tenantOptions.set([]);
       },
     });
   }

@@ -15,15 +15,20 @@ export class AdminGatewayService {
       map((rows) =>
         (rows as Record<string, unknown>[]).map((row) => {
           const mapped: ObfuscatedGateway = {
-            gatewayId: this.asString(row['id']),
-            tenantId: this.asString(row['tenant_id']),
+            gatewayId: this.pickString(row, ['id', 'gateway_id', 'gatewayId']),
+            tenantId: this.pickString(row, ['tenant_id', 'tenantId']),
             provisioned: Boolean(row['provisioned']),
             model: this.asString(row['model']),
-            factoryId: this.asString(row['factory_id']),
-            createdAt: this.asString(row['created_at']),
+            factoryId: this.pickString(row, ['factory_id', 'factoryId']),
+            createdAt: this.pickString(row, ['created_at', 'createdAt']),
           };
-          if (row['firmware']) {
-            mapped.firmware = this.asString(row['firmware']);
+          const firmware = this.pickString(row, [
+            'firmware',
+            'firmware_version',
+            'firmwareVersion',
+          ]);
+          if (firmware) {
+            mapped.firmware = firmware;
           }
 
           return mapped;
@@ -47,5 +52,16 @@ export class AdminGatewayService {
 
   private asString(value: unknown): string {
     return typeof value === 'string' ? value : '';
+  }
+
+  private pickString(row: Record<string, unknown>, keys: string[]): string {
+    for (const key of keys) {
+      const value = row[key];
+      if (typeof value === 'string' && value.length > 0) {
+        return value;
+      }
+    }
+
+    return '';
   }
 }

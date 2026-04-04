@@ -2,38 +2,42 @@
   <div class="header-row">
     <h3>Threshold correnti</h3>
     @if (isLoading()) {
-      <span class="status">Caricamento...</span>
+    <span class="status">Caricamento...</span>
     }
   </div>
 
   @if (!isLoading() && thresholds().length === 0) {
-    <p class="empty">Nessuna soglia configurata.</p>
+  <p class="empty">Nessuna soglia configurata.</p>
   }
 
   @if (thresholds().length > 0) {
-    <table>
-      <thead>
-        <tr>
-          <th>Scope</th>
-          <th>Chiave</th>
-          <th>Min</th>
-          <th>Max</th>
-          <th>Azioni</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (row of thresholds(); track row.type + keyOf(row)) {
-          <tr>
-            <td>{{ scopeOf(row) }}</td>
-            <td>{{ keyOf(row) }}</td>
-            <td>{{ row.minValue ?? '-' }}</td>
-            <td>{{ row.maxValue ?? '-' }}</td>
-            <td>
-              <button type="button" class="danger" (click)="requestDelete(row)">Elimina</button>
-            </td>
-          </tr>
+  <table>
+    <thead>
+      <tr>
+        <th>Scope</th>
+        <th>Chiave</th>
+        <th>Min</th>
+        <th>Max</th>
+        @if (canDelete()) {
+        <th>Azioni</th>
         }
-      </tbody>
-    </table>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of thresholds(); track row.type + keyOf(row)) {
+      <tr>
+        <td>{{ scopeOf(row) }}</td>
+        <td>{{ keyOf(row) }}</td>
+        <td>{{ row.minValue ?? '-' }}</td>
+        <td>{{ row.maxValue ?? '-' }}</td>
+        @if (canDelete()) {
+        <td>
+          <button type="button" class="danger" (click)="requestDelete(row)">Elimina</button>
+        </td>
+        }
+      </tr>
+      }
+    </tbody>
+  </table>
   }
 </section>

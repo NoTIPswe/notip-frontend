@@ -2,45 +2,39 @@
   <div class="header-row">
     <h2>Admin Gateway</h2>
     @if (!showCreateForm()) {
-      <button type="button" class="create-toggle" (click)="toggleCreateForm()">
-        + Nuovo gateway
-      </button>
+    <button type="button" class="create-toggle" (click)="toggleCreateForm()">
+      + Nuovo gateway
+    </button>
     }
   </div>
 
   @if (!showCreateForm()) {
-    <form class="filter-row" (submit)="onApplyFilter(tenantFilterInput.value)">
-      <label>
-        Filtro tenant ID
-        <input #tenantFilterInput type="text" [value]="tenantFilter()" placeholder="tenant_123" />
-      </label>
-      <div class="actions">
-        <button type="submit">Applica</button>
-        <button type="button" class="ghost" (click)="onResetFilter()">Reset</button>
-      </div>
-    </form>
+  <form class="filter-row" (submit)="onApplyFilter($event, tenantFilterInput.value)">
+    <label>
+      Filtro tenant ID
+      <input #tenantFilterInput type="text" [value]="tenantFilter()" placeholder="tenant_123" />
+    </label>
+    <div class="actions">
+      <button type="submit">Applica</button>
+      <button type="button" class="ghost" (click)="onResetFilter()">Reset</button>
+    </div>
+  </form>
   }
 
   @if (errorMessage()) {
-    <p class="error">{{ errorMessage() }}</p>
+  <p class="error">{{ errorMessage() }}</p>
   }
 
   @if (infoMessage()) {
-    <p class="info">{{ infoMessage() }}</p>
+  <p class="info">{{ infoMessage() }}</p>
   }
 
   @if (!showCreateForm()) {
-    <app-admin-gateway-table
-      [gateways]="gateways()"
-      [isLoading]="isLoading()"
-    ></app-admin-gateway-table>
+  <app-admin-gateway-table [gateways]="gateways()" [isLoading]="isLoading()"></app-admin-gateway-table>
   }
 
   @if (showCreateForm()) {
-    <app-admin-gateway-form
-      [isSaving]="isSaving()"
-      (createRequested)="onCreateGateway($event)"
-      (cancelRequested)="onCreateCancelled()"
-    ></app-admin-gateway-form>
+  <app-admin-gateway-form [isSaving]="isSaving()" [tenantIds]="tenantOptions()"
+    (createRequested)="onCreateGateway($event)" (cancelRequested)="onCreateCancelled()"></app-admin-gateway-form>
   }
 </section>

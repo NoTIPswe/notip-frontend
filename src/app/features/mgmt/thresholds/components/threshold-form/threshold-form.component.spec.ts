@@ -57,4 +57,14 @@ describe('ThresholdFormComponent', () => {
       minValue: 2,
     });
   });
+
+  it('accepts sensor type and sensor id options', () => {
+    const fixture = TestBed.createComponent(ThresholdFormComponent);
+    fixture.componentRef.setInput('sensorTypes', ['temperature', 'humidity']);
+    fixture.componentRef.setInput('sensorIds', ['sensor-1', 'sensor-2']);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.sensorTypes()).toEqual(['temperature', 'humidity']);
+    expect(fixture.componentInstance.sensorIds()).toEqual(['sensor-1', 'sensor-2']);
+  });
 });

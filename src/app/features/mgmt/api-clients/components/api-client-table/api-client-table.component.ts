@@ -1,9 +1,11 @@
+import { DatePipe } from '@angular/common';
 import { Component, input, output } from '@angular/core';
 import { Client } from '../../../../../core/models/client';
 
 @Component({
   selector: 'app-api-client-table',
   standalone: true,
+  imports: [DatePipe],
   templateUrl: './api-client-table.component.html',
   styleUrl: './api-client-table.component.css',
 })

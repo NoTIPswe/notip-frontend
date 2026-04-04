@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription, distinctUntilChanged, filter, map } from 'rxjs';
@@ -24,6 +24,7 @@ export class SensorDetailPageComponent implements OnInit, OnDestroy {
   private readonly sensorService = inject(SensorService);
   private readonly obfuscatedMeasureService = inject(ObfuscatedMeasureService);
   private readonly validatedMeasureFacadeService = inject(ValidatedMeasureFacadeService);
+  private readonly destroyRef = inject(DestroyRef);
 
   private streamSubscription: Subscription | null = null;
 
@@ -40,7 +41,7 @@ export class SensorDetailPageComponent implements OnInit, OnDestroy {
         map((params) => params.get('id') ?? ''),
         filter((id) => id.length > 0),
         distinctUntilChanged(),
-        takeUntilDestroyed(),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((id) => {
         this.sensorId.set(id);
@@ -58,7 +59,7 @@ export class SensorDetailPageComponent implements OnInit, OnDestroy {
 
     this.sensorService
       .getAllSensors(0)
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (rows) => {
           const selected = rows.find((row) => row.sensorId === sensorId) ?? null;

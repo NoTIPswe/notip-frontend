@@ -5,7 +5,12 @@
     <h4>Per Sensor Type</h4>
     <label>
       Sensor Type
-      <input #typeSensorType type="text" required minlength="2" />
+      <select #typeSensorType required>
+        <option value="">Seleziona sensor type</option>
+        @for (sensorType of sensorTypes(); track sensorType) {
+        <option [value]="sensorType">{{ sensorType }}</option>
+        }
+      </select>
     </label>
     <label>
       Min value
@@ -15,14 +20,21 @@
       Max value
       <input #typeMax type="number" step="0.1" />
     </label>
-    <button type="submit" [disabled]="isSaving()">Salva type threshold</button>
+    <button type="submit" [disabled]="isSaving() || sensorTypes().length === 0">
+      Salva type threshold
+    </button>
   </form>
 
   <form (submit)="submitSensor($event, sensorId.value, sensorMin.value, sensorMax.value)">
     <h4>Per Sensor ID</h4>
     <label>
       Sensor ID
-      <input #sensorId type="text" required minlength="2" />
+      <select #sensorId required>
+        <option value="">Seleziona sensor ID</option>
+        @for (sensorIdOption of sensorIds(); track sensorIdOption) {
+        <option [value]="sensorIdOption">{{ sensorIdOption }}</option>
+        }
+      </select>
     </label>
     <label>
       Min value
@@ -32,7 +44,9 @@
       Max value
       <input #sensorMax type="number" step="0.1" />
     </label>
-    <button type="submit" [disabled]="isSaving()">Salva sensor threshold</button>
+    <button type="submit" [disabled]="isSaving() || sensorIds().length === 0">
+      Salva sensor threshold
+    </button>
   </form>
 
   <div class="actions">

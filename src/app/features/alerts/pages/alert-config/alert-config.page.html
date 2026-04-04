@@ -1,46 +1,52 @@
 <section class="alert-config-page">
   <div class="header-row">
     <h2>Configurazione Alert</h2>
-    @if (!showForm()) {
-      <button
-        type="button"
-        class="create-toggle"
-        [disabled]="isLoading() || !config()"
-        (click)="toggleForm()"
-      >
-        Modifica configurazione
-      </button>
+    @if (canEditConfig && !showForm()) {
+    <button type="button" class="create-toggle" [disabled]="isLoading() || !config()" (click)="toggleForm()">
+      Modifica configurazione
+    </button>
     }
   </div>
 
   @if (errorMessage()) {
-    <p class="error">{{ errorMessage() }}</p>
+  <p class="error">{{ errorMessage() }}</p>
   }
 
   @if (infoMessage()) {
-    <p class="info">{{ infoMessage() }}</p>
+  <p class="info">{{ infoMessage() }}</p>
   }
 
   @if (isLoading()) {
-    <p class="meta">Caricamento configurazione...</p>
+  <p class="meta">Caricamento configurazione...</p>
+  }
+
+  @if (!canEditConfig) {
+  <p class="meta">Modalita sola lettura per ruolo tenant user.</p>
   }
 
   @if (config() && !showForm()) {
-    <p class="meta">
-      Timeout default attuale: {{ config()!.default.timeoutMs }} ms (aggiornato:
-      {{ config()!.default.updatedAt || '-' }})
-    </p>
+  <p class="meta">
+    Timeout default attuale: {{ config()!.default.timeoutMs }} ms (aggiornato:
+    {{ config()!.default.updatedAt || '-' }})
+  </p>
+
+  @if ((config()!.gatewayOverrides ?? []).length > 0) {
+  <ul class="current-overrides">
+    @for (row of config()!.gatewayOverrides ?? []; track row.gatewayId) {
+    <li>{{ row.gatewayId }}: {{ row.timeoutMs }} ms (aggiornato: {{ row.updatedAt || '-' }})</li>
+    }
+  </ul>
   }
 
-  @if (config() && showForm()) {
-    <app-alert-config-form
-      [defaultTimeoutMs]="config()!.default.timeoutMs"
-      [gatewayOverrides]="config()!.gatewayOverrides ?? []"
-      [isSaving]="isSaving()"
-      (defaultSubmitted)="saveDefault($event)"
-      (gatewaySubmitted)="saveGateway($event)"
-      (gatewayDeleteRequested)="deleteGateway($event)"
-      (cancelRequested)="closeForm()"
-    ></app-alert-config-form>
+  @if ((config()!.gatewayOverrides ?? []).length === 0) {
+  <p class="meta">Nessun override gateway configurato.</p>
+  }
+  }
+
+  @if (canEditConfig && config() && showForm()) {
+  <app-alert-config-form [defaultTimeoutMs]="config()!.default.timeoutMs"
+    [gatewayOverrides]="config()!.gatewayOverrides ?? []" [availableGatewayIds]="availableGatewayIds()"
+    [isSaving]="isSaving()" (defaultSubmitted)="saveDefault($event)" (gatewaySubmitted)="saveGateway($event)"
+    (gatewayDeleteRequested)="deleteGateway($event)" (cancelRequested)="closeForm()"></app-alert-config-form>
   }
 </section>

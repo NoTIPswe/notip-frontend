@@ -55,6 +55,23 @@ describe('SidebarComponent', () => {
     expect(links).toContain('Users Management');
   });
 
+  it('shows tenant user read menu entries', () => {
+    fixture.componentRef.setInput('role', UserRole.tenant_user);
+    fixture.detectChanges();
+
+    const links = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('nav a')).map(
+      (a) => a.textContent?.trim(),
+    );
+
+    expect(links).toContain('Dashboard');
+    expect(links).toContain('Gateways');
+    expect(links).toContain('Sensors');
+    expect(links).toContain('Alerts');
+    expect(links).toContain('Threshold Settings');
+    expect(links).not.toContain('Users Management');
+    expect(links).not.toContain('API Clients');
+  });
+
   it('shows system admin menu entries only', () => {
     fixture.componentRef.setInput('role', UserRole.system_admin);
     fixture.detectChanges();

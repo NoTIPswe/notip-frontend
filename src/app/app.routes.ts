@@ -56,13 +56,13 @@ export const routes: Routes = [
     path: 'alerts',
     component: AlertListPageComponent,
     canActivate: [AuthGuard, RoleGuard],
-    data: { title: 'Alerts', roles: [UserRole.tenant_admin] },
+    data: { title: 'Alerts', roles: [UserRole.tenant_user, UserRole.tenant_admin] },
   },
   {
     path: 'alerts/config',
     component: AlertConfigPageComponent,
     canActivate: [AuthGuard, RoleGuard],
-    data: { title: 'Alerts Config', roles: [UserRole.tenant_admin] },
+    data: { title: 'Alerts Config', roles: [UserRole.tenant_user, UserRole.tenant_admin] },
   },
   {
     path: 'mgmt/users',
@@ -74,7 +74,7 @@ export const routes: Routes = [
     path: 'mgmt/limits',
     component: ThresholdSettingsPageComponent,
     canActivate: [AuthGuard, RoleGuard],
-    data: { title: 'Threshold Settings', roles: [UserRole.tenant_admin] },
+    data: { title: 'Threshold Settings', roles: [UserRole.tenant_user, UserRole.tenant_admin] },
   },
   {
     path: 'mgmt/api',

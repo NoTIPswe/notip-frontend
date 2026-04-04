@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, filter, map } from 'rxjs';
@@ -11,7 +12,7 @@ import { TenantService } from '../../services/tenant.service';
 @Component({
   selector: 'app-tenant-detail-page',
   standalone: true,
-  imports: [TenantUserListComponent],
+  imports: [TenantUserListComponent, DatePipe],
   templateUrl: './tenant-detail.page.html',
   styleUrl: './tenant-detail.page.css',
 })
@@ -19,6 +20,7 @@ export class TenantDetailPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly adminUserService = inject(AdminUserService);
   private readonly tenantService = inject(TenantService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly tenantId = signal<string>('');
   readonly tenant = signal<Tenant | null>(null);
@@ -34,7 +36,7 @@ export class TenantDetailPageComponent implements OnInit {
         map((params) => params.get('id') ?? ''),
         filter((id) => id.length > 0),
         distinctUntilChanged(),
-        takeUntilDestroyed(),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((id) => {
         this.tenantId.set(id);

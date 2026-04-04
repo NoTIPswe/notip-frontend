@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import { GatewayOverride } from '../../../../core/models/alert';
 
 export type DefaultTimeoutPayload = {
@@ -19,7 +19,9 @@ export type GatewayTimeoutPayload = {
 export class AlertConfigFormComponent {
   readonly defaultTimeoutMs = input<number>(0);
   readonly gatewayOverrides = input<GatewayOverride[]>([]);
+  readonly availableGatewayIds = input<string[]>([]);
   readonly isSaving = input<boolean>(false);
+  readonly selectedGatewayCurrentTimeoutMs = signal<number | null>(null);
 
   readonly defaultSubmitted = output<DefaultTimeoutPayload>();
   readonly gatewaySubmitted = output<GatewayTimeoutPayload>();
@@ -41,7 +43,14 @@ export class AlertConfigFormComponent {
 
     const timeoutMs = Number.parseInt(timeoutRaw, 10);
     const cleanGatewayId = gatewayId.trim();
-    if (!cleanGatewayId || !Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+    const allowedGatewayIds = this.availableGatewayIds();
+
+    if (
+      !cleanGatewayId ||
+      !Number.isFinite(timeoutMs) ||
+      timeoutMs <= 0 ||
+      !allowedGatewayIds.includes(cleanGatewayId)
+    ) {
       return;
     }
 
@@ -51,11 +60,30 @@ export class AlertConfigFormComponent {
     });
   }
 
+  onGatewaySelectionChanged(gatewayId: string, timeoutInput: HTMLInputElement): void {
+    const cleanGatewayId = gatewayId.trim();
+
+    if (!cleanGatewayId) {
+      this.selectedGatewayCurrentTimeoutMs.set(null);
+      timeoutInput.value = '';
+      return;
+    }
+
+    const timeoutMs = this.resolveCurrentTimeout(cleanGatewayId);
+    this.selectedGatewayCurrentTimeoutMs.set(timeoutMs);
+    timeoutInput.value = String(timeoutMs);
+  }
+
   deleteGatewayOverride(gatewayId: string): void {
     this.gatewayDeleteRequested.emit(gatewayId);
   }
 
   cancel(): void {
     this.cancelRequested.emit();
+  }
+
+  private resolveCurrentTimeout(gatewayId: string): number {
+    const override = this.gatewayOverrides().find((row) => row.gatewayId === gatewayId);
+    return override?.timeoutMs ?? this.defaultTimeoutMs();
   }
 }

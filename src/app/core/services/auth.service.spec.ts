@@ -142,7 +142,7 @@ describe('AuthService', () => {
       role: 'tenant_admin',
     };
 
-    await expect(service.getUsername()).resolves.toBe('alice');
+    await expect(service.getUsername()).resolves.toBe('Alice');
     expect(service.getTenantId()).toBe('tenant-1');
     expect(service.getUserId()).toBe('user-1');
     expect(service.getRole()).toBe(UserRole.tenant_admin);
@@ -179,7 +179,7 @@ describe('AuthService', () => {
       preferred_username: 'mario.bianchi',
     };
 
-    await expect(service.getUsername()).resolves.toBe('mario.bianchi');
+    await expect(service.getUsername()).resolves.toBe('Mario.bianchi');
 
     keycloakMock.tokenParsed = {
       name: 'Mario Bianchi',
@@ -191,7 +191,7 @@ describe('AuthService', () => {
       username: 'legacy.username',
     };
 
-    await expect(service.getUsername()).resolves.toBe('legacy.username');
+    await expect(service.getUsername()).resolves.toBe('Legacy.username');
 
     keycloakMock.tokenParsed = {
       name: 'Fallback Name',
@@ -226,7 +226,7 @@ describe('AuthService', () => {
     expect(authApiMock.authControllerImpersonate).toHaveBeenCalledWith({ user_id: 'target-1' });
     expect(service.isImpersonating()).toBe(true);
     await expect(service.getToken()).resolves.toBe(impersonatedToken);
-    await expect(service.getUsername()).resolves.toBe('impersonated.name');
+    await expect(service.getUsername()).resolves.toBe('Impersonated.name');
     expect(service.getTenantId()).toBe('tenant-77');
     expect(service.getUserId()).toBe('impersonated-user');
     expect(service.getRole()).toBe(UserRole.tenant_admin);

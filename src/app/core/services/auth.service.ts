@@ -82,15 +82,15 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
     const payload = this.decodeJwtPayload();
     const preferredUsername = payload.preferred_username?.trim();
     if (preferredUsername) {
-      return Promise.resolve(preferredUsername);
+      return Promise.resolve(this.formatDisplayName(preferredUsername));
     }
 
     const username = payload.username?.trim();
     if (username) {
-      return Promise.resolve(username);
+      return Promise.resolve(this.formatDisplayName(username));
     }
 
-    return Promise.resolve(payload.name?.trim() ?? '');
+    return Promise.resolve(this.formatDisplayName(payload.name?.trim() ?? ''));
   }
 
   getRole(): UserRole {
@@ -203,5 +203,13 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
 
     const parsed = this.keycloak.tokenParsed as JwtPayload | undefined;
     return parsed ?? {};
+  }
+
+  private formatDisplayName(value: string): string {
+    if (!value) {
+      return '';
+    }
+
+    return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription, distinctUntilChanged, filter, map, tap } from 'rxjs';
@@ -47,6 +47,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
   private readonly sensorService = inject(SensorService);
   private readonly obfuscatedMeasureService = inject(ObfuscatedMeasureService);
   private readonly validatedMeasureFacadeService = inject(ValidatedMeasureFacadeService);
+  private readonly destroyRef = inject(DestroyRef);
 
   private streamSubscription: Subscription | null = null;
 
@@ -79,7 +80,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
           this.commandStatus.set(null);
           this.stopTelemetryStream();
         }),
-        takeUntilDestroyed(),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((gatewayId) => {
         this.gatewayId.set(gatewayId);
@@ -107,7 +108,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
     this.isBusy.set(true);
     this.gatewayService
       .updateGatewayName(current.gatewayId, nextName)
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {
           this.isBusy.set(false);
@@ -145,7 +146,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
     this.isBusy.set(true);
     this.commandService
       .sendConfig(gatewayId, config)
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (update) => {
           this.commandStatus.set(update);
@@ -175,7 +176,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
     this.isBusy.set(true);
     this.commandService
       .sendFirmware(gatewayId, firmware)
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (update) => {
           this.commandStatus.set(update);
@@ -213,7 +214,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
     this.isBusy.set(true);
     this.gatewayService
       .deleteGateway(gatewayId)
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.isBusy.set(false);
@@ -230,7 +231,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
   private loadGateway(gatewayId: string): void {
     this.gatewayService
       .getGatewayDetail(gatewayId)
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (row) => {
           this.gateway.set(row);
@@ -244,7 +245,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
   private loadSensors(gatewayId: string): void {
     this.sensorService
       .getGatewaySensors(gatewayId, 0)
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (rows) => {
           this.sensors.set(rows);

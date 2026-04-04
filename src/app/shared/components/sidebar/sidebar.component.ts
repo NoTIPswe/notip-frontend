@@ -15,12 +15,12 @@ const TENANT_USER_MENU: ReadonlyArray<MenuItem> = [
   { label: 'Dashboard', path: '/dashboard', exact: true },
   { label: 'Gateways', path: '/gateways' },
   { label: 'Sensors', path: '/sensors' },
+  { label: 'Alerts', path: '/alerts' },
+  { label: 'Threshold Settings', path: '/mgmt/limits' },
 ];
 
 const TENANT_ADMIN_EXTRA_MENU: ReadonlyArray<MenuItem> = [
-  { label: 'Alerts', path: '/alerts' },
   { label: 'Users Management', path: '/mgmt/users' },
-  { label: 'Threshold Settings', path: '/mgmt/limits' },
   { label: 'API Clients', path: '/mgmt/api' },
   { label: 'Audit Log', path: '/mgmt/logs' },
   { label: 'Costs', path: '/mgmt/costs' },

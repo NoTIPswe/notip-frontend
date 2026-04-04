@@ -35,6 +35,21 @@ const ALLOWED_CMD_GATEWAY_STATUSES = new Set<CmdGatewayStatus>([
   CmdGatewayStatus.paused,
 ]);
 
+type CommandResponsePayload = {
+  command_id?: string;
+  commandId?: string;
+  status?: string;
+  issued_at?: string;
+  issuedAt?: string;
+};
+
+type CommandStatusResponsePayload = {
+  command_id?: string;
+  commandId?: string;
+  status?: string;
+  timestamp?: string;
+};
+
 @Injectable({ providedIn: 'root' })
 export class CommandService {
   private readonly commandsApi = inject(CommandsApiService);
@@ -49,11 +64,7 @@ export class CommandService {
     }
 
     return this.commandsApi.commandControllerSendConfig(id, body).pipe(
-      map((res) => ({
-        commandId: res.command_id,
-        status: this.toCommandStatus(res.status),
-        timestamp: res.issued_at,
-      })),
+      map((res) => this.mapCommandResponse(res)),
       switchMap((first) => this.pollStatus(id, first.commandId)),
     );
   }
@@ -65,26 +76,31 @@ export class CommandService {
     };
 
     return this.commandsApi.commandControllerSendFirmware(id, body).pipe(
-      map((res) => ({
-        commandId: res.command_id,
-        status: this.toCommandStatus(res.status),
-        timestamp: res.issued_at,
-      })),
+      map((res) => this.mapCommandResponse(res)),
       switchMap((first) => this.pollStatus(id, first.commandId)),
     );
   }
 
   pollStatus(gwId: string, cmdId: string, intervalMs = 2000): Observable<CommandStatusUpdate> {
+    let lastKnownUpdate: CommandStatusUpdate = {
+      commandId: cmdId,
+      status: CommandStatus.queued,
+    };
+
     return interval(intervalMs).pipe(
       switchMap(() =>
         this.commandsApi.commandControllerGetStatus(gwId, cmdId).pipe(
-          map((res) => ({
-            commandId: res.command_id,
-            status: this.toCommandStatus(res.status),
-            timestamp: res.timestamp,
-          })),
+          map((res) => {
+            const update = this.mapCommandStatusResponse(res);
+            lastKnownUpdate = update;
+            return update;
+          }),
           catchError((error: unknown) => {
             const status = (error as { status?: number }).status;
+            if (status === 304) {
+              return of(lastKnownUpdate);
+            }
+
             if (status === 404 || status === 503) {
               return of({ commandId: cmdId, status: CommandStatus.timeout });
             }
@@ -111,6 +127,48 @@ export class CommandService {
       default:
         return CommandStatus.queued;
     }
+  }
+
+  private mapCommandResponse(response: unknown): CommandStatusUpdate {
+    const res = response as CommandResponsePayload;
+    const commandId = res.command_id ?? res.commandId;
+    const timestamp = res.issued_at ?? res.issuedAt;
+
+    if (!commandId) {
+      throw new Error('Invalid command response: missing command id');
+    }
+
+    const update: CommandStatusUpdate = {
+      commandId,
+      status: this.toCommandStatus(res.status ?? ''),
+    };
+
+    if (timestamp) {
+      update.timestamp = timestamp;
+    }
+
+    return update;
+  }
+
+  private mapCommandStatusResponse(response: unknown): CommandStatusUpdate {
+    const res = response as CommandStatusResponsePayload;
+    const commandId = res.command_id ?? res.commandId;
+    const timestamp = res.timestamp;
+
+    if (!commandId) {
+      throw new Error('Invalid command status response: missing command id');
+    }
+
+    const update: CommandStatusUpdate = {
+      commandId,
+      status: this.toCommandStatus(res.status ?? ''),
+    };
+
+    if (timestamp) {
+      update.timestamp = timestamp;
+    }
+
+    return update;
   }
 
   private isCmdGatewayStatus(status: unknown): status is CmdGatewayStatus {

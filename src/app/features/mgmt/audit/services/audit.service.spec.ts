@@ -26,11 +26,11 @@ describe('AuditService', () => {
       of([
         {
           id: 'log-1',
-          user_id: 'u-1',
+          userId: 'u-1',
           action: 'CREATE',
           timestamp: '2026-03-31T11:00:00.000Z',
           resource: 'tenant',
-          details: 'created tenant',
+          details: { message: 'created tenant' },
         },
       ]),
     );
@@ -51,7 +51,7 @@ describe('AuditService', () => {
         action: 'CREATE',
         timestamp: '2026-03-31T11:00:00.000Z',
         resource: 'tenant',
-        details: 'created tenant',
+        details: '{"message":"created tenant"}',
       },
     ]);
 
@@ -75,7 +75,7 @@ describe('AuditService', () => {
         action: '',
         timestamp: '',
         resource: '',
-        details: '',
+        details: '[]',
       },
     ]);
   });

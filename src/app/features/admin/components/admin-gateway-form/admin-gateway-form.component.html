@@ -9,7 +9,12 @@
 
     <label>
       Tenant ID
-      <input #tenantId type="text" required minlength="3" />
+      <select #tenantId required [disabled]="tenantIds().length === 0">
+        <option value="">Seleziona tenant</option>
+        @for (tenantIdOption of tenantIds(); track tenantIdOption) {
+        <option [value]="tenantIdOption">{{ tenantIdOption }}</option>
+        }
+      </select>
     </label>
 
     <label>

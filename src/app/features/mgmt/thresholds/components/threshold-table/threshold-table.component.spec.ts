@@ -46,4 +46,16 @@ describe('ThresholdTableComponent', () => {
       key: 'sensor-1',
     });
   });
+
+  it('does not emit delete payload when delete is disabled', () => {
+    const fixture = TestBed.createComponent(ThresholdTableComponent);
+    fixture.componentRef.setInput('canDelete', false);
+    fixture.detectChanges();
+
+    const emitSpy = vi.spyOn(fixture.componentInstance.deleteRequested, 'emit');
+
+    fixture.componentInstance.requestDelete(sensorThreshold);
+
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
 });

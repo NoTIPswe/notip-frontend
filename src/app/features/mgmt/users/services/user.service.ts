@@ -42,7 +42,7 @@ export class UserService {
 
   createUser(up: UserParameters): Observable<CreatedUser> {
     const body: CreateUserRequestDto = {
-      username: up.username,
+      username: this.normalizeUsername(up.username),
       email: up.email,
       role: this.toCreateRole(up.role),
       password: up.password,
@@ -61,7 +61,7 @@ export class UserService {
 
   updateUser(userId: string, u: UpdateUserParameters): Observable<UpdatedUser> {
     const body: UpdateUserRequestDto = {
-      username: u.username ?? '',
+      username: this.normalizeUsername(u.username ?? ''),
       email: u.email ?? '',
       role: this.toUpdateRole(u.role ?? UserRole.tenant_user),
       permissions: [],
@@ -86,8 +86,6 @@ export class UserService {
 
   private toCreateRole(role: UserRole): CreateUserRequestDtoRoleEnum {
     switch (role) {
-      case UserRole.system_admin:
-        return CreateUserRequestDtoRoleEnum.SystemAdmin;
       case UserRole.tenant_admin:
         return CreateUserRequestDtoRoleEnum.TenantAdmin;
       default:
@@ -97,13 +95,20 @@ export class UserService {
 
   private toUpdateRole(role: UserRole): UpdateUserRequestDtoRoleEnum {
     switch (role) {
-      case UserRole.system_admin:
-        return UpdateUserRequestDtoRoleEnum.SystemAdmin;
       case UserRole.tenant_admin:
         return UpdateUserRequestDtoRoleEnum.TenantAdmin;
       default:
         return UpdateUserRequestDtoRoleEnum.TenantUser;
     }
+  }
+
+  private normalizeUsername(value: string): string {
+    const lowered = value.trim().toLowerCase();
+    if (!lowered) {
+      return '';
+    }
+
+    return `${lowered[0].toUpperCase()}${lowered.slice(1)}`;
   }
 
   private toUserRole(role: string): UserRole {

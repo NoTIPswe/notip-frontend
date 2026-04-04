@@ -28,4 +28,12 @@ describe('AdminGatewayFormComponent', () => {
       model: 'model',
     });
   });
+
+  it('accepts tenant options input', () => {
+    const fixture = TestBed.createComponent(AdminGatewayFormComponent);
+    fixture.componentRef.setInput('tenantIds', ['tenant-a', 'tenant-b']);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.tenantIds()).toEqual(['tenant-a', 'tenant-b']);
+  });
 });

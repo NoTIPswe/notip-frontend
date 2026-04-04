@@ -61,6 +61,34 @@ describe('AdminGatewayService', () => {
     expect(apiMock.gatewaysControllerGetAdminGateways).toHaveBeenCalledWith('t-1');
   });
 
+  it('maps admin gateways when backend returns camelCase keys', async () => {
+    apiMock.gatewaysControllerGetAdminGateways.mockReturnValue(
+      of([
+        {
+          id: 'gw-1',
+          tenantId: 't-1',
+          provisioned: true,
+          model: 'M1',
+          factoryId: 'f-1',
+          firmwareVersion: '1.0.0',
+          createdAt: '2026-03-31T10:00:00.000Z',
+        },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.getGateways('t-1'))).resolves.toEqual([
+      {
+        gatewayId: 'gw-1',
+        tenantId: 't-1',
+        provisioned: true,
+        model: 'M1',
+        factoryId: 'f-1',
+        firmware: '1.0.0',
+        createdAt: '2026-03-31T10:00:00.000Z',
+      },
+    ]);
+  });
+
   it('sends add gateway payload and returns gateway id', async () => {
     apiMock.gatewaysControllerAddGateway.mockReturnValue(of({ id: 'gw-new' }));
 

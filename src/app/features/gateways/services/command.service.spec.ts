@@ -101,6 +101,35 @@ describe('CommandService', () => {
     expect(pollSpy).toHaveBeenCalledWith('gw-1', 'cmd-fw');
   });
 
+  it('accepts camelCase command response fields', async () => {
+    apiMock.commandControllerSendConfig.mockReturnValue(
+      of({ commandId: 'cmd-camel', status: 'queued', issuedAt: 't0' }),
+    );
+
+    const pollSpy = vi.spyOn(service, 'pollStatus').mockReturnValue(
+      of({
+        commandId: 'cmd-camel',
+        status: CommandStatus.ack,
+        timestamp: 't1',
+      }),
+    );
+
+    await expect(
+      firstValueFrom(
+        service.sendConfig('gw-1', {
+          send_frequency_ms: 1000,
+          status: CmdGatewayStatus.online,
+        }),
+      ),
+    ).resolves.toEqual({
+      commandId: 'cmd-camel',
+      status: CommandStatus.ack,
+      timestamp: 't1',
+    });
+
+    expect(pollSpy).toHaveBeenCalledWith('gw-1', 'cmd-camel');
+  });
+
   it('maps 404 and 503 polling errors to timeout status', async () => {
     apiMock.commandControllerGetStatus.mockReturnValue(throwError(() => ({ status: 404 })));
 
@@ -123,6 +152,25 @@ describe('CommandService', () => {
     });
   });
 
+  it('keeps last known status on 304 polling responses', async () => {
+    apiMock.commandControllerGetStatus
+      .mockReturnValueOnce(of({ command_id: 'cmd-304', status: 'queued', timestamp: 't1' }))
+      .mockReturnValueOnce(throwError(() => ({ status: 304 })))
+      .mockReturnValueOnce(of({ command_id: 'cmd-304', status: 'ack', timestamp: 't2' }));
+
+    const updatesPromise = firstValueFrom(
+      service.pollStatus('gw-1', 'cmd-304', 100).pipe(toArray()),
+    );
+
+    vi.advanceTimersByTime(350);
+
+    await expect(updatesPromise).resolves.toEqual([
+      { commandId: 'cmd-304', status: CommandStatus.queued, timestamp: 't1' },
+      { commandId: 'cmd-304', status: CommandStatus.queued, timestamp: 't1' },
+      { commandId: 'cmd-304', status: CommandStatus.ack, timestamp: 't2' },
+    ]);
+  });
+
   it('polls until terminal status and includes final emission', async () => {
     apiMock.commandControllerGetStatus
       .mockReturnValueOnce(of({ command_id: 'cmd-3', status: 'queued', timestamp: 't1' }))
@@ -135,6 +183,21 @@ describe('CommandService', () => {
     await expect(updatesPromise).resolves.toEqual([
       { commandId: 'cmd-3', status: CommandStatus.queued, timestamp: 't1' },
       { commandId: 'cmd-3', status: CommandStatus.ack, timestamp: 't2' },
+    ]);
+  });
+
+  it('accepts camelCase command status fields while polling', async () => {
+    apiMock.commandControllerGetStatus
+      .mockReturnValueOnce(of({ commandId: 'cmd-6', status: 'queued', timestamp: 't1' }))
+      .mockReturnValueOnce(of({ commandId: 'cmd-6', status: 'ack', timestamp: 't2' }));
+
+    const updatesPromise = firstValueFrom(service.pollStatus('gw-1', 'cmd-6', 100).pipe(toArray()));
+
+    vi.advanceTimersByTime(250);
+
+    await expect(updatesPromise).resolves.toEqual([
+      { commandId: 'cmd-6', status: CommandStatus.queued, timestamp: 't1' },
+      { commandId: 'cmd-6', status: CommandStatus.ack, timestamp: 't2' },
     ]);
   });
 

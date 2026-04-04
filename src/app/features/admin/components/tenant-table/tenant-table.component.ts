@@ -1,9 +1,11 @@
+import { DatePipe } from '@angular/common';
 import { Component, input, output } from '@angular/core';
 import { Tenant } from '../../../../core/models/tenant';
 
 @Component({
   selector: 'app-tenant-table',
   standalone: true,
+  imports: [DatePipe],
   templateUrl: './tenant-table.component.html',
   styleUrl: './tenant-table.component.css',
 })

@@ -36,9 +36,21 @@ describe('UserFormComponent', () => {
     expect(emitSpy).toHaveBeenCalledWith({
       username: 'Alice',
       email: 'alice@test.dev',
-      role: UserRole.system_admin,
+      role: UserRole.tenant_user,
       password: 'pwd-1',
     });
+  });
+
+  it('does not show system_admin among create role options', () => {
+    fixture.detectChanges();
+
+    const options = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('select option'),
+    ).map((option) => option.textContent?.trim());
+
+    expect(options).toContain('tenant_user');
+    expect(options).toContain('tenant_admin');
+    expect(options).not.toContain('system_admin');
   });
 
   it('does not emit update when edit user is missing', () => {
@@ -62,7 +74,7 @@ describe('UserFormComponent', () => {
 
     expect(emitSpy).toHaveBeenCalledWith({
       userId: 'user-1',
-      username: 'Alice Updated',
+      username: 'Alice updated',
       email: 'alice-updated@test.dev',
       role: UserRole.tenant_user,
     });

@@ -27,7 +27,8 @@ label {
   color: #364152;
 }
 
-input {
+input,
+select {
   height: 2.2rem;
   border: 1px solid #d4dae3;
   border-radius: 8px;

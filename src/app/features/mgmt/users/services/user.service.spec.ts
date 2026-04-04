@@ -83,7 +83,7 @@ describe('UserService', () => {
 
     await firstValueFrom(
       service.createUser({
-        username: 'Carol',
+        username: ' Carol ',
         email: 'c@test.dev',
         password: 'Strong123',
         role: UserRole.system_admin,
@@ -93,7 +93,7 @@ describe('UserService', () => {
     expect(apiMock.usersControllerCreateUser).toHaveBeenCalledWith({
       username: 'Carol',
       email: 'c@test.dev',
-      role: CreateUserRequestDtoRoleEnum.SystemAdmin,
+      role: CreateUserRequestDtoRoleEnum.TenantUser,
       password: 'Strong123',
     });
   });
