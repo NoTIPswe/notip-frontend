@@ -10,6 +10,8 @@ import { Gateway, GatewayUpdateResult } from '../../../core/models/gateway';
 import { GatewayStatus } from '../../../core/models/enums';
 import { IMPERSONATION_STATUS, ImpersonationStatus } from '../../../core/auth/contracts';
 
+const DEFAULT_GATEWAY_SEND_FREQUENCY_MS = 30000;
+
 @Injectable({ providedIn: 'root' })
 export class GatewayService {
   private readonly gatewaysApi = inject(GatewaysApiService);
@@ -77,28 +79,84 @@ export class GatewayService {
   }
 
   private toGateway(dto: GatewayResponseDto): Gateway {
+    const row = dto as unknown as Record<string, unknown>;
+    const lastSeenAt = this.pickOptionalString(row, ['last_seen_at', 'lastSeenAt']);
+    const firmwareVersion = this.pickOptionalString(row, ['firmware_version', 'firmwareVersion']);
+
     return {
-      gatewayId: dto.id,
-      name: dto.name,
-      status: this.toGatewayStatus(dto.status),
-      lastSeenAt: dto.last_seen_at,
-      provisioned: dto.provisioned,
-      firmwareVersion: dto.firmware_version,
-      sendFrequencyMs: dto.send_frequency_ms,
+      gatewayId: this.pickString(row, ['id', 'gateway_id', 'gatewayId']),
+      name: this.pickString(row, ['name']),
+      status: this.toGatewayStatus(row['status']),
+      provisioned: this.pickBoolean(row, ['provisioned']),
+      sendFrequencyMs: this.pickNumber(row, ['send_frequency_ms', 'sendFrequencyMs']),
+      ...(lastSeenAt ? { lastSeenAt } : {}),
+      ...(firmwareVersion ? { firmwareVersion } : {}),
     };
   }
 
-  private toGatewayStatus(
-    status: GatewayResponseDto['status'] | UpdateGatewayResponseDto['status'],
-  ): GatewayStatus {
+  private toGatewayStatus(status: unknown): GatewayStatus {
     switch (String(status)) {
       case 'gateway_online':
+      case 'online':
         return GatewayStatus.online;
       case 'gateway_suspended':
+      case 'paused':
         return GatewayStatus.paused;
       case 'gateway_offline':
+      case 'offline':
       default:
         return GatewayStatus.offline;
     }
+  }
+
+  private pickString(row: Record<string, unknown>, keys: string[]): string {
+    for (const key of keys) {
+      const value = row[key];
+      if (typeof value === 'string' && value.length > 0) {
+        return value;
+      }
+    }
+
+    return '';
+  }
+
+  private pickOptionalString(row: Record<string, unknown>, keys: string[]): string | undefined {
+    for (const key of keys) {
+      const value = row[key];
+      if (typeof value === 'string' && value.length > 0) {
+        return value;
+      }
+    }
+
+    return undefined;
+  }
+
+  private pickBoolean(row: Record<string, unknown>, keys: string[]): boolean {
+    for (const key of keys) {
+      const value = row[key];
+      if (typeof value === 'boolean') {
+        return value;
+      }
+    }
+
+    return false;
+  }
+
+  private pickNumber(row: Record<string, unknown>, keys: string[]): number {
+    for (const key of keys) {
+      const value = row[key];
+      if (typeof value === 'number' && Number.isFinite(value)) {
+        return value;
+      }
+
+      if (typeof value === 'string') {
+        const parsed = Number(value);
+        if (Number.isFinite(parsed)) {
+          return parsed;
+        }
+      }
+    }
+
+    return DEFAULT_GATEWAY_SEND_FREQUENCY_MS;
   }
 }

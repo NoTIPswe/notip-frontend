@@ -115,6 +115,34 @@ describe('GatewayService', () => {
     expect(service.isLoading()()).toBe(false);
   });
 
+  it('maps gateway list when backend returns camelCase keys', async () => {
+    apiMock.gatewaysControllerGetGateways.mockReturnValue(
+      of([
+        {
+          id: 'gw-camel-1',
+          name: 'Gateway Camel',
+          status: 'gateway_offline',
+          lastSeenAt: '2026-04-04T12:00:00.000Z',
+          provisioned: true,
+          firmwareVersion: '1.2.5',
+          sendFrequencyMs: '1500',
+        },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.getGateways())).resolves.toEqual([
+      {
+        gatewayId: 'gw-camel-1',
+        name: 'Gateway Camel',
+        status: 'offline',
+        lastSeenAt: '2026-04-04T12:00:00.000Z',
+        provisioned: true,
+        firmwareVersion: '1.2.5',
+        sendFrequencyMs: 1500,
+      },
+    ]);
+  });
+
   it('updates gateway name and returns mapped result', async () => {
     apiMock.gatewaysControllerUpdateGateway.mockReturnValue(
       of({ id: 'gw-1', name: 'New Name', status: 'gateway_online', updated_at: '2026-03-31' }),

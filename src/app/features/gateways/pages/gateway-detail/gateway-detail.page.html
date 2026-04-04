@@ -2,70 +2,52 @@
   <h2>Dettaglio Gateway</h2>
 
   @if (errorMessage()) {
-    <p class="error">{{ errorMessage() }}</p>
+  <p class="error">{{ errorMessage() }}</p>
   }
 
   @if (infoMessage()) {
-    <p class="info">{{ infoMessage() }}</p>
+  <p class="info">{{ infoMessage() }}</p>
   }
 
   @if (gateway()) {
-    <section class="summary">
-      <p><strong>ID:</strong> {{ gateway()!.gatewayId }}</p>
-      <p><strong>Nome:</strong> {{ gateway()!.name }}</p>
-      <p><strong>Status:</strong> {{ gateway()!.status }}</p>
-      <p><strong>Firmware:</strong> {{ gateway()!.firmwareVersion ?? '-' }}</p>
-      <p><strong>Frequenza:</strong> {{ gateway()!.sendFrequencyMs }} ms</p>
-    </section>
+  <section class="summary">
+    <p><strong>ID:</strong> {{ gateway()!.gatewayId }}</p>
+    <p><strong>Nome:</strong> {{ gateway()!.name }}</p>
+    <p><strong>Status:</strong> {{ gateway()!.status }}</p>
+    <p><strong>Firmware:</strong> {{ gateway()!.firmwareVersion ?? '-' }}</p>
+    <p><strong>Frequenza:</strong> {{ gateway()!.sendFrequencyMs }} ms</p>
+  </section>
   }
 
-  <app-gateway-actions
-    [canManage]="canManage"
-    [isBusy]="isBusy()"
-    (renameRequested)="requestRename()"
-    (configureRequested)="openConfigModal()"
-    (firmwareRequested)="openFirmwareModal()"
-    (deleteRequested)="openDeleteModal()"
-  ></app-gateway-actions>
+  <app-gateway-actions [canManage]="canManage" [isBusy]="isBusy()" (renameRequested)="requestRename()"
+    (configureRequested)="openConfigModal()" (firmwareRequested)="openFirmwareModal()"
+    (deleteRequested)="openDeleteModal()"></app-gateway-actions>
 
-  <app-command-modal
-    [open]="commandModalOpen()"
-    [mode]="commandModalMode()"
-    [busy]="isBusy()"
-    (closed)="closeCommandModal()"
-    (configSubmitted)="submitConfigCommand($event)"
-    (firmwareSubmitted)="submitFirmwareCommand($event)"
-  ></app-command-modal>
+  <app-command-modal [open]="commandModalOpen()" [mode]="commandModalMode()" [busy]="isBusy()"
+    (closed)="closeCommandModal()" (configSubmitted)="submitConfigCommand($event)"
+    (firmwareSubmitted)="submitFirmwareCommand($event)"></app-command-modal>
 
-  <app-delete-confirm-modal
-    [open]="deleteModalOpen()"
-    [title]="'Eliminare gateway'"
-    [message]="'Confermi la rimozione del gateway selezionato?'"
-    [busy]="isBusy()"
-    (confirmed)="confirmDeleteGateway()"
-    (cancelled)="closeDeleteModal()"
-  ></app-delete-confirm-modal>
+  <app-delete-confirm-modal [open]="deleteModalOpen()" [title]="'Eliminare gateway'"
+    [message]="'Confermi la rimozione del gateway selezionato?'" [busy]="isBusy()" (confirmed)="confirmDeleteGateway()"
+    (cancelled)="closeDeleteModal()"></app-delete-confirm-modal>
 
   @if (commandStatus()) {
-    <p class="meta">
-      Ultimo comando: {{ commandStatus()!.commandId }} ({{ commandStatus()!.status }})
-    </p>
+  <p class="meta">
+    Ultimo comando: {{ commandStatus()!.commandId }} ({{ commandStatus()!.status }})
+  </p>
   }
 
   <section class="sensor-block">
     <h3>Sensori</h3>
     @if (sensors().length === 0) {
-      <p class="meta">Nessun sensore disponibile.</p>
+    <p class="meta">Nessun sensore disponibile.</p>
     }
     <ul>
       @for (sensor of sensors(); track sensor.sensorId) {
-        <li>{{ sensor.sensorId }} ({{ sensor.sensorType }})</li>
+      <li>{{ sensor.sensorId }} ({{ sensor.sensorType }})</li>
       }
     </ul>
   </section>
 
-  <app-telemetry-table
-    [measures]="telemetry()"
-    [isLoading]="isTelemetryLoading()"
-  ></app-telemetry-table>
+  <app-telemetry-table [measures]="telemetry()" [isLoading]="isTelemetryLoading()"></app-telemetry-table>
 </section>
