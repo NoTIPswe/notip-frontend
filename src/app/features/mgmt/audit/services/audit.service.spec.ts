@@ -79,4 +79,30 @@ describe('AuditService', () => {
       },
     ]);
   });
+
+  it('maps user id from snake_case payloads', async () => {
+    apiMock.auditLogControllerGetAuditLogs.mockReturnValue(
+      of([
+        {
+          id: 'log-2',
+          user_id: 'u-2',
+          action: 'DELETE',
+          timestamp: '2026-03-31T12:00:00.000Z',
+          resource: 'gateway',
+          details: { message: 'deleted gateway' },
+        },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.getLogs({ from: 'f', to: 't' }))).resolves.toEqual([
+      {
+        id: 'log-2',
+        userId: 'u-2',
+        action: 'DELETE',
+        timestamp: '2026-03-31T12:00:00.000Z',
+        resource: 'gateway',
+        details: '{"message":"deleted gateway"}',
+      },
+    ]);
+  });
 });

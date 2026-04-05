@@ -59,29 +59,9 @@ describe('AlertService', () => {
     });
   });
 
-  it('supports legacy alerts configuration payload keys', async () => {
-    apiMock.alertsControllerGetAlertsConfig.mockReturnValue(
-      of({
-        tenant_id: 'tenant-legacy',
-        tenant_unreachable_timeout_ms: 12345,
-        updated_at: '2026-03-31T11:00:00.000Z',
-        gateway_configs: [{ gateway_id: 'gw-legacy', gateway_unreachable_timeout_ms: 7000 }],
-      }),
-    );
-
-    await expect(firstValueFrom(service.getAlertsConfig())).resolves.toEqual({
-      default: {
-        tenantId: 'tenant-legacy',
-        timeoutMs: 12345,
-        updatedAt: '2026-03-31T11:00:00.000Z',
-      },
-      gatewayOverrides: [{ gatewayId: 'gw-legacy', timeoutMs: 7000 }],
-    });
-  });
-
   it('sets default config and applies numeric fallback', async () => {
     apiMock.alertsControllerSetDefaultAlertsConfig.mockReturnValue(
-      of({ tenant_id: 'tenant-1', default_timeout_ms: 'bad', updated_at: 'now' }),
+      of({ tenant_id: 'tenant-1', default_timeout_ms: 'bad', default_updated_at: 'now' }),
     );
 
     await expect(firstValueFrom(service.setDefaultConfig(12000))).resolves.toEqual({

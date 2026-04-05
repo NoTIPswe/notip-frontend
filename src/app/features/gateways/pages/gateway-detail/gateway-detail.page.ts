@@ -148,18 +148,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
       .sendConfig(gatewayId, config)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (update) => {
-          this.commandStatus.set(update);
-          if (
-            update.status === CommandStatus.ack ||
-            update.status === CommandStatus.nack ||
-            update.status === CommandStatus.expired ||
-            update.status === CommandStatus.timeout
-          ) {
-            this.isBusy.set(false);
-            this.closeCommandModal();
-          }
-        },
+        next: (update) => this.handleCommandUpdate(gatewayId, update),
         error: () => {
           this.isBusy.set(false);
           this.errorMessage.set('Invio comando di configurazione non riuscito.');
@@ -178,23 +167,36 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
       .sendFirmware(gatewayId, firmware)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (update) => {
-          this.commandStatus.set(update);
-          if (
-            update.status === CommandStatus.ack ||
-            update.status === CommandStatus.nack ||
-            update.status === CommandStatus.expired ||
-            update.status === CommandStatus.timeout
-          ) {
-            this.isBusy.set(false);
-            this.closeCommandModal();
-          }
-        },
+        next: (update) => this.handleCommandUpdate(gatewayId, update),
         error: () => {
           this.isBusy.set(false);
           this.errorMessage.set('Invio comando firmware non riuscito.');
         },
       });
+  }
+
+  private handleCommandUpdate(gatewayId: string, update: CommandStatusUpdate): void {
+    this.commandStatus.set(update);
+
+    if (!this.isTerminalCommandStatus(update.status)) {
+      return;
+    }
+
+    this.isBusy.set(false);
+    this.closeCommandModal();
+
+    if (update.status === CommandStatus.ack) {
+      this.loadGateway(gatewayId);
+    }
+  }
+
+  private isTerminalCommandStatus(status: CommandStatus): boolean {
+    return (
+      status === CommandStatus.ack ||
+      status === CommandStatus.nack ||
+      status === CommandStatus.expired ||
+      status === CommandStatus.timeout
+    );
   }
 
   openDeleteModal(): void {
