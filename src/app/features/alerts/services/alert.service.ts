@@ -23,24 +23,13 @@ export class AlertService {
     return this.alertsApi.alertsControllerGetAlertsConfig().pipe(
       map((row) => {
         const data = this.asRecord(row);
-        const gatewayConfigs =
-          data['gateway_overrides'] ?? data['gatewayOverrides'] ?? data['gateway_configs'];
+        const gatewayConfigs = data['gateway_overrides'];
 
         const cfg: AlertsConfig = {
           default: {
-            tenantId: this.asString(data['tenant_id'] ?? data['tenantId']),
-            timeoutMs: this.asNumber(
-              data['default_timeout_ms'] ??
-                data['defaultTimeoutMs'] ??
-                data['tenant_unreachable_timeout_ms'],
-              60000,
-            ),
-            updatedAt: this.asString(
-              data['default_updated_at'] ??
-                data['defaultUpdatedAt'] ??
-                data['updated_at'] ??
-                data['updatedAt'],
-            ),
+            tenantId: this.asString(data['tenant_id']),
+            timeoutMs: this.asNumber(data['default_timeout_ms'], 60000),
+            updatedAt: this.asString(data['default_updated_at']),
           },
         };
 
@@ -48,17 +37,11 @@ export class AlertService {
           cfg.gatewayOverrides = gatewayConfigs.map((item) => {
             const gatewayConfig = this.asRecord(item);
             const mappedOverride: GatewayOverride = {
-              gatewayId: this.asString(gatewayConfig['gateway_id'] ?? gatewayConfig['gatewayId']),
-              timeoutMs: this.asNumber(
-                gatewayConfig['timeout_ms'] ??
-                  gatewayConfig['timeoutMs'] ??
-                  gatewayConfig['gateway_unreachable_timeout_ms'],
-              ),
+              gatewayId: this.asString(gatewayConfig['gateway_id']),
+              timeoutMs: this.asNumber(gatewayConfig['timeout_ms']),
             };
 
-            const updatedAt = this.asString(
-              gatewayConfig['updated_at'] ?? gatewayConfig['updatedAt'],
-            );
+            const updatedAt = this.asString(gatewayConfig['updated_at']);
             if (updatedAt) {
               mappedOverride.updatedAt = updatedAt;
             }
@@ -78,19 +61,13 @@ export class AlertService {
       map((row) => {
         const data = this.asRecord(row);
         return {
-          tenantId: this.asString(data['tenant_id'] ?? data['tenantId']),
-          timeoutMs: this.asNumber(
-            data['default_timeout_ms'] ??
-              data['defaultTimeoutMs'] ??
-              data['tenant_unreachable_timeout_ms'],
-            timeoutMs,
-          ),
-          updatedAt: this.asString(data['updated_at'] ?? data['updatedAt']),
+          tenantId: this.asString(data['tenant_id']),
+          timeoutMs: this.asNumber(data['default_timeout_ms'], timeoutMs),
+          updatedAt: this.asString(data['default_updated_at']),
         };
       }),
     );
   }
-
   sendGatewayConfig(gatewayId: string, timeoutMs: number): Observable<GatewayAlertsConfig> {
     const body: SetGatewayAlertsConfigRequestDto = {
       gateway_unreachable_timeout_ms: timeoutMs,
@@ -99,12 +76,9 @@ export class AlertService {
       map((row) => {
         const data = this.asRecord(row);
         return {
-          gatewayId: this.asString(data['gateway_id'] ?? data['gatewayId']) || gatewayId,
-          timeoutMs: this.asNumber(
-            data['timeout_ms'] ?? data['timeoutMs'] ?? data['gateway_unreachable_timeout_ms'],
-            timeoutMs,
-          ),
-          updatedAt: this.asString(data['updated_at'] ?? data['updatedAt']),
+          gatewayId: this.asString(data['gateway_id']) || gatewayId,
+          timeoutMs: this.asNumber(data['timeout_ms'], timeoutMs),
+          updatedAt: this.asString(data['updated_at']),
         };
       }),
     );
@@ -165,8 +139,8 @@ export class AlertService {
 
     if (typeof details === 'object' && details !== null) {
       const data = details as Record<string, unknown>;
-      const lastSeen = this.asString(data['lastSeen'] ?? data['last_seen']);
-      const timeout = this.asNumber(data['timeoutConfigured'] ?? data['timeout_configured']);
+      const lastSeen = this.asString(data['last_seen']);
+      const timeout = this.asNumber(data['timeout_configured']);
       if (lastSeen || timeout > 0) {
         const lastSeenPart = lastSeen ? `lastSeen=${lastSeen}` : '';
         const timeoutPart = timeout > 0 ? `timeout=${timeout}ms` : '';

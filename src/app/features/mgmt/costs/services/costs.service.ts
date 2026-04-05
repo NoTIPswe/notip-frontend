@@ -12,8 +12,8 @@ export class CostsService {
       map((res) => {
         const payload = res as unknown as Record<string, unknown>;
         return {
-          storageGb: this.toNumber(payload['storage_gb'] ?? payload['storageGb']),
-          bandwidthGb: this.toNumber(payload['bandwidth_gb'] ?? payload['bandwidthGb']),
+          storageGb: this.toNumber(payload['storage_gb']),
+          bandwidthGb: this.toNumber(payload['bandwidth_gb']),
         };
       }),
     );

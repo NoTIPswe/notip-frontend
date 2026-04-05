@@ -131,8 +131,8 @@ export class CommandService {
 
   private mapCommandResponse(response: unknown): CommandStatusUpdate {
     const res = response as CommandResponsePayload;
-    const commandId = res.command_id ?? res.commandId;
-    const timestamp = res.issued_at ?? res.issuedAt;
+    const commandId = res.command_id;
+    const timestamp = res.issued_at;
 
     if (!commandId) {
       throw new Error('Invalid command response: missing command id');
@@ -152,7 +152,7 @@ export class CommandService {
 
   private mapCommandStatusResponse(response: unknown): CommandStatusUpdate {
     const res = response as CommandStatusResponsePayload;
-    const commandId = res.command_id ?? res.commandId;
+    const commandId = res.command_id;
     const timestamp = res.timestamp;
 
     if (!commandId) {

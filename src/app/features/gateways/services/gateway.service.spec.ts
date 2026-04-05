@@ -115,37 +115,47 @@ describe('GatewayService', () => {
     expect(service.isLoading()()).toBe(false);
   });
 
-  it('maps gateway list when backend returns camelCase keys', async () => {
+  it('maps online gateway status even when backend uses uppercase/camel-case variants', async () => {
     apiMock.gatewaysControllerGetGateways.mockReturnValue(
       of([
         {
-          id: 'gw-camel-1',
-          name: 'Gateway Camel',
-          status: 'gateway_offline',
-          lastSeenAt: '2026-04-04T12:00:00.000Z',
+          id: 'gw-upper-1',
+          name: 'Gateway Upper',
+          status: 'GATEWAY_ONLINE',
           provisioned: true,
-          firmwareVersion: '1.2.5',
-          sendFrequencyMs: '1500',
+          send_frequency_ms: 3000,
+        },
+        {
+          id: 'gw-camel-2',
+          name: 'Gateway Camel Online',
+          status: 'GatewayOnline',
+          provisioned: true,
+          send_frequency_ms: 3500,
         },
       ]),
     );
 
     await expect(firstValueFrom(service.getGateways())).resolves.toEqual([
       {
-        gatewayId: 'gw-camel-1',
-        name: 'Gateway Camel',
-        status: 'offline',
-        lastSeenAt: '2026-04-04T12:00:00.000Z',
+        gatewayId: 'gw-upper-1',
+        name: 'Gateway Upper',
+        status: 'online',
         provisioned: true,
-        firmwareVersion: '1.2.5',
-        sendFrequencyMs: 1500,
+        sendFrequencyMs: 3000,
+      },
+      {
+        gatewayId: 'gw-camel-2',
+        name: 'Gateway Camel Online',
+        status: 'online',
+        provisioned: true,
+        sendFrequencyMs: 3500,
       },
     ]);
   });
 
   it('updates gateway name and returns mapped result', async () => {
     apiMock.gatewaysControllerUpdateGateway.mockReturnValue(
-      of({ id: 'gw-1', name: 'New Name', status: 'gateway_online', updated_at: '2026-03-31' }),
+      of({ id: 'gw-1', name: 'New Name', status: 'GATEWAY_ONLINE', updated_at: '2026-03-31' }),
     );
 
     await expect(firstValueFrom(service.updateGatewayName('gw-1', 'New Name'))).resolves.toEqual({

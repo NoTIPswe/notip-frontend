@@ -80,33 +80,43 @@ export class GatewayService {
 
   private toGateway(dto: GatewayResponseDto): Gateway {
     const row = dto as unknown as Record<string, unknown>;
-    const lastSeenAt = this.pickOptionalString(row, ['last_seen_at', 'lastSeenAt']);
-    const firmwareVersion = this.pickOptionalString(row, ['firmware_version', 'firmwareVersion']);
+    const lastSeenAt = this.pickOptionalString(row, ['last_seen_at']);
+    const firmwareVersion = this.pickOptionalString(row, ['firmware_version']);
 
     return {
-      gatewayId: this.pickString(row, ['id', 'gateway_id', 'gatewayId']),
+      gatewayId: this.pickString(row, ['id']),
       name: this.pickString(row, ['name']),
       status: this.toGatewayStatus(row['status']),
       provisioned: this.pickBoolean(row, ['provisioned']),
-      sendFrequencyMs: this.pickNumber(row, ['send_frequency_ms', 'sendFrequencyMs']),
+      sendFrequencyMs: this.pickNumber(row, ['send_frequency_ms']),
       ...(lastSeenAt ? { lastSeenAt } : {}),
       ...(firmwareVersion ? { firmwareVersion } : {}),
     };
   }
 
   private toGatewayStatus(status: unknown): GatewayStatus {
-    switch (String(status)) {
-      case 'gateway_online':
-      case 'online':
-        return GatewayStatus.online;
-      case 'gateway_suspended':
-      case 'paused':
-        return GatewayStatus.paused;
-      case 'gateway_offline':
-      case 'offline':
-      default:
-        return GatewayStatus.offline;
+    const normalized = String(status ?? '')
+      .trim()
+      .toLowerCase()
+      .replace(/[\s_-]/g, '');
+
+    if (normalized === 'online' || normalized === 'gatewayonline') {
+      return GatewayStatus.online;
     }
+
+    if (
+      normalized === 'paused' ||
+      normalized === 'suspended' ||
+      normalized === 'gatewaysuspended'
+    ) {
+      return GatewayStatus.paused;
+    }
+
+    if (normalized === 'offline' || normalized === 'gatewayoffline') {
+      return GatewayStatus.offline;
+    }
+
+    return GatewayStatus.offline;
   }
 
   private pickString(row: Record<string, unknown>, keys: string[]): string {

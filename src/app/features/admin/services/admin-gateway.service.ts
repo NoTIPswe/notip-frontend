@@ -15,18 +15,14 @@ export class AdminGatewayService {
       map((rows) =>
         (rows as Record<string, unknown>[]).map((row) => {
           const mapped: ObfuscatedGateway = {
-            gatewayId: this.pickString(row, ['id', 'gateway_id', 'gatewayId']),
-            tenantId: this.pickString(row, ['tenant_id', 'tenantId']),
+            gatewayId: this.pickString(row, ['id']),
+            tenantId: this.pickString(row, ['tenant_id']),
             provisioned: Boolean(row['provisioned']),
             model: this.asString(row['model']),
-            factoryId: this.pickString(row, ['factory_id', 'factoryId']),
-            createdAt: this.pickString(row, ['created_at', 'createdAt']),
+            factoryId: this.pickString(row, ['factory_id']),
+            createdAt: this.pickString(row, ['created_at']),
           };
-          const firmware = this.pickString(row, [
-            'firmware',
-            'firmware_version',
-            'firmwareVersion',
-          ]);
+          const firmware = this.pickString(row, ['firmware', 'firmware_version']);
           if (firmware) {
             mapped.firmware = firmware;
           }

@@ -13,9 +13,9 @@ export class ClientsService {
         (rows as Record<string, unknown>[]).map((row) => {
           const mapped: Client = {
             id: this.pickString(row, ['id']),
-            clientId: this.pickString(row, ['client_id', 'clientId']),
+            clientId: this.pickString(row, ['client_id']),
             name: this.pickString(row, ['name']),
-            createdAt: this.pickString(row, ['created_at', 'createdAt']),
+            createdAt: this.pickString(row, ['created_at']),
           };
 
           return mapped;
@@ -30,10 +30,10 @@ export class ClientsService {
         const dict = res as Record<string, unknown>;
         const mapped: SecretClient = {
           id: this.pickString(dict, ['id']),
-          clientId: this.pickString(dict, ['client_id', 'clientId']),
+          clientId: this.pickString(dict, ['client_id']),
           name: this.pickString(dict, ['name']),
-          clientSecret: this.pickString(dict, ['client_secret', 'clientSecret']),
-          createdAt: this.pickString(dict, ['created_at', 'createdAt']),
+          clientSecret: this.pickString(dict, ['client_secret']),
+          createdAt: this.pickString(dict, ['created_at']),
         };
 
         return mapped;

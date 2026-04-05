@@ -15,7 +15,7 @@ export class AuditService {
       map((rows) =>
         (rows as Record<string, unknown>[]).map((row) => ({
           id: this.asString(row['id']),
-          userId: this.asString(row['user_id'] ?? row['userId']),
+          userId: this.asString(row['user_id']),
           action: this.asString(row['action']),
           timestamp: this.asString(row['timestamp']),
           resource: this.asString(row['resource']),

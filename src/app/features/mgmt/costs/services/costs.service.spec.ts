@@ -32,17 +32,6 @@ describe('CostsService', () => {
     });
   });
 
-  it('maps camelCase payload fields', async () => {
-    apiMock.costsControllerGetTenantCost.mockReturnValue(
-      of({ storageGb: 7.75, bandwidthGb: 3.25 }),
-    );
-
-    await expect(firstValueFrom(service.getTenantCosts())).resolves.toEqual({
-      storageGb: 7.75,
-      bandwidthGb: 3.25,
-    });
-  });
-
   it('falls back to zero when payload values are missing or invalid', async () => {
     apiMock.costsControllerGetTenantCost.mockReturnValue(
       of({ storage_gb: null, bandwidth_gb: 'not-a-number' }),

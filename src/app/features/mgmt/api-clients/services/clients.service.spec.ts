@@ -35,16 +35,6 @@ describe('ClientsService', () => {
     ]);
   });
 
-  it('maps clients list also from camelCase payload', async () => {
-    apiMock.apiClientControllerGetApiClients.mockReturnValue(
-      of([{ id: '1', clientId: 'cid-1', name: 'client one', createdAt: '2026-03-31' }]),
-    );
-
-    await expect(firstValueFrom(service.getClients())).resolves.toEqual([
-      { id: '1', clientId: 'cid-1', name: 'client one', createdAt: '2026-03-31' },
-    ]);
-  });
-
   it('maps non-string fields to empty strings', async () => {
     apiMock.apiClientControllerGetApiClients.mockReturnValue(
       of([{ id: 1, client_id: null, name: false, created_at: 123 }]),
@@ -75,26 +65,6 @@ describe('ClientsService', () => {
     });
 
     expect(apiMock.apiClientControllerCreateApiClient).toHaveBeenCalledWith({ name: 'client one' });
-  });
-
-  it('creates client and maps secret payload also from camelCase fields', async () => {
-    apiMock.apiClientControllerCreateApiClient.mockReturnValue(
-      of({
-        id: '1',
-        clientId: 'cid-1',
-        name: 'client one',
-        clientSecret: 'super-secret',
-        createdAt: '2026-03-31',
-      }),
-    );
-
-    await expect(firstValueFrom(service.createClient('client one'))).resolves.toEqual({
-      id: '1',
-      clientId: 'cid-1',
-      name: 'client one',
-      clientSecret: 'super-secret',
-      createdAt: '2026-03-31',
-    });
   });
 
   it('deletes client', async () => {
