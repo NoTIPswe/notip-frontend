@@ -25,6 +25,7 @@ export class ThresholdSettingsPageComponent implements OnInit {
   private readonly thresholdService = inject(ThresholdService);
   private readonly sensorService = inject(SensorService);
   private readonly authService = inject(AuthService);
+  private readonly sensorTypeBySensorId = signal<Record<string, string>>({});
 
   readonly thresholds = signal<ThresholdConfig[]>([]);
   readonly sensorTypeOptions = signal<string[]>([]);
@@ -83,12 +84,20 @@ export class ThresholdSettingsPageComponent implements OnInit {
       return;
     }
 
+    const sensorType = this.sensorTypeBySensorId()[payload.sensorId];
+    if (!sensorType) {
+      this.errorMessage.set(
+        `Impossibile determinare il sensor type per il sensore ${payload.sensorId}.`,
+      );
+      return;
+    }
+
     this.isSaving.set(true);
     this.errorMessage.set(null);
     this.infoMessage.set(null);
 
     this.thresholdService
-      .setSensorThreshold(payload.sensorId, payload.minValue, payload.maxValue)
+      .setSensorThreshold(payload.sensorId, sensorType, payload.minValue, payload.maxValue)
       .subscribe({
         next: () => {
           this.isSaving.set(false);
@@ -154,18 +163,29 @@ export class ThresholdSettingsPageComponent implements OnInit {
   private loadSensorOptions(): void {
     this.sensorService.getAllSensors(0).subscribe({
       next: (rows) => {
+        const sensorTypeBySensorId = rows.reduce<Record<string, string>>((acc, row) => {
+          const sensorId = row.sensorId.trim();
+          const sensorType = row.sensorType.trim();
+
+          if (sensorId.length > 0 && sensorType.length > 0) {
+            acc[sensorId] = sensorType;
+          }
+
+          return acc;
+        }, {});
+
         const sensorTypes = Array.from(
           new Set(rows.map((row) => row.sensorType).filter((sensorType) => sensorType.length > 0)),
         ).sort((a, b) => a.localeCompare(b));
 
-        const sensorIds = Array.from(
-          new Set(rows.map((row) => row.sensorId.trim()).filter((sensorId) => sensorId.length > 0)),
-        ).sort((a, b) => a.localeCompare(b));
+        const sensorIds = Object.keys(sensorTypeBySensorId).sort((a, b) => a.localeCompare(b));
 
+        this.sensorTypeBySensorId.set(sensorTypeBySensorId);
         this.sensorTypeOptions.set(sensorTypes);
         this.sensorIdOptions.set(sensorIds);
       },
       error: () => {
+        this.sensorTypeBySensorId.set({});
         this.sensorTypeOptions.set([]);
         this.sensorIdOptions.set([]);
       },

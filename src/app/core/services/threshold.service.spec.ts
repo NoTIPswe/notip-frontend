@@ -103,14 +103,14 @@ describe('ThresholdService', () => {
 
     await firstValueFrom(service.fetchThresholds());
 
-    await firstValueFrom(service.setSensorThreshold('sensor-9', 12));
+    await firstValueFrom(service.setSensorThreshold('sensor-9', 'temperature', 12));
 
     expect(thresholdsApiMock.thresholdsControllerSetSensorThreshold).toHaveBeenCalledWith(
       'sensor-9',
       {
         min_value: 12,
         max_value: 22,
-        sensor_type: null,
+        sensor_type: 'temperature',
       },
     );
   });
@@ -118,14 +118,14 @@ describe('ThresholdService', () => {
   it('allows sensor threshold with one explicit bound and null fallback', async () => {
     thresholdsApiMock.thresholdsControllerSetSensorThreshold.mockReturnValue(of({}));
 
-    await firstValueFrom(service.setSensorThreshold('sensor-9', 12));
+    await firstValueFrom(service.setSensorThreshold('sensor-9', 'temperature', 12));
 
     expect(thresholdsApiMock.thresholdsControllerSetSensorThreshold).toHaveBeenCalledWith(
       'sensor-9',
       {
         min_value: 12,
         max_value: null,
-        sensor_type: null,
+        sensor_type: 'temperature',
       },
     );
   });

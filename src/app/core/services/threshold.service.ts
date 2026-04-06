@@ -56,6 +56,7 @@ export class ThresholdService {
 
   setSensorThreshold(
     sensorId: string,
+    sensorType: string,
     minValue?: number | null,
     maxValue?: number | null,
   ): Observable<void> {
@@ -65,7 +66,7 @@ export class ThresholdService {
     const body = {
       min_value: bounds.min,
       max_value: bounds.max,
-      sensor_type: null,
+      sensor_type: sensorType,
     } as unknown as SetThresholdSensorRequestDto;
 
     return this.thresholdsApi
