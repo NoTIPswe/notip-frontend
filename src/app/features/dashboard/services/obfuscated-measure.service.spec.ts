@@ -27,7 +27,6 @@ describe('MeasureService', () => {
     encryptedData: 'enc',
     iv: 'iv',
     authTag: 'tag',
-    unit: 'C',
   };
 
   beforeEach(async () => {

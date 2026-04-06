@@ -28,7 +28,6 @@ describe('ObfuscatedStreamManagerService', () => {
     encryptedData: 'enc',
     iv: 'iv',
     authTag: 'tag',
-    unit: 'C',
   };
 
   beforeEach(async () => {

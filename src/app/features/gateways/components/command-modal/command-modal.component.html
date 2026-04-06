@@ -9,12 +9,19 @@
       <form (submit)="submitConfig($event, sendFrequency.value, status.value)">
         <label>
           Send frequency (ms)
-          <input #sendFrequency type="number" min="1000" step="100" required />
+          <input
+            #sendFrequency
+            type="number"
+            min="1000"
+            step="100"
+            [value]="initialSendFrequencyMs() ?? ''"
+          />
         </label>
 
         <label>
           Status
-          <select #status>
+          <select #status [value]="initialStatus() ?? ''">
+            <option value="">mantieni attuale</option>
             <option [value]="cmdStatusOnline">online</option>
             <option [value]="cmdStatusPaused">paused</option>
           </select>

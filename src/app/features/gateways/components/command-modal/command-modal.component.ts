@@ -14,6 +14,8 @@ export class CommandModalComponent {
   readonly open = input<boolean>(false);
   readonly mode = input<CommandModalMode>(null);
   readonly busy = input<boolean>(false);
+  readonly initialSendFrequencyMs = input<number | null>(null);
+  readonly initialStatus = input<CmdGatewayStatus | null>(null);
   readonly cmdStatusOnline = CmdGatewayStatus.online;
   readonly cmdStatusPaused = CmdGatewayStatus.paused;
 

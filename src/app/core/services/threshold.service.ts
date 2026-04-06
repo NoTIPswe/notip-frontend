@@ -65,7 +65,7 @@ export class ThresholdService {
     const body = {
       min_value: bounds.min,
       max_value: bounds.max,
-      sensor_type: '',
+      sensor_type: null,
     } as unknown as SetThresholdSensorRequestDto;
 
     return this.thresholdsApi
@@ -108,23 +108,74 @@ export class ThresholdService {
   }
 
   private toThresholds(rows: Record<string, unknown>[]): ThresholdConfig[] {
-    return rows.map((row) => {
-      const mapped: Partial<ThresholdConfig> = {
-        minValue: typeof row['min_value'] === 'number' ? row['min_value'] : null,
-        maxValue: typeof row['max_value'] === 'number' ? row['max_value'] : null,
-      };
+    return rows.flatMap<ThresholdConfig>((row) => {
+      const minValue = this.toNullableNumber(row['min_value'] ?? row['minValue']);
+      const maxValue = this.toNullableNumber(row['max_value'] ?? row['maxValue']);
+      const type = this.normalizeType(row['type']);
+      const sensorId = this.toNonEmptyString(row['sensor_id'] ?? row['sensorId']);
+      const sensorType = this.toNonEmptyString(row['sensor_type'] ?? row['sensorType']);
 
-      if (row['type'] == 'sensorId' && typeof row['sensor_id'] === 'string') {
-        (mapped as unknown as { sensorId?: string }).sensorId = row['sensor_id'];
-        (mapped as unknown as { type?: string }).type = 'sensorId';
+      if (type === 'sensorId') {
+        if (sensorId) {
+          return [{ type: 'sensorId', sensorId, minValue, maxValue }];
+        }
+
+        return sensorType ? [{ type: 'sensorType', sensorType, minValue, maxValue }] : [];
       }
 
-      if (row['type'] === 'sensorType' && typeof row['sensor_type'] === 'string') {
-        (mapped as unknown as { sensorType?: string }).sensorType = row['sensor_type'];
-        (mapped as unknown as { type?: string }).type = 'sensorType';
+      if (type === 'sensorType') {
+        if (sensorType) {
+          return [{ type: 'sensorType', sensorType, minValue, maxValue }];
+        }
+
+        return sensorId ? [{ type: 'sensorId', sensorId, minValue, maxValue }] : [];
       }
 
-      return mapped as ThresholdConfig;
+      if (sensorId) {
+        return [{ type: 'sensorId', sensorId, minValue, maxValue }];
+      }
+
+      if (sensorType) {
+        return [{ type: 'sensorType', sensorType, minValue, maxValue }];
+      }
+
+      return [];
     });
+  }
+
+  private normalizeType(type: unknown): 'sensorId' | 'sensorType' | null {
+    if (type === 'sensorId' || type === 'sensor_id') {
+      return 'sensorId';
+    }
+
+    if (type === 'sensorType' || type === 'sensor_type') {
+      return 'sensorType';
+    }
+
+    return null;
+  }
+
+  private toNullableNumber(value: unknown): number | null {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+
+    if (typeof value === 'string' && value.trim().length > 0) {
+      const parsed = Number.parseFloat(value);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+
+    return null;
+  }
+
+  private toNonEmptyString(value: unknown): string | null {
+    if (typeof value !== 'string') {
+      return null;
+    }
+
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
   }
 }

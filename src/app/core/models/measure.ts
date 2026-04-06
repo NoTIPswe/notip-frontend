@@ -11,7 +11,6 @@ export interface TelemetryEnvelope {
   encryptedData: string;
   iv: string;
   authTag: string;
-  unit: string;
 }
 
 export interface DecryptedEnvelope {

@@ -225,8 +225,7 @@ export class ObfuscatedStreamManagerService {
       typeof row.encryptedData === 'string' &&
       typeof row.iv === 'string' &&
       typeof row.authTag === 'string' &&
-      typeof row.keyVersion === 'number' &&
-      typeof row.unit === 'string'
+      typeof row.keyVersion === 'number'
     );
   }
 

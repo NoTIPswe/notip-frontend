@@ -159,7 +159,7 @@ export class ThresholdSettingsPageComponent implements OnInit {
         ).sort((a, b) => a.localeCompare(b));
 
         const sensorIds = Array.from(
-          new Set(rows.map((row) => row.sensorId).filter((sensorId) => sensorId.length > 0)),
+          new Set(rows.map((row) => row.sensorId.trim()).filter((sensorId) => sensorId.length > 0)),
         ).sort((a, b) => a.localeCompare(b));
 
         this.sensorTypeOptions.set(sensorTypes);

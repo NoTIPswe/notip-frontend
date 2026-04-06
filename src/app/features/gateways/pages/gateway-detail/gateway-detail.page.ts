@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription, distinctUntilChanged, filter, map, tap } from 'rxjs';
@@ -6,12 +6,13 @@ import { Sensor } from '../../../../core/models/sensor';
 import { Gateway } from '../../../../core/models/gateway';
 import { CheckedEnvelope, ObfuscatedEnvelope } from '../../../../core/models/measure';
 import {
+  CmdGatewayStatus,
   CommandStatus,
   CommandStatusUpdate,
   GatewayConfig,
   GatewayFirmware,
 } from '../../../../core/models/command';
-import { UserRole } from '../../../../core/models/enums';
+import { GatewayStatus, UserRole } from '../../../../core/models/enums';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SensorService } from '../../../sensors/services/sensor.service';
 import { TelemetryTableComponent } from '../../../dashboard/components/telemetry-table/telemetry-table.component';
@@ -65,6 +66,22 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
 
   readonly canManage = this.authService.getRole() === UserRole.tenant_admin;
   readonly isLoading = this.gatewayService.isLoading();
+  readonly commandModalInitialSendFrequencyMs = computed<number | null>(
+    () => this.gateway()?.sendFrequencyMs ?? null,
+  );
+  readonly commandModalInitialStatus = computed<CmdGatewayStatus | null>(() => {
+    const status = this.gateway()?.status;
+
+    if (status === GatewayStatus.online) {
+      return CmdGatewayStatus.online;
+    }
+
+    if (status === GatewayStatus.paused) {
+      return CmdGatewayStatus.paused;
+    }
+
+    return null;
+  });
   readonly isTelemetryLoading = signal(false);
   readonly telemetry = signal<Array<CheckedEnvelope | ObfuscatedEnvelope>>([]);
 

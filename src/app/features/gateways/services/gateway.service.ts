@@ -4,7 +4,6 @@ import {
   GatewayResponseDto,
   GatewaysService as GatewaysApiService,
   UpdateGatewayRequestDto,
-  UpdateGatewayResponseDto,
 } from '../../../generated/openapi/notip-management-api-openapi';
 import { Gateway, GatewayUpdateResult } from '../../../core/models/gateway';
 import { GatewayStatus } from '../../../core/models/enums';
@@ -95,7 +94,7 @@ export class GatewayService {
   }
 
   private toGatewayStatus(status: unknown): GatewayStatus {
-    const normalized = String(status ?? '')
+    const normalized = (typeof status === 'string' ? status : '')
       .trim()
       .toLowerCase()
       .replace(/[\s_-]/g, '');
