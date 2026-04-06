@@ -8,6 +8,8 @@ import { SensorService } from '../../../sensors/services/sensor.service';
 import { ObfuscatedMeasureService } from '../../services/obfuscated-measure.service';
 import { ValidatedMeasureFacadeService } from '../../services/validated-measure-facade.service';
 import { DataDashboardPageComponent } from './data-dashboard.page';
+import { AdminGatewayService } from '../../../admin/services/admin-gateway.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 describe('DataDashboardPageComponent', () => {
   const obfuscatedMeasureServiceMock = {
@@ -25,6 +27,14 @@ describe('DataDashboardPageComponent', () => {
 
   const gatewayServiceMock = {
     getGateways: vi.fn(),
+  };
+
+  const adminGatewayServiceMock = {
+    getGateways: vi.fn(),
+  };
+
+  const authServiceMock = {
+    getTenantId: vi.fn(),
   };
 
   const sensorServiceMock = {
@@ -77,13 +87,19 @@ describe('DataDashboardPageComponent', () => {
     validatedMeasureFacadeServiceMock.closeStream.mockReset();
 
     gatewayServiceMock.getGateways.mockReset();
+    adminGatewayServiceMock.getGateways.mockReset();
     sensorServiceMock.getAllSensors.mockReset();
+    authServiceMock.getTenantId.mockReset();
 
     routeMock.snapshot.data = { dataMode: 'clear' };
 
     gatewayServiceMock.getGateways.mockReturnValue(
       of([{ gatewayId: 'gw-1' }, { gatewayId: 'gw-2' }]),
     );
+    adminGatewayServiceMock.getGateways.mockReturnValue(
+      of([{ gatewayId: 'gw-1' }, { gatewayId: 'gw-2' }]),
+    );
+    authServiceMock.getTenantId.mockReturnValue('tenant-1');
     sensorServiceMock.getAllSensors.mockReturnValue(
       of([
         { sensorId: 's-1', sensorType: 'temperature' },
@@ -98,7 +114,9 @@ describe('DataDashboardPageComponent', () => {
         { provide: ObfuscatedMeasureService, useValue: obfuscatedMeasureServiceMock },
         { provide: ValidatedMeasureFacadeService, useValue: validatedMeasureFacadeServiceMock },
         { provide: GatewayService, useValue: gatewayServiceMock },
+        { provide: AdminGatewayService, useValue: adminGatewayServiceMock },
         { provide: SensorService, useValue: sensorServiceMock },
+        { provide: AuthService, useValue: authServiceMock },
       ],
     }).compileComponents();
   });
@@ -116,6 +134,8 @@ describe('DataDashboardPageComponent', () => {
     await flushAsyncWork(fixture);
 
     expect(validatedMeasureFacadeServiceMock.openStream).toHaveBeenCalledOnce();
+    expect(gatewayServiceMock.getGateways).toHaveBeenCalledOnce();
+    expect(adminGatewayServiceMock.getGateways).not.toHaveBeenCalled();
     expect(component.streamMeasures()).toEqual([]);
 
     for (let index = 0; index < 25; index += 1) {
@@ -211,6 +231,8 @@ describe('DataDashboardPageComponent', () => {
 
     expect(obfuscatedMeasureServiceMock.openStream).toHaveBeenCalledOnce();
     expect(validatedMeasureFacadeServiceMock.openStream).not.toHaveBeenCalled();
+    expect(adminGatewayServiceMock.getGateways).toHaveBeenCalledWith('tenant-1');
+    expect(gatewayServiceMock.getGateways).not.toHaveBeenCalled();
 
     component.setActiveView('query');
     await flushAsyncWork(fixture);

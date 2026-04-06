@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, filter, map } from 'rxjs';
 import { Tenant } from '../../../../core/models/tenant';
@@ -18,6 +18,7 @@ import { TenantService } from '../../services/tenant.service';
 })
 export class TenantDetailPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly adminUserService = inject(AdminUserService);
   private readonly tenantService = inject(TenantService);
   private readonly destroyRef = inject(DestroyRef);
@@ -51,6 +52,7 @@ export class TenantDetailPageComponent implements OnInit {
 
   onImpersonationStarted(userId: string): void {
     this.feedbackMessage.set(`Impersonazione avviata per utente ${userId}.`);
+    void this.router.navigateByUrl('/dashboard');
   }
 
   onImpersonationFailed(message: string): void {

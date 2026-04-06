@@ -9,6 +9,8 @@
   <p class="meta">Frequenza: {{ gateway().sendFrequencyMs }} ms</p>
 
   <div class="actions">
-    <button type="button" (click)="onOpenDetail()">Apri dettaglio</button>
+    <button type="button" [disabled]="!canOpenDetail()" (click)="onOpenDetail()">
+      Apri dettaglio
+    </button>
   </div>
 </article>

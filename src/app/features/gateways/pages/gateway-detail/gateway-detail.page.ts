@@ -86,6 +86,11 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
   readonly telemetry = signal<Array<CheckedEnvelope | ObfuscatedEnvelope>>([]);
 
   ngOnInit(): void {
+    if (this.authService.isImpersonating()) {
+      void this.router.navigate(['/gateways']);
+      return;
+    }
+
     this.route.paramMap
       .pipe(
         map((params) => params.get('id') ?? ''),

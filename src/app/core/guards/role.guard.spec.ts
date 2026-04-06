@@ -75,6 +75,16 @@ describe('RoleGuard', () => {
     expect(guard.canActivate(route)).toBe(adminTenantsTree);
     expect(routerMock.parseUrl).toHaveBeenCalledWith('/admin/tenants');
   });
+
+  it('allows tenant routes while impersonating via tenant_admin role', () => {
+    authMock.getRole.mockReturnValue(UserRole.tenant_admin);
+    const route = {
+      data: { roles: [UserRole.tenant_user, UserRole.tenant_admin] },
+    } as ActivatedRouteSnapshot;
+
+    expect(guard.canActivate(route)).toBe(true);
+    expect(routerMock.parseUrl).not.toHaveBeenCalled();
+  });
 });
 
 describe('HomeRedirectGuard', () => {
@@ -125,6 +135,13 @@ describe('HomeRedirectGuard', () => {
 
     routerMock.parseUrl.mockClear();
     authMock.getRole.mockReturnValue(UserRole.tenant_user);
+
+    expect(guard.canActivate()).toBe(dashboardTree);
+    expect(routerMock.parseUrl).toHaveBeenCalledWith('/dashboard');
+  });
+
+  it('redirects impersonating users to dashboard', () => {
+    authMock.getRole.mockReturnValue(UserRole.tenant_admin);
 
     expect(guard.canActivate()).toBe(dashboardTree);
     expect(routerMock.parseUrl).toHaveBeenCalledWith('/dashboard');

@@ -1,4 +1,5 @@
 import { signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, of, Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -16,6 +17,9 @@ describe('GatewayService', () => {
     gatewaysControllerUpdateGateway: vi.fn(),
     gatewaysControllerDeleteGateway: vi.fn(),
   };
+  const httpMock = {
+    get: vi.fn(),
+  };
 
   beforeEach(async () => {
     impersonatingSignal.set(false);
@@ -23,11 +27,13 @@ describe('GatewayService', () => {
     apiMock.gatewaysControllerGetGatewayById.mockReset();
     apiMock.gatewaysControllerUpdateGateway.mockReset();
     apiMock.gatewaysControllerDeleteGateway.mockReset();
+    httpMock.get.mockReset();
 
     await TestBed.configureTestingModule({
       providers: [
         GatewayService,
         { provide: GatewaysApiService, useValue: apiMock },
+        { provide: HttpClient, useValue: httpMock },
         { provide: IMPERSONATION_STATUS, useValue: { isImpersonating: impersonatingSignal } },
       ],
     }).compileComponents();
@@ -113,6 +119,46 @@ describe('GatewayService', () => {
     const selected = service.selectedGateway()();
     expect(selected?.gatewayId).toBe('gw-9');
     expect(service.isLoading()()).toBe(false);
+  });
+
+  it('loads obfuscated gateway list while impersonating', async () => {
+    impersonatingSignal.set(true);
+    apiMock.gatewaysControllerGetGateways.mockReturnValue(
+      of([
+        {
+          id: 'gw-obf-1',
+          name: 'Gateway 1',
+          status: 'offline',
+          provisioned: true,
+          firmware_version: '1.0.0',
+          send_frequency_ms: 30000,
+          last_seen_at: '2026-04-06T12:00:00.000Z',
+        },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.getGateways())).resolves.toEqual([
+      {
+        gatewayId: 'gw-obf-1',
+        name: 'Gateway 1',
+        status: 'offline',
+        provisioned: true,
+        firmwareVersion: '1.0.0',
+        sendFrequencyMs: 30000,
+        lastSeenAt: '2026-04-06T12:00:00.000Z',
+      },
+    ]);
+
+    expect(apiMock.gatewaysControllerGetGateways).toHaveBeenCalledOnce();
+  });
+
+  it('blocks gateway detail in impersonation mode', async () => {
+    impersonatingSignal.set(true);
+
+    await expect(firstValueFrom(service.getGatewayDetail('gw-9'))).rejects.toThrow(
+      'Gateway detail unavailable during impersonation',
+    );
+    expect(apiMock.gatewaysControllerGetGatewayById).not.toHaveBeenCalled();
   });
 
   it('maps online gateway status even when backend uses uppercase/camel-case variants', async () => {

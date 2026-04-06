@@ -117,6 +117,24 @@ describe('MeasureService', () => {
     });
   });
 
+  it('queries and maps array-wrapped page response', async () => {
+    measuresApiMock.measureControllerQuery.mockReturnValue(
+      of([{ data: [baseEnvelope], nextCursor: 'next-2', hasMore: true }]),
+    );
+
+    const page = await firstValueFrom(service.query({ from: 'from', to: 'to', limit: 10 }));
+
+    expect(page.hasMore).toBe(true);
+    expect(page.nextCursor).toBe('next-2');
+    expect(page.data).toHaveLength(1);
+    expect(page.data[0]).toMatchObject({
+      gatewayId: 'gw-1',
+      sensorId: 's-1',
+      sensorType: 'temperature',
+      timestamp: '2026-03-31T10:00:00.000Z',
+    });
+  });
+
   it('queries and maps non-array payload to empty data', async () => {
     measuresApiMock.measureControllerQuery.mockReturnValue(
       of({ data: { not: 'an-array' }, hasMore: false }),

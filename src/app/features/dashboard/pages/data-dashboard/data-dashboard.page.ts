@@ -19,6 +19,8 @@ import { GatewayService } from '../../../gateways/services/gateway.service';
 import { SensorService } from '../../../sensors/services/sensor.service';
 import { ObfuscatedMeasureService } from '../../services/obfuscated-measure.service';
 import { ValidatedMeasureFacadeService } from '../../services/validated-measure-facade.service';
+import { AdminGatewayService } from '../../../admin/services/admin-gateway.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 type DashboardViewMode = 'stream' | 'query';
 
@@ -35,7 +37,9 @@ export class DataDashboardPageComponent implements OnInit, OnDestroy {
   private static readonly DEFAULT_QUERY_WINDOW_HOURS = 24;
 
   private readonly route = inject(ActivatedRoute);
+  private readonly authService = inject(AuthService);
   private readonly gatewayService = inject(GatewayService);
+  private readonly adminGatewayService = inject(AdminGatewayService);
   private readonly sensorService = inject(SensorService);
   private readonly obfuscatedMeasureService = inject(ObfuscatedMeasureService);
   private readonly validatedMeasureFacadeService = inject(ValidatedMeasureFacadeService);
@@ -182,10 +186,15 @@ export class DataDashboardPageComponent implements OnInit, OnDestroy {
 
   private async loadFilterOptions(): Promise<void> {
     try {
-      const [gateways, sensors] = await Promise.all([
-        firstValueFrom(this.gatewayService.getGateways()),
-        firstValueFrom(this.sensorService.getAllSensors(0)),
-      ]);
+      const sensorsPromise = firstValueFrom(this.sensorService.getAllSensors(0));
+      const gatewaysPromise =
+        this.dataMode() === 'obfuscated'
+          ? firstValueFrom(
+              this.adminGatewayService.getGateways(this.authService.getTenantId() || undefined),
+            )
+          : firstValueFrom(this.gatewayService.getGateways());
+
+      const [gateways, sensors] = await Promise.all([gatewaysPromise, sensorsPromise]);
 
       this.gatewayOptions.set(this.uniqueSorted(gateways.map((gateway) => gateway.gatewayId)));
       this.sensorTypeOptions.set(

@@ -1,5 +1,6 @@
 import { Injectable, Signal, signal, inject } from '@angular/core';
-import { finalize, map, Observable, tap } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { finalize, map, Observable, tap, throwError } from 'rxjs';
 import {
   GatewayResponseDto,
   GatewaysService as GatewaysApiService,
@@ -14,6 +15,7 @@ const DEFAULT_GATEWAY_SEND_FREQUENCY_MS = 30000;
 @Injectable({ providedIn: 'root' })
 export class GatewayService {
   private readonly gatewaysApi = inject(GatewaysApiService);
+  private readonly http = inject(HttpClient);
   private readonly impersonationStatus = inject<ImpersonationStatus>(IMPERSONATION_STATUS);
 
   private readonly listSignal = signal<Gateway[]>([]);
@@ -33,6 +35,10 @@ export class GatewayService {
   }
 
   getGatewayDetail(gatewayId: string): Observable<Gateway> {
+    if (this.impersonationStatus.isImpersonating()) {
+      return throwError(() => new Error('Gateway detail unavailable during impersonation'));
+    }
+
     this.loadingSignal.set(true);
 
     return this.gatewaysApi.gatewaysControllerGetGatewayById(gatewayId).pipe(
