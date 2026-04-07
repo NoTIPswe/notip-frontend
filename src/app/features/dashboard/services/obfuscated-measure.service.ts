@@ -24,8 +24,8 @@ export class ObfuscatedMeasureService {
       .measureControllerQuery(
         qp.from,
         qp.to,
-        qp.limit ?? 100,
         qp.cursor,
+        qp.limit ?? 100,
         qp.gatewayIds,
         qp.sensorIds,
         qp.sensorTypes,
