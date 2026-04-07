@@ -26,6 +26,22 @@ describe('SidebarComponent', () => {
     expect(emitSpy).toHaveBeenCalledOnce();
   });
 
+  it('emits profile request', () => {
+    const emitSpy = vi.spyOn(component.profileRequested, 'emit');
+
+    component.emitProfileRequested();
+
+    expect(emitSpy).toHaveBeenCalledOnce();
+  });
+
+  it('emits password change request', () => {
+    const emitSpy = vi.spyOn(component.passwordChangeRequested, 'emit');
+
+    component.emitPasswordChangeRequested();
+
+    expect(emitSpy).toHaveBeenCalledOnce();
+  });
+
   it('shows impersonation tag only when impersonating', () => {
     fixture.componentRef.setInput('isImpersonating', true);
     fixture.detectChanges();

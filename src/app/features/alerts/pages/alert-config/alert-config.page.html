@@ -31,15 +31,16 @@
 
   @if (config() && !showForm()) {
     <p class="meta">
-      Timeout default attuale: {{ config()!.default.timeoutMs }} ms (aggiornato:
-      {{ config()!.default.updatedAt || '-' }})
+      Timeout default attuale: {{ config()!.default.timeoutMs }} ms (aggiornato GMT+1:
+      {{ (config()!.default.updatedAt | date: 'dd/MM/yyyy - HH:mm:ss' : '+0100') || '-' }})
     </p>
 
     @if ((config()!.gatewayOverrides ?? []).length > 0) {
       <ul class="current-overrides">
         @for (row of config()!.gatewayOverrides ?? []; track row.gatewayId) {
           <li>
-            {{ row.gatewayId }}: {{ row.timeoutMs }} ms (aggiornato: {{ row.updatedAt || '-' }})
+            {{ row.gatewayId }}: {{ row.timeoutMs }} ms (aggiornato GMT+1:
+            {{ (row.updatedAt | date: 'dd/MM/yyyy - HH:mm:ss' : '+0100') || '-' }})
           </li>
         }
       </ul>

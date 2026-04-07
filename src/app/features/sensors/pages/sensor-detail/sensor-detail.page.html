@@ -10,7 +10,10 @@
       <p><strong>Sensor ID:</strong> {{ sensor()!.sensorId }}</p>
       <p><strong>Gateway ID:</strong> {{ sensor()!.gatewayId }}</p>
       <p><strong>Type:</strong> {{ sensor()!.sensorType }}</p>
-      <p><strong>Last seen:</strong> {{ sensor()!.lastSeen }}</p>
+      <p>
+        <strong>Last seen (GMT+1):</strong>
+        {{ (sensor()!.lastSeen | date: 'dd/MM/yyyy - HH:mm:ss' : '+0100') || '-' }}
+      </p>
     </section>
   }
 

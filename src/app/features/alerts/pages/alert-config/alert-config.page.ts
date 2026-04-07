@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import {
   AlertConfigFormComponent,
@@ -13,7 +14,7 @@ import { UserRole } from '../../../../core/models/enums';
 @Component({
   selector: 'app-alert-config-page',
   standalone: true,
-  imports: [AlertConfigFormComponent],
+  imports: [AlertConfigFormComponent, DatePipe],
   templateUrl: './alert-config.page.html',
   styleUrl: './alert-config.page.css',
 })

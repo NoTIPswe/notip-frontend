@@ -49,6 +49,8 @@ export class SidebarComponent {
   readonly username = input<string>('Utente');
   readonly role = input<UserRole>(UserRole.tenant_user);
   readonly logoutRequested = output<void>();
+  readonly profileRequested = output<void>();
+  readonly passwordChangeRequested = output<void>();
 
   menuItems(): ReadonlyArray<MenuItem> {
     const role = this.currentRole();
@@ -70,5 +72,13 @@ export class SidebarComponent {
 
   emitLogout(): void {
     this.logoutRequested.emit();
+  }
+
+  emitProfileRequested(): void {
+    this.profileRequested.emit();
+  }
+
+  emitPasswordChangeRequested(): void {
+    this.passwordChangeRequested.emit();
   }
 }

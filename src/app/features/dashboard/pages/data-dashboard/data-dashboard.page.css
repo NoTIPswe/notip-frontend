@@ -18,63 +18,111 @@ h2 {
   font-size: 1.2rem;
 }
 
-.view-switch {
-  display: inline-flex;
-  border: 1px solid #d4dae3;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.view-switch button {
-  border: 0;
-  border-right: 1px solid #d4dae3;
-  background: #fff;
-  color: #334155;
-  padding: 0.45rem 0.9rem;
-  cursor: pointer;
-}
-
-.view-switch button:last-child {
-  border-right: 0;
-}
-
-.view-switch button.active {
-  background: #0f172a;
-  color: #fff;
-}
-
 .meta {
   margin: 0;
   color: #576074;
   font-size: 0.9rem;
 }
 
-.query-toolbar {
+.modern-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+/* ================================== */
+/* Unified Button Styles
+/* ================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* --- Primary Button --- */
+.btn.primary,
+.btn-primary {
+  background-image: linear-gradient(to right, #3b82f6 0%, #60a5fa 100%);
+  color: #fff;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.btn.primary:hover,
+.btn-primary:hover {
+  box-shadow: 0 4px 8px rgb(0 0 0 / 0.1);
+}
+
+/* --- Ghost Button --- */
+.btn.ghost,
+.btn-ghost {
+  background: transparent;
+  border-color: #cbd5e1;
+  color: #334155;
+  box-shadow: none;
+}
+
+.btn.ghost:hover,
+.btn-ghost:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  box-shadow: none;
+}
+
+/* --- View Switcher --- */
+.view-switch {
+  display: inline-flex;
+  border-radius: 9px;
+  overflow: hidden;
+  padding: 4px;
+  background-color: #e2e8f0;
+}
+
+.view-switch button {
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #475569;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.view-switch button:hover {
+  background-color: #f1f5f9;
+}
+
+.view-switch button.active {
+  background: #fff;
+  color: #3b82f6;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+}
+
+.query-toolbar,
+.query-pagination {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
   gap: 0.6rem;
-}
-
-.query-toolbar button,
-.query-pagination button {
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: #0f172a;
-  color: #fff;
-  padding: 0.45rem 0.8rem;
-  cursor: pointer;
-}
-
-.query-toolbar button:disabled,
-.query-pagination button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.query-pagination {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
 }

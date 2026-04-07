@@ -31,7 +31,7 @@
     <table>
       <thead>
         <tr>
-          <th>Timestamp</th>
+          <th>Timestamp (GMT+1)</th>
           <th>Type</th>
           <th>Gateway</th>
           <th>Tenant</th>
@@ -41,7 +41,7 @@
       <tbody>
         @for (row of alerts(); track row.createdAt + row.gatewayId + row.type) {
           <tr>
-            <td>{{ (row.createdAt | date: 'dd/MM/yyyy - HH:mm') || '-' }}</td>
+            <td>{{ (row.createdAt | date: 'dd/MM/yyyy - HH:mm' : '+0100') || '-' }}</td>
             <td>{{ row.type }}</td>
             <td>{{ row.gatewayId }}</td>
             <td>{{ row.tenantId }}</td>

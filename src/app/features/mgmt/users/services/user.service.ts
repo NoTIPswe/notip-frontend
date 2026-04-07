@@ -34,7 +34,7 @@ export class UserService {
           username: row.username,
           email: row.email,
           role: this.toUserRole(row.role),
-          lastAccess: row.last_access,
+          lastAccess: this.resolveLastAccess(row),
         })),
       ),
     );
@@ -109,6 +109,13 @@ export class UserService {
     }
 
     return `${lowered[0].toUpperCase()}${lowered.slice(1)}`;
+  }
+
+  private resolveLastAccess(row: UserResponseDto): string | null {
+    const payload = row as unknown as Record<string, unknown>;
+    const raw = payload['last_access'] ?? payload['lastAccess'];
+
+    return typeof raw === 'string' && raw.length > 0 ? raw : null;
   }
 
   private toUserRole(role: string): UserRole {

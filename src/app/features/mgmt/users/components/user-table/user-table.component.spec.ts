@@ -23,4 +23,16 @@ describe('UserTableComponent', () => {
     expect(editSpy).toHaveBeenCalledWith('user-1');
     expect(deleteSpy).toHaveBeenCalledWith('user-1');
   });
+
+  it('formats UTC timestamps to GMT+1 for display', () => {
+    expect(component.formatLastAccess('2026-04-07T10:15:30.000Z')).toBe('07/04/2026 11:15:30');
+  });
+
+  it('returns dash when last access is missing', () => {
+    expect(component.formatLastAccess(null)).toBe('-');
+  });
+
+  it('returns original value when timestamp is invalid', () => {
+    expect(component.formatLastAccess('not-a-date')).toBe('not-a-date');
+  });
 });

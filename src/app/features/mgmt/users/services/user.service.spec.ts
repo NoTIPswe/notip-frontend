@@ -49,6 +49,13 @@ describe('UserService', () => {
           role: 'invalid',
           last_access: null,
         },
+        {
+          id: 'u-3',
+          username: 'Charlie',
+          email: 'c@test.dev',
+          role: 'tenant_user',
+          lastAccess: '2026-04-06T08:00:00.000Z',
+        },
       ]),
     );
 
@@ -66,6 +73,13 @@ describe('UserService', () => {
         email: 'b@test.dev',
         role: UserRole.tenant_user,
         lastAccess: null,
+      },
+      {
+        userId: 'u-3',
+        username: 'Charlie',
+        email: 'c@test.dev',
+        role: UserRole.tenant_user,
+        lastAccess: '2026-04-06T08:00:00.000Z',
       },
     ]);
   });

@@ -1,11 +1,17 @@
-import { Component, input } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  input,
+  OnDestroy,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { CheckedEnvelope, ObfuscatedEnvelope } from '../../../../core/models/measure';
+import { Chart, registerables } from 'chart.js';
 
-type ChartPoint = {
-  sensorId: string;
-  value: number;
-  widthPct: number;
-};
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-telemetry-chart',
@@ -13,25 +19,120 @@ type ChartPoint = {
   templateUrl: './telemetry-chart.component.html',
   styleUrl: './telemetry-chart.component.css',
 })
-export class TelemetryChartComponent {
+export class TelemetryChartComponent implements OnDestroy {
   readonly measures = input<Array<CheckedEnvelope | ObfuscatedEnvelope>>([]);
+  readonly selectedSensorId = signal<string | null>(null);
 
-  points(): ChartPoint[] {
-    const decrypted = this.measures()
-      .filter((row): row is CheckedEnvelope => this.isCheckedEnvelope(row))
-      .filter((row) => Number.isFinite(row.value))
-      .slice(-10);
+  readonly uniqueSensorIds = computed(() => {
+    const ids = this.measures()
+      .map((m) => m.sensorId)
+      .filter((id, index, self) => self.indexOf(id) === index);
+    return ids;
+  });
 
-    const max = decrypted.reduce((acc, row) => Math.max(acc, Math.abs(row.value)), 0);
-    if (max <= 0) {
-      return [];
+  readonly chartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('chartCanvas');
+  private chartInstance: Chart | undefined;
+
+  constructor() {
+    // Auto-select the first sensor when the list of sensors changes and none is selected
+    effect(() => {
+      const availableSensors = this.uniqueSensorIds();
+      if (availableSensors.length > 0 && !this.selectedSensorId()) {
+        this.selectedSensorId.set(availableSensors[0]);
+      }
+    });
+
+    // Update chart when data or selection changes
+    effect(() => {
+      const allMeasures = this.measures();
+      const selectedId = this.selectedSensorId();
+      const canvasRef = this.chartCanvas();
+
+      if (!canvasRef || !selectedId) {
+        // If there's no canvas or no sensor selected, we can't do anything.
+        // If a chart exists, we can clear it.
+        if (this.chartInstance) {
+          this.chartInstance.data.labels = [];
+          this.chartInstance.data.datasets[0].data = [];
+          this.chartInstance.update('none');
+        }
+        return;
+      }
+
+      const canvas = canvasRef.nativeElement;
+
+      const decrypted = allMeasures
+        .filter((row): row is CheckedEnvelope => this.isCheckedEnvelope(row))
+        .filter((row) => Number.isFinite(row.value) && row.sensorId === selectedId)
+        .slice(-50); // Show up to 50 recent points for the selected sensor
+
+      const labels = decrypted.map((d, i) => i); // Use index for x-axis to show progression
+      const values = decrypted.map((d) => d.value);
+
+      if (this.chartInstance) {
+        this.chartInstance.data.labels = labels;
+        this.chartInstance.data.datasets[0].data = values;
+        this.chartInstance.update('none');
+      } else {
+        this.chartInstance = new Chart(canvas, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [
+              {
+                label: 'Valore Decifrato',
+                data: values,
+                borderColor: '#0ea5e9',
+                backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3,
+                pointBackgroundColor: '#22c55e',
+                pointBorderColor: '#fff',
+                pointRadius: 4,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: false,
+                grid: {
+                  color: '#f1f5f9',
+                },
+              },
+              x: {
+                grid: {
+                  display: false,
+                },
+                ticks: {
+                  display: false, // Hide x-axis labels for clarity
+                },
+              },
+            },
+          },
+        });
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.chartInstance) {
+      this.chartInstance.destroy();
     }
+  }
 
-    return decrypted.map((row) => ({
-      sensorId: row.sensorId,
-      value: row.value,
-      widthPct: Math.max(6, Math.round((Math.abs(row.value) / max) * 100)),
-    }));
+  onSensorSelected(event: Event): void {
+    const selectElement = event.target as HTMLSelectElement;
+    this.selectedSensorId.set(selectElement.value);
   }
 
   obfuscatedCount(): number {

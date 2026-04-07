@@ -1,79 +1,99 @@
-<section class="dashboard-page">
-  <header class="page-header">
-    <h2>Dashboard Dati</h2>
-
-    <div class="view-switch" role="tablist" aria-label="Modalita dashboard">
-      <button
-        type="button"
-        role="tab"
-        [class.active]="activeView() === 'stream'"
-        [attr.aria-selected]="activeView() === 'stream'"
-        (click)="setActiveView('stream')"
-      >
-        Stream
+<div class="dashboard-wrapper dashboard-modern">
+  <!-- Sidebar Filtri -->
+  <aside class="filters-sidebar modern-sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path
+            d="M21 12V7a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 7v10a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14">
+          </path>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+        </svg>
+      </div>
+      <h3>Configurazione</h3>
+    </div>
+    <div class="view-selector">
+      <button type="button" [class.active]="activeView() === 'stream'" (click)="setActiveView('stream')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+        Live Stream
       </button>
-
-      <button
-        type="button"
-        role="tab"
-        [class.active]="activeView() === 'query'"
-        [attr.aria-selected]="activeView() === 'query'"
-        (click)="setActiveView('query')"
-      >
-        Query
+      <button type="button" [class.active]="activeView() === 'query'" (click)="setActiveView('query')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        Analisi Storica
       </button>
     </div>
-  </header>
-
-  <app-filter-panel
-    [mode]="activeView()"
-    [gatewayOptions]="gatewayOptions()"
-    [sensorTypeOptions]="sensorTypeOptions()"
-    [sensorOptions]="sensorOptions()"
-    [defaultFilters]="activeView() === 'stream' ? streamFilters() : queryFilters()"
-    (filtersApplied)="onFiltersApplied($event)"
-    (clearRequested)="onFiltersCleared()"
-  ></app-filter-panel>
-
-  @if (activeView() === 'stream') {
-    <p class="meta">Righe mostrate: {{ streamMeasures().length }} / 20</p>
-
-    <app-telemetry-table
-      [measures]="streamMeasures()"
-      [isLoading]="isStreamLoading()"
-    ></app-telemetry-table>
-
-    <app-telemetry-chart [measures]="streamMeasures()"></app-telemetry-chart>
-  }
-
-  @if (activeView() === 'query') {
-    <div class="query-toolbar">
-      <p class="meta">Pagina {{ queryPage() }} - Righe: {{ queryMeasures().length }} / 20</p>
-
-      @if (canExportQuery()) {
-        <button
-          type="button"
-          [disabled]="isExporting() || isQueryLoading()"
-          (click)="onExportQuery()"
-        >
-          {{ isExporting() ? 'Export in corso...' : 'Export dati' }}
-        </button>
+    <div class="sidebar-scroll-area">
+      <app-filter-panel [mode]="activeView()" [gatewayOptions]="gatewayOptions()"
+        [sensorTypeOptions]="sensorTypeOptions()" [sensorOptions]="sensorOptions()"
+        [defaultFilters]="activeView() === 'stream' ? streamFilters() : queryFilters()"
+        (filtersApplied)="onFiltersApplied($event)" (clearRequested)="onFiltersCleared()">
+      </app-filter-panel>
+    </div>
+  </aside>
+  <!-- Area Contenuti -->
+  <main class="main-content modern-main">
+    <header class="main-header modern-header sticky">
+      <div class="header-left">
+        <h1>{{ activeView() === 'stream' ? 'Monitoraggio Real-Time' : 'Archivio Telemetria' }}</h1>
+        @if (activeView() === 'stream') {
+        <div class="live-indicator">
+          <span class="dot"></span>
+          Sincronizzato
+        </div>
+        }
+      </div>
+      <div class="header-right">
+        <div class="data-pill">
+          @if (activeView() === 'stream') {
+          <strong>{{ streamMeasures().length }}</strong> campioni mostrati
+          } @else {
+          Pagina <strong>{{ queryPage() }}</strong> • <strong>{{ queryMeasures().length }}</strong> risultati
+          }
+        </div>
+      </div>
+    </header>
+    <div class="dashboard-grid modern-grid">
+      @if (activeView() === 'stream') {
+      <div class="grid-item chart-card modern-card">
+        <app-telemetry-chart [measures]="streamMeasures()"></app-telemetry-chart>
+      </div>
+      <div class="grid-item table-card modern-card">
+        <app-telemetry-table [measures]="streamMeasures()" [isLoading]="isStreamLoading()"></app-telemetry-table>
+      </div>
+      }
+      @if (activeView() === 'query') {
+      <div class="grid-item chart-card modern-card">
+        <app-telemetry-chart [measures]="queryMeasures()"></app-telemetry-chart>
+      </div>
+      <div class="grid-item actions-card modern-card">
+        <div class="query-actions">
+          @if (canExportQuery()) {
+          <button class="btn btn-primary" [disabled]="isExporting() || isQueryLoading()" (click)="onExportQuery()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Esporta CSV
+          </button>
+          }
+        </div>
+      </div>
+      <div class="grid-item table-card modern-card">
+        <app-telemetry-table [measures]="queryMeasures()" [isLoading]="isQueryLoading()"></app-telemetry-table>
+      </div>
       }
     </div>
 
-    @if (!canExportQuery()) {
-      <p class="meta">In impersonazione l'export non e disponibile.</p>
-    }
-
-    <app-telemetry-table
-      [measures]="queryMeasures()"
-      [isLoading]="isQueryLoading()"
-    ></app-telemetry-table>
-
-    <div class="query-pagination">
-      <button type="button" [disabled]="!canGoToNextQueryPage()" (click)="onNextQueryPage()">
-        Successiva
-      </button>
-    </div>
-  }
-</section>
+  </main>
+</div>

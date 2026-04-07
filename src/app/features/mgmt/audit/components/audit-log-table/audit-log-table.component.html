@@ -14,7 +14,7 @@
     <table>
       <thead>
         <tr>
-          <th>Timestamp</th>
+          <th>Timestamp (GMT+1)</th>
           <th>User ID</th>
           <th>Azione</th>
           <th>Risorsa</th>
@@ -24,7 +24,7 @@
       <tbody>
         @for (log of logs(); track log.id) {
           <tr>
-            <td>{{ log.timestamp }}</td>
+            <td>{{ (log.timestamp | date: 'dd/MM/yyyy - HH:mm:ss' : '+0100') || '-' }}</td>
             <td>{{ log.userId }}</td>
             <td>{{ log.action }}</td>
             <td>{{ log.resource }}</td>

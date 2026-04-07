@@ -93,6 +93,28 @@ describe('AuthService', () => {
     sub.unsubscribe();
   });
 
+  it('opens Keycloak update profile action', () => {
+    keycloakMock.login.mockResolvedValue(undefined);
+
+    service.openProfile();
+
+    expect(keycloakMock.login).toHaveBeenCalledWith({
+      action: 'UPDATE_PROFILE',
+      redirectUri: globalThis.location.origin,
+    });
+  });
+
+  it('opens Keycloak update password action', () => {
+    keycloakMock.login.mockResolvedValue(undefined);
+
+    service.openPasswordChange();
+
+    expect(keycloakMock.login).toHaveBeenCalledWith({
+      action: 'UPDATE_PASSWORD',
+      redirectUri: globalThis.location.origin,
+    });
+  });
+
   it('resets impersonation when Keycloak emits AuthLogout event', () => {
     const logoutEvents: number[] = [];
     const sub = service.logout$.subscribe(() => logoutEvents.push(1));

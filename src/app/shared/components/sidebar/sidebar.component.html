@@ -24,6 +24,8 @@
       [username]="username()"
       [role]="role()"
       [showProfileLink]="!isImpersonating()"
+      (profileRequested)="emitProfileRequested()"
+      (passwordChangeRequested)="emitPasswordChangeRequested()"
     />
 
     <app-logout-button (clicked)="emitLogout()" />

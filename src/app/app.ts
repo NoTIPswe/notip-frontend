@@ -45,4 +45,12 @@ export class App {
   onLogout(): void {
     this.auth.logout();
   }
+
+  onProfileOpen(): void {
+    this.auth.openProfile();
+  }
+
+  onPasswordChange(): void {
+    this.auth.openPasswordChange();
+  }
 }

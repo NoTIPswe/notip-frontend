@@ -50,7 +50,7 @@
           <th>Sensor ID</th>
           <th>Gateway ID</th>
           <th>Type</th>
-          <th>Last seen</th>
+          <th>Last seen (GMT+1)</th>
           <th>Azioni</th>
         </tr>
       </thead>
@@ -60,7 +60,7 @@
             <td>{{ sensor.sensorId }}</td>
             <td>{{ sensor.gatewayId }}</td>
             <td>{{ sensor.sensorType }}</td>
-            <td>{{ sensor.lastSeen }}</td>
+            <td>{{ (sensor.lastSeen | date: 'dd/MM/yyyy - HH:mm:ss' : '+0100') || '-' }}</td>
             <td>
               <button type="button" (click)="openSensorDetail(sensor.sensorId)">Dettaglio</button>
             </td>

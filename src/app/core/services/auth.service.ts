@@ -26,9 +26,54 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
   private readonly authApi = inject(AuthApiService);
 
   private readonly logoutSubject = new Subject<void>();
-  private readonly impersonatingSignal = signal(false);
-  private readonly impersonationTokenSignal = signal<string | null>(null);
-  private readonly impersonationPayloadSignal = signal<JwtPayload | null>(null);
+  private readonly impersonatingSignal = signal(this.loadImpersonating());
+  private readonly impersonationTokenSignal = signal<string | null>(this.loadImpersonationToken());
+  private readonly impersonationPayloadSignal = signal<JwtPayload | null>(
+    this.loadImpersonationPayload(),
+  );
+  private static readonly STORAGE_KEY = 'impersonation';
+
+  private saveImpersonationContext(token: string, payload: JwtPayload): void {
+    const data = { token, payload };
+    sessionStorage.setItem(AuthService.STORAGE_KEY, JSON.stringify(data));
+  }
+
+  private clearImpersonationStorage(): void {
+    sessionStorage.removeItem(AuthService.STORAGE_KEY);
+  }
+
+  private loadImpersonating(): boolean {
+    const raw = sessionStorage.getItem(AuthService.STORAGE_KEY);
+    if (!raw) return false;
+    try {
+      const data = JSON.parse(raw);
+      return !!data.token;
+    } catch {
+      return false;
+    }
+  }
+
+  private loadImpersonationToken(): string | null {
+    const raw = sessionStorage.getItem(AuthService.STORAGE_KEY);
+    if (!raw) return null;
+    try {
+      const data = JSON.parse(raw);
+      return data.token ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  private loadImpersonationPayload(): JwtPayload | null {
+    const raw = sessionStorage.getItem(AuthService.STORAGE_KEY);
+    if (!raw) return null;
+    try {
+      const data = JSON.parse(raw);
+      return data.payload ?? null;
+    } catch {
+      return null;
+    }
+  }
 
   readonly logout$: Observable<void> = this.logoutSubject.asObservable();
   readonly isImpersonating = this.impersonatingSignal.asReadonly();
@@ -50,6 +95,20 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
 
   login(): void {
     void this.keycloak.login();
+  }
+
+  openProfile(): void {
+    void this.keycloak.login({
+      action: 'UPDATE_PROFILE',
+      redirectUri: globalThis.location.origin,
+    });
+  }
+
+  openPasswordChange(): void {
+    void this.keycloak.login({
+      action: 'UPDATE_PASSWORD',
+      redirectUri: globalThis.location.origin,
+    });
   }
 
   logout(): void {
@@ -118,8 +177,15 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
   setImpersonating(value: boolean): void {
     if (!value) {
       this.clearImpersonationContext();
+      this.clearImpersonationStorage();
+    } else {
+      // Se già in impersonazione, salva lo stato attuale solo se payload non è null
+      const token = this.impersonationTokenSignal();
+      const payload = this.impersonationPayloadSignal();
+      if (token && payload != null) {
+        this.saveImpersonationContext(token, payload);
+      }
     }
-
     this.impersonatingSignal.set(value);
   }
 
@@ -130,11 +196,13 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
         if (!token) {
           return '';
         }
-
+        const payload = this.decodeTokenPayload(token);
         this.impersonationTokenSignal.set(token);
-        this.impersonationPayloadSignal.set(this.decodeTokenPayload(token));
+        this.impersonationPayloadSignal.set(payload);
         this.impersonatingSignal.set(true);
-
+        if (payload != null) {
+          this.saveImpersonationContext(token, payload);
+        }
         return token;
       }),
     );
@@ -163,6 +231,7 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
   private clearImpersonationContext(): void {
     this.impersonationTokenSignal.set(null);
     this.impersonationPayloadSignal.set(null);
+    this.clearImpersonationStorage();
   }
 
   private decodeTokenPayload(token: string): JwtPayload | null {

@@ -14,7 +14,8 @@
       <p><strong>Nome:</strong> {{ tenant()!.name }}</p>
       <p><strong>Stato:</strong> {{ tenant()!.status }}</p>
       <p>
-        <strong>Creato il:</strong> {{ (tenant()!.createdAt | date: 'dd/MM/yyyy - HH:mm') || '-' }}
+        <strong>Creato il:</strong>
+        {{ (tenant()!.createdAt | date: 'dd/MM/yyyy - HH:mm' : '+0100') || '-' }}
       </p>
       <p>
         <strong>Intervallo sospensione:</strong>

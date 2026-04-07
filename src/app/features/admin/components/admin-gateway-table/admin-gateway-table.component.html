@@ -33,7 +33,7 @@
               <td>{{ gateway.firmware ?? '-' }}</td>
               <td>{{ gateway.provisioned ? 'yes' : 'no' }}</td>
               <td>{{ gateway.factoryId }}</td>
-              <td>{{ (gateway.createdAt | date: 'dd/MM/yyyy - HH:mm') || '-' }}</td>
+              <td>{{ (gateway.createdAt | date: 'dd/MM/yyyy - HH:mm' : '+0100') || '-' }}</td>
             </tr>
           }
         </tbody>

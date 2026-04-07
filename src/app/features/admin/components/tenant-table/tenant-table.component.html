@@ -28,7 +28,7 @@
               <td>{{ tenant.tenantId }}</td>
               <td>{{ tenant.name }}</td>
               <td>{{ tenant.status }}</td>
-              <td>{{ (tenant.createdAt | date: 'dd/MM/yyyy - HH:mm') || '-' }}</td>
+              <td>{{ (tenant.createdAt | date: 'dd/MM/yyyy - HH:mm' : '+0100') || '-' }}</td>
               <td class="actions-cell">
                 <button type="button" class="ghost" (click)="onSelect(tenant.tenantId)">
                   Apri

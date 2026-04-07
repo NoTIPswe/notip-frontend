@@ -19,7 +19,7 @@
             <th>Username</th>
             <th>Email</th>
             <th>Ruolo</th>
-            <th>Ultimo accesso</th>
+            <th>Ultimo accesso (GMT+1)</th>
             <th>Azioni</th>
           </tr>
         </thead>
@@ -30,7 +30,7 @@
               <td>{{ user.username }}</td>
               <td>{{ user.email }}</td>
               <td>{{ user.role }}</td>
-              <td>{{ user.lastAccess || '-' }}</td>
+              <td>{{ formatLastAccess(user.lastAccess) }}</td>
               <td class="actions-cell">
                 <button type="button" class="ghost" (click)="requestEdit(user.userId)">
                   Modifica

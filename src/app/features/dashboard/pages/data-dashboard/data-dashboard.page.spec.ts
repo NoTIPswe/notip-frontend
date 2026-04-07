@@ -35,6 +35,7 @@ describe('DataDashboardPageComponent', () => {
 
   const authServiceMock = {
     getTenantId: vi.fn(),
+    isImpersonating: vi.fn(),
   };
 
   const sensorServiceMock = {
@@ -90,6 +91,7 @@ describe('DataDashboardPageComponent', () => {
     adminGatewayServiceMock.getGateways.mockReset();
     sensorServiceMock.getAllSensors.mockReset();
     authServiceMock.getTenantId.mockReset();
+    authServiceMock.isImpersonating.mockReset();
 
     routeMock.snapshot.data = { dataMode: 'clear' };
 
@@ -100,6 +102,7 @@ describe('DataDashboardPageComponent', () => {
       of([{ gatewayId: 'gw-1' }, { gatewayId: 'gw-2' }]),
     );
     authServiceMock.getTenantId.mockReturnValue('tenant-1');
+    authServiceMock.isImpersonating.mockReturnValue(false);
     sensorServiceMock.getAllSensors.mockReturnValue(
       of([
         { sensorId: 's-1', sensorType: 'temperature' },

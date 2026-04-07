@@ -78,7 +78,9 @@ export class DataDashboardPageComponent implements OnInit, OnDestroy {
   readonly queryHasNextPage = signal(false);
 
   ngOnInit(): void {
-    const mode = this.asDataMode(this.route.snapshot.data['dataMode']);
+    // Se impersonificazione attiva, forza modalità obfuscated
+    const isImpersonating = this.authService.isImpersonating();
+    const mode = isImpersonating ? 'obfuscated' : this.asDataMode(this.route.snapshot.data['dataMode']);
     this.dataMode.set(mode);
 
     void this.loadFilterOptions();
@@ -187,12 +189,8 @@ export class DataDashboardPageComponent implements OnInit, OnDestroy {
   private async loadFilterOptions(): Promise<void> {
     try {
       const sensorsPromise = firstValueFrom(this.sensorService.getAllSensors(0));
-      const gatewaysPromise =
-        this.dataMode() === 'obfuscated'
-          ? firstValueFrom(
-              this.adminGatewayService.getGateways(this.authService.getTenantId() || undefined),
-            )
-          : firstValueFrom(this.gatewayService.getGateways());
+      // In impersonificazione, anche se dataMode è 'obfuscated', NON usare AdminGatewayService (403)
+      const gatewaysPromise = firstValueFrom(this.gatewayService.getGateways());
 
       const [gateways, sensors] = await Promise.all([gatewaysPromise, sensorsPromise]);
 

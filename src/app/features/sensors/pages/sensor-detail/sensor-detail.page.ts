@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, DestroyRef, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -19,7 +20,7 @@ import { SensorService } from '../../services/sensor.service';
 @Component({
   selector: 'app-sensor-detail-page',
   standalone: true,
-  imports: [TelemetryTableComponent, TelemetryChartComponent],
+  imports: [TelemetryTableComponent, TelemetryChartComponent, DatePipe],
   templateUrl: './sensor-detail.page.html',
   styleUrl: './sensor-detail.page.css',
 })

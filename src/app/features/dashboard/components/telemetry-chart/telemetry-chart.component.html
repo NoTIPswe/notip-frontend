@@ -1,23 +1,24 @@
 <section class="telemetry-chart">
-  <h3>Trend (ultimi valori decifrati)</h3>
+  <div class="chart-header">
+    <h3>Trend Sensore</h3>
+    @if (uniqueSensorIds().length > 1) {
+      <div class="sensor-selector">
+        <select [value]="selectedSensorId()" (change)="onSensorSelected($event)">
+          @for (id of uniqueSensorIds(); track id) {
+            <option [value]="id">{{ id }}</option>
+          }
+        </select>
+      </div>
+    }
+  </div>
 
-  @if (points().length === 0) {
-    <p class="empty">Nessun punto decifrato disponibile.</p>
-  }
-
-  @if (points().length > 0) {
-    <ul>
-      @for (point of points(); track point.sensorId + point.value) {
-        <li>
-          <span class="label">{{ point.sensorId }}</span>
-          <div class="bar-wrap">
-            <div class="bar" [style.width.%]="point.widthPct"></div>
-          </div>
-          <span class="value">{{ point.value.toFixed(2) }}</span>
-        </li>
-      }
-    </ul>
-  }
+  <div class="chart-container">
+    @if (selectedSensorId()) {
+      <canvas #chartCanvas></canvas>
+    } @else {
+      <p class="empty">Nessun sensore disponibile o selezionato.</p>
+    }
+  </div>
 
   <p class="meta">Envelope oscurati ricevuti: {{ obfuscatedCount() }}</p>
 </section>

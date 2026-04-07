@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -7,6 +8,7 @@ import { SensorService } from '../../services/sensor.service';
 @Component({
   selector: 'app-sensor-list-page',
   standalone: true,
+  imports: [DatePipe],
   templateUrl: './sensor-list.page.html',
   styleUrl: './sensor-list.page.css',
 })
