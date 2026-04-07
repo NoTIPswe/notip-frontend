@@ -1,4 +1,4 @@
-import { Component, effect, input, output, signal } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, input, output, signal } from '@angular/core';
 import { TenantStatus } from '../../../../core/models/enums';
 
 export interface CreateTenantPayload {
@@ -21,7 +21,7 @@ export interface UpdateTenantPayload {
   templateUrl: './tenant-form.component.html',
   styleUrl: './tenant-form.component.css',
 })
-export class TenantFormComponent {
+export class TenantFormComponent implements OnChanges {
   readonly tenantId = input<string | null>(null);
   readonly initialName = input<string>('');
   readonly initialStatus = input<TenantStatus>(TenantStatus.active);
@@ -31,10 +31,10 @@ export class TenantFormComponent {
 
   readonly currentStatus = signal<TenantStatus>(TenantStatus.active);
 
-  constructor() {
-    effect(() => {
-      this.currentStatus.set(this.initialStatus());
-    });
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['initialStatus']) {
+      this.currentStatus.set(this.normalizeStatus(this.initialStatus()));
+    }
   }
 
   readonly tenantStatusOptions: ReadonlyArray<{ value: TenantStatus; label: string }> = [
@@ -94,7 +94,9 @@ export class TenantFormComponent {
   }
 
   private normalizeStatus(statusRaw: string): TenantStatus {
-    if (statusRaw === 'suspended') {
+    const normalized = statusRaw.trim().toLowerCase();
+
+    if (normalized === 'suspended') {
       return TenantStatus.suspended;
     }
 

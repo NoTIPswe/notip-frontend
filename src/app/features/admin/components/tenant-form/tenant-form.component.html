@@ -18,14 +18,11 @@
 
       <label>
         Status
-        <select
-          #editStatus
-          [value]="currentStatus()"
-          (change)="onStatusChange(editStatus.value)"
-          required
-        >
+        <select #editStatus (change)="onStatusChange(editStatus.value)" required>
           @for (option of tenantStatusOptions; track option.value) {
-            <option [value]="option.value">{{ option.label }}</option>
+            <option [value]="option.value" [selected]="option.value === currentStatus()">
+              {{ option.label }}
+            </option>
           }
         </select>
       </label>

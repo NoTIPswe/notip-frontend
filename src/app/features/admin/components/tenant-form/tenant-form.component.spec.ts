@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { TenantStatus } from '../../../../core/models/enums';
 import { TenantFormComponent } from './tenant-form.component';
 
 describe('TenantFormComponent', () => {
@@ -117,6 +118,31 @@ describe('TenantFormComponent', () => {
 
     component.onStatusChange('unsupported-status');
     expect(component.currentStatus()).toBe('active');
+  });
+
+  it('preloads selected edit status from current tenant status', () => {
+    fixture.componentRef.setInput('tenantId', 'tenant-5');
+    fixture.componentRef.setInput('initialStatus', TenantStatus.suspended);
+    fixture.detectChanges();
+
+    const statusSelect = (fixture.nativeElement as HTMLElement).querySelector(
+      'select',
+    ) as HTMLSelectElement;
+
+    expect(statusSelect.value).toBe(TenantStatus.suspended);
+  });
+
+  it('normalizes preloaded status casing before selecting edit status', () => {
+    fixture.componentRef.setInput('tenantId', 'tenant-6');
+    fixture.componentRef.setInput('initialStatus', 'SUSPENDED' as unknown as TenantStatus);
+    fixture.detectChanges();
+
+    const statusSelect = (fixture.nativeElement as HTMLElement).querySelector(
+      'select',
+    ) as HTMLSelectElement;
+
+    expect(component.currentStatus()).toBe(TenantStatus.suspended);
+    expect(statusSelect.value).toBe(TenantStatus.suspended);
   });
 
   it('emits cancel request', () => {

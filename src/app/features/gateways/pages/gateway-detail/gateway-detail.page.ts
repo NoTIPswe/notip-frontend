@@ -23,6 +23,7 @@ import {
   CommandModalMode,
 } from '../../components/command-modal/command-modal.component';
 import { GatewayActionsComponent } from '../../components/gateway-actions/gateway-actions.component';
+import { GatewayRenameModalComponent } from '../../components/gateway-rename-modal/gateway-rename-modal.component';
 import { DeleteConfirmModalComponent } from '../../../../shared/components/delete-confirm-modal/delete-confirm-modal.component';
 import { GatewayService } from '../../services/gateway.service';
 import { CommandService } from '../../services/command.service';
@@ -32,6 +33,7 @@ import { CommandService } from '../../services/command.service';
   standalone: true,
   imports: [
     GatewayActionsComponent,
+    GatewayRenameModalComponent,
     CommandModalComponent,
     DeleteConfirmModalComponent,
     TelemetryTableComponent,
@@ -62,6 +64,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
   readonly infoMessage = signal<string | null>(null);
   readonly commandStatus = signal<CommandStatusUpdate | null>(null);
 
+  readonly renameModalOpen = signal<boolean>(false);
   readonly commandModalOpen = signal<boolean>(false);
   readonly commandModalMode = signal<CommandModalMode>(null);
   readonly deleteModalOpen = signal<boolean>(false);
@@ -121,8 +124,24 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const nextName = globalThis.prompt('New gateway name', current.name)?.trim();
+    this.errorMessage.set(null);
+    this.infoMessage.set(null);
+    this.renameModalOpen.set(true);
+  }
+
+  closeRenameModal(): void {
+    this.renameModalOpen.set(false);
+  }
+
+  submitRename(nextNameRaw: string): void {
+    const current = this.gateway();
+    if (!current || !this.canManage || this.isBusy() || this.isImpersonating()) {
+      return;
+    }
+
+    const nextName = nextNameRaw.trim();
     if (!nextName || nextName === current.name) {
+      this.closeRenameModal();
       return;
     }
 
@@ -133,6 +152,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (result) => {
           this.isBusy.set(false);
+          this.closeRenameModal();
           this.gateway.set({ ...current, name: result.name, status: result.status });
           this.infoMessage.set('Gateway name updated.');
         },

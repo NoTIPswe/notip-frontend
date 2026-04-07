@@ -101,7 +101,9 @@ export class TenantService {
   }
 
   private normalizeTenantStatus(status: unknown): TenantStatus {
-    if (status === 'suspended') {
+    const normalized = typeof status === 'string' ? status.trim().toLowerCase() : '';
+
+    if (normalized === 'suspended') {
       return TenantStatus.suspended;
     }
 

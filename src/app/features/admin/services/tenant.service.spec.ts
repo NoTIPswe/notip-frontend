@@ -88,6 +88,30 @@ describe('TenantService', () => {
     ]);
   });
 
+  it('maps suspended status case-insensitively from payload', async () => {
+    apiMock.tenantsControllerGetTenants.mockReturnValue(
+      of([
+        {
+          id: 't-5',
+          name: 'Tenant 5',
+          status: 'SUSPENDED',
+          created_at: '2026-03-31',
+          suspension_interval_days: '14',
+        },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.getTenants())).resolves.toEqual([
+      {
+        tenantId: 't-5',
+        name: 'Tenant 5',
+        status: TenantStatus.suspended,
+        suspensionIntervalDays: 14,
+        createdAt: '2026-03-31',
+      },
+    ]);
+  });
+
   it('creates tenant with correct payload', async () => {
     apiMock.tenantsControllerCreateTenant.mockReturnValue(
       of({
