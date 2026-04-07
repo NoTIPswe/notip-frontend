@@ -118,4 +118,18 @@ describe('ThresholdPrefetchService', () => {
     await Promise.resolve();
     expect(thresholdMock.fetchThresholds).toHaveBeenCalledTimes(1);
   });
+
+  it('does not create duplicate scheduler when start is called twice', async () => {
+    service.start();
+    service.start();
+
+    vi.advanceTimersByTime(0);
+    await Promise.resolve();
+
+    expect(thresholdMock.fetchThresholds).toHaveBeenCalledTimes(1);
+  });
+
+  it('can stop safely when scheduler has not started yet', () => {
+    expect(() => service.stop()).not.toThrow();
+  });
 });

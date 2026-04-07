@@ -146,6 +146,18 @@ describe('MeasureService', () => {
     expect(page.hasMore).toBe(false);
   });
 
+  it('ignores non-string nextCursor values', async () => {
+    measuresApiMock.measureControllerQuery.mockReturnValue(
+      of({ data: [baseEnvelope], nextCursor: 123, hasMore: true }),
+    );
+
+    const page = await firstValueFrom(service.query({ from: 'from', to: 'to', limit: 10 }));
+
+    expect(page.data).toHaveLength(1);
+    expect(page.hasMore).toBe(true);
+    expect(page.nextCursor).toBeUndefined();
+  });
+
   it('delegates closeStream', () => {
     service.closeStream();
     expect(msmMock.closeStream).toHaveBeenCalledOnce();

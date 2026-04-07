@@ -58,6 +58,22 @@ describe('TenantFormComponent', () => {
     });
   });
 
+  it('truncates decimal suspension interval when status is suspended', () => {
+    const preventDefault = vi.fn();
+    const event = { preventDefault } as unknown as Event;
+    const emitSpy = vi.spyOn(component.updateRequested, 'emit');
+    fixture.componentRef.setInput('tenantId', 'tenant-4');
+
+    component.onUpdateSubmit(event, ' Tenant Updated ', 'suspended', 15.8);
+
+    expect(emitSpy).toHaveBeenCalledWith({
+      tenantId: 'tenant-4',
+      name: 'Tenant Updated',
+      status: 'suspended',
+      suspensionIntervalDays: 15,
+    });
+  });
+
   it('normalizes invalid update status and suspension interval', () => {
     const preventDefault = vi.fn();
     const event = { preventDefault } as unknown as Event;
@@ -88,6 +104,19 @@ describe('TenantFormComponent', () => {
       status: 'active',
       suspensionIntervalDays: 0,
     });
+  });
+
+  it('syncs current status with input and status changes', () => {
+    fixture.componentRef.setInput('initialStatus', 'suspended');
+    fixture.detectChanges();
+
+    expect(component.currentStatus()).toBe('suspended');
+
+    component.onStatusChange('active');
+    expect(component.currentStatus()).toBe('active');
+
+    component.onStatusChange('unsupported-status');
+    expect(component.currentStatus()).toBe('active');
   });
 
   it('emits cancel request', () => {

@@ -37,6 +37,7 @@ export default defineConfig({
         'src/app/shared/components/logout-button/logout-button.component.ts',
         'src/app/shared/components/sidebar/sidebar.component.ts',
         'src/app/shared/components/delete-confirm-modal/delete-confirm-modal.component.ts',
+        'src/app/shared/components/modal-layer/modal-layer.component.ts',
         'src/app/features/admin/components/impersonate-button/impersonate-button.component.ts',
         'src/app/features/admin/components/admin-gateway-form/admin-gateway-form.component.ts',
         'src/app/features/admin/components/admin-gateway-table/admin-gateway-table.component.ts',
@@ -60,6 +61,8 @@ export default defineConfig({
         'src/app/shared/components/impersonation-tag/impersonation-tag.component.ts',
         'src/app/shared/components/placeholder-page/placeholder-page.component.ts',
         'src/app/shared/components/profile-section/profile-section.component.ts',
+        'src/app/shared/pipes/rome-date-time.pipe.ts',
+        'src/app/shared/utils/rome-timezone.util.ts',
       ],
       exclude: ['**/*.spec.ts'],
       thresholds: {

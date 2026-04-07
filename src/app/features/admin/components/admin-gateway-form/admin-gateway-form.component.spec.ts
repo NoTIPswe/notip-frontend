@@ -36,4 +36,12 @@ describe('AdminGatewayFormComponent', () => {
 
     expect(fixture.componentInstance.tenantIds()).toEqual(['tenant-a', 'tenant-b']);
   });
+
+  it('emits cancel request', () => {
+    const emitSpy = vi.spyOn(component.cancelRequested, 'emit');
+
+    component.onCancel();
+
+    expect(emitSpy).toHaveBeenCalledOnce();
+  });
 });

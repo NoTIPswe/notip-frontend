@@ -159,6 +159,44 @@ describe('FilterPanelComponent', () => {
     expect(component.filteredOptions('sensorIds')).toEqual(['sensor-abc', 'abc-aux']);
   });
 
+  it('opens and closes dropdown with toggle and escape', () => {
+    expect(component.isDropdownOpen('gatewayIds')).toBe(false);
+
+    component.toggleDropdown('gatewayIds');
+    expect(component.isDropdownOpen('gatewayIds')).toBe(true);
+
+    component.toggleDropdown('gatewayIds');
+    expect(component.isDropdownOpen('gatewayIds')).toBe(false);
+
+    component.toggleDropdown('sensorIds');
+    expect(component.isDropdownOpen('sensorIds')).toBe(true);
+
+    component.onEscape();
+    expect(component.isDropdownOpen('sensorIds')).toBe(false);
+  });
+
+  it('closes dropdown on outside document click and ignores invalid event target', () => {
+    component.toggleDropdown('gatewayIds');
+    expect(component.isDropdownOpen('gatewayIds')).toBe(true);
+
+    component.onDocumentClick({ target: null } as unknown as MouseEvent);
+    expect(component.isDropdownOpen('gatewayIds')).toBe(true);
+
+    const nativeElement = fixture.nativeElement as HTMLElement;
+    const insideTarget = nativeElement.querySelector('form') as Node;
+    component.onDocumentClick({ target: insideTarget } as unknown as MouseEvent);
+    expect(component.isDropdownOpen('gatewayIds')).toBe(true);
+
+    const outsideTarget = document.createElement('div');
+    document.body.appendChild(outsideTarget);
+    try {
+      component.onDocumentClick({ target: outsideTarget } as unknown as MouseEvent);
+      expect(component.isDropdownOpen('gatewayIds')).toBe(false);
+    } finally {
+      document.body.removeChild(outsideTarget);
+    }
+  });
+
   it('shows dependent sensor type and sensor id options for selected gateway and type', () => {
     fixture.componentRef.setInput('gatewayOptions', ['gw-1', 'gw-2']);
     fixture.componentRef.setInput('sensorTypeOptions', ['temperature', 'humidity']);

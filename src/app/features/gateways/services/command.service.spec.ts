@@ -78,6 +78,25 @@ describe('CommandService', () => {
     });
   });
 
+  it('omits config payload fields when frequency is invalid and status is not a string', async () => {
+    apiMock.commandControllerSendConfig.mockReturnValue(
+      of({ command_id: 'cmd-empty', status: 'queued' }),
+    );
+
+    vi.spyOn(service, 'pollStatus').mockReturnValue(
+      of({ commandId: 'cmd-empty', status: CommandStatus.ack }),
+    );
+
+    await firstValueFrom(
+      service.sendConfig('gw-empty', {
+        send_frequency_ms: Number.NaN,
+        status: 123 as unknown as CmdGatewayStatus,
+      }),
+    );
+
+    expect(apiMock.commandControllerSendConfig).toHaveBeenCalledWith('gw-empty', {});
+  });
+
   it('sends firmware and then polls status', async () => {
     apiMock.commandControllerSendFirmware.mockReturnValue(
       of({ command_id: 'cmd-fw', status: 'queued', issued_at: 't0' }),
@@ -121,6 +140,16 @@ describe('CommandService', () => {
       commandId: 'cmd-503',
       status: CommandStatus.timeout,
     });
+  });
+
+  it('rethrows polling errors that are not handled', async () => {
+    const backendError = { status: 500, message: 'internal error' };
+    apiMock.commandControllerGetStatus.mockReturnValue(throwError(() => backendError));
+
+    const pollPromise = firstValueFrom(service.pollStatus('gw-1', 'cmd-500', 100));
+    vi.advanceTimersByTime(100);
+
+    await expect(pollPromise).rejects.toBe(backendError);
   });
 
   it('keeps last known status on 304 polling responses', async () => {
@@ -177,5 +206,20 @@ describe('CommandService', () => {
       status: CommandStatus.expired,
       timestamp: 't2',
     });
+  });
+
+  it('throws when command response does not include command id', async () => {
+    apiMock.commandControllerSendFirmware.mockReturnValue(
+      of({ commandId: 'missing_snake_case_id', status: 'queued' }),
+    );
+
+    await expect(
+      firstValueFrom(
+        service.sendFirmware('gw-7', {
+          firmware_version: '2.1.0',
+          download_url: 'https://example.test/fw-v2.bin',
+        }),
+      ),
+    ).rejects.toThrowError('Invalid command response: missing command id');
   });
 });

@@ -270,4 +270,75 @@ describe('AuthService', () => {
 
     expect(service.isImpersonating()).toBe(false);
   });
+
+  it('restores impersonation context from session storage on startup', async () => {
+    const token = createUnsignedJwt({
+      sub: 'stored-user',
+      preferred_username: 'stored.user',
+      tenant_id: 'tenant-stored',
+      role: 'tenant_admin',
+    });
+
+    sessionStorage.setItem(
+      'impersonation',
+      JSON.stringify({
+        token,
+        payload: {
+          sub: 'stored-user',
+          preferred_username: 'stored.user',
+          tenant_id: 'tenant-stored',
+          role: 'tenant_admin',
+        },
+      }),
+    );
+
+    const restored = TestBed.runInInjectionContext(() => new AuthService());
+
+    expect(restored.isImpersonating()).toBe(true);
+    await expect(restored.getToken()).resolves.toBe(token);
+    await expect(restored.getUsername()).resolves.toBe('Stored.user');
+    expect(restored.getTenantId()).toBe('tenant-stored');
+    expect(restored.getRole()).toBe(UserRole.tenant_admin);
+  });
+
+  it('ignores invalid impersonation data persisted in session storage', async () => {
+    sessionStorage.setItem('impersonation', 'not-json');
+
+    const restored = TestBed.runInInjectionContext(() => new AuthService());
+
+    expect(restored.isImpersonating()).toBe(false);
+    await expect(restored.getToken()).resolves.toBe('');
+  });
+
+  it('keeps impersonation in memory when token payload is not decodable', async () => {
+    authApiMock.authControllerImpersonate.mockReturnValue(of({ access_token: 'invalid-token' }));
+
+    await expect(firstValueFrom(service.startImpersonation('target-3'))).resolves.toBe(
+      'invalid-token',
+    );
+
+    expect(service.isImpersonating()).toBe(true);
+    await expect(service.getToken()).resolves.toBe('invalid-token');
+    expect(sessionStorage.getItem('impersonation')).toBeNull();
+  });
+
+  it('persists impersonation again when enabled with in-memory token and payload', async () => {
+    const token = createUnsignedJwt({
+      sub: 'persisted-user',
+      preferred_username: 'persisted.user',
+      tenant_id: 'tenant-9',
+      role: 'tenant_admin',
+    });
+    authApiMock.authControllerImpersonate.mockReturnValue(of({ access_token: token }));
+
+    await firstValueFrom(service.startImpersonation('target-4'));
+    sessionStorage.removeItem('impersonation');
+
+    service.setImpersonating(true);
+
+    const persisted = sessionStorage.getItem('impersonation');
+    expect(persisted).toBeTruthy();
+    const parsed = JSON.parse(persisted as string) as { token?: string };
+    expect(parsed.token).toBe(token);
+  });
 });

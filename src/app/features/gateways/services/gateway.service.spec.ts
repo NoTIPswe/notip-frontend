@@ -205,6 +205,46 @@ describe('GatewayService', () => {
     ]);
   });
 
+  it('maps paused/offline statuses and defaults send frequency for invalid values', async () => {
+    apiMock.gatewaysControllerGetGateways.mockReturnValue(
+      of([
+        {
+          id: 'gw-paused',
+          name: 'Gateway Paused',
+          status: 'paused',
+          provisioned: true,
+          send_frequency_ms: '4500',
+          firmware_version: '',
+          last_seen_at: '',
+        },
+        {
+          id: 'gw-unknown',
+          name: 'Gateway Unknown',
+          status: 'UNKNOWN_STATUS',
+          provisioned: 'yes',
+          send_frequency_ms: 'not-a-number',
+        },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.getGateways())).resolves.toEqual([
+      {
+        gatewayId: 'gw-paused',
+        name: 'Gateway Paused',
+        status: 'paused',
+        provisioned: true,
+        sendFrequencyMs: 4500,
+      },
+      {
+        gatewayId: 'gw-unknown',
+        name: 'Gateway Unknown',
+        status: 'offline',
+        provisioned: false,
+        sendFrequencyMs: 30000,
+      },
+    ]);
+  });
+
   it('updates gateway name and returns mapped result', async () => {
     apiMock.gatewaysControllerUpdateGateway.mockReturnValue(
       of({ id: 'gw-1', name: 'New Name', status: 'GATEWAY_ONLINE', updated_at: '2026-03-31' }),
