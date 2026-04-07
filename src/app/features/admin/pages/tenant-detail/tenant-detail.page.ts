@@ -1,5 +1,5 @@
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, filter, map } from 'rxjs';
 import { Tenant } from '../../../../core/models/tenant';
@@ -12,7 +12,7 @@ import { RomeDateTimePipe } from '../../../../shared/pipes/rome-date-time.pipe';
 @Component({
   selector: 'app-tenant-detail-page',
   standalone: true,
-  imports: [TenantUserListComponent, RomeDateTimePipe],
+  imports: [TenantUserListComponent, RomeDateTimePipe, RouterLink],
   templateUrl: './tenant-detail.page.html',
   styleUrl: './tenant-detail.page.css',
 })

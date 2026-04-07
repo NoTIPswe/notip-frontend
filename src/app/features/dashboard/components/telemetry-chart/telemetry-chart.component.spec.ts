@@ -8,13 +8,25 @@ vi.mock('chart.js', () => {
   const Chart = class Chart {
     constructor(el: unknown, config: unknown) {
       void el;
-      void config;
+
+      const chartConfig =
+        (config as {
+          data?: {
+            labels?: unknown[];
+            datasets?: Array<{ label?: string; data?: unknown[] }>;
+          };
+        }) ?? {};
+
+      this.data = {
+        labels: chartConfig.data?.labels ?? [],
+        datasets: chartConfig.data?.datasets ?? [],
+      };
     }
     update() {}
     destroy() {}
     data = {
       labels: [],
-      datasets: [{ data: [] }],
+      datasets: [] as Array<{ label?: string; data?: unknown[] }>,
     };
     static register(...args: unknown[]) {
       void args;
@@ -79,25 +91,35 @@ describe('TelemetryChartComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should compute unique sensor IDs', () => {
+  it('computes unique decrypted sensor IDs only', () => {
     fixture.componentRef.setInput('measures', mockMeasures);
     fixture.detectChanges();
-    expect(component.uniqueSensorIds()).toEqual(['sensor-1', 'sensor-2', 'obf-1']);
+    expect(component.uniqueCheckedSensorIds()).toEqual(['sensor-1', 'sensor-2']);
   });
 
-  it('should auto-select the first sensor', () => {
-    expect(component.selectedSensorId()).toBeNull();
-    fixture.componentRef.setInput('measures', mockMeasures);
-    fixture.detectChanges(); // Trigger effects
-    expect(component.selectedSensorId()).toBe('sensor-1');
-  });
-
-  it('should update selected sensor on user selection', () => {
+  it('renders one dataset for each decrypted sensor', () => {
     fixture.componentRef.setInput('measures', mockMeasures);
     fixture.detectChanges();
-    const event = { target: { value: 'sensor-2' } } as unknown as Event;
-    component.onSensorSelected(event);
-    expect(component.selectedSensorId()).toBe('sensor-2');
+
+    const chartData = ((component as unknown as { chartInstance?: { data: unknown } }).chartInstance
+      ?.data ?? {
+      labels: [],
+      datasets: [],
+    }) as {
+      labels: unknown[];
+      datasets: Array<{ label?: string; data?: unknown[] }>;
+    };
+
+    expect(chartData.labels.length).toBeGreaterThan(0);
+    expect(chartData.datasets).toHaveLength(2);
+    expect(chartData.datasets.map((dataset) => dataset.label)).toEqual(['sensor-1', 'sensor-2']);
+  });
+
+  it('reports no decrypted data when only obfuscated rows are available', () => {
+    fixture.componentRef.setInput('measures', [mockMeasures[3]]);
+    fixture.detectChanges();
+
+    expect(component.hasDecryptedMeasures()).toBe(false);
   });
 
   it('counts obfuscated rows only', () => {

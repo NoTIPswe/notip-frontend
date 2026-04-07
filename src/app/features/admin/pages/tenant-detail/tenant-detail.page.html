@@ -1,7 +1,6 @@
 <section class="tenant-detail">
+  <a class="back-link" routerLink="/admin/tenants">Back to tenants</a>
   <h2>Tenant Details</h2>
-
-  <p class="tenant-id">Tenant ID: {{ tenantId() }}</p>
 
   @if (isTenantLoading()) {
     <p class="meta">Loading tenant information...</p>

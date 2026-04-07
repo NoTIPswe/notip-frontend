@@ -11,6 +11,7 @@ import {
 import { DashboardDataMode } from '../../../../core/resolvers/dashboard.resolver';
 import {
   DashboardFilters,
+  DashboardSensorCatalogEntry,
   FilterPanelComponent,
 } from '../../components/filter-panel/filter-panel.component';
 import { TelemetryChartComponent } from '../../components/telemetry-chart/telemetry-chart.component';
@@ -59,6 +60,7 @@ export class DataDashboardPageComponent implements OnInit, OnDestroy {
   readonly gatewayOptions = signal<string[]>([]);
   readonly sensorTypeOptions = signal<string[]>([]);
   readonly sensorOptions = signal<string[]>([]);
+  readonly sensorCatalog = signal<DashboardSensorCatalogEntry[]>([]);
 
   readonly streamFilters = signal<DashboardFilters>({
     gatewayIds: [],
@@ -227,10 +229,29 @@ export class DataDashboardPageComponent implements OnInit, OnDestroy {
             .filter((sensorId) => typeof sensorId === 'string' && sensorId.length > 0),
         ),
       );
+
+      this.sensorCatalog.set(
+        sensors
+          .map((sensor) => ({
+            gatewayId: sensor.gatewayId,
+            sensorType: sensor.sensorType,
+            sensorId: sensor.sensorId,
+          }))
+          .filter(
+            (sensor) =>
+              typeof sensor.gatewayId === 'string' &&
+              sensor.gatewayId.length > 0 &&
+              typeof sensor.sensorType === 'string' &&
+              sensor.sensorType.length > 0 &&
+              typeof sensor.sensorId === 'string' &&
+              sensor.sensorId.length > 0,
+          ),
+      );
     } catch {
       this.gatewayOptions.set([]);
       this.sensorTypeOptions.set([]);
       this.sensorOptions.set([]);
+      this.sensorCatalog.set([]);
     }
   }
 

@@ -1,5 +1,5 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { IMPERSONATION_STATUS, ImpersonationStatus } from './core/auth/contracts';
 import { UserRole } from './core/models/enums';
 import { AuthService } from './core/services/auth.service';
@@ -13,6 +13,7 @@ import { SidebarComponent } from './shared/components/sidebar/sidebar.component'
 })
 export class App {
   private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
   private readonly impersonationStatus = inject<ImpersonationStatus>(IMPERSONATION_STATUS);
 
   readonly username = signal('User');
@@ -52,5 +53,10 @@ export class App {
 
   onPasswordChange(): void {
     this.auth.openPasswordChange();
+  }
+
+  onImpersonationStopRequested(): void {
+    this.auth.stopImpersonation();
+    void this.router.navigate(['/admin/tenants']);
   }
 }

@@ -6,7 +6,11 @@
   }
 
   <div class="actions">
-    <button type="button" (click)="onRename()" [disabled]="!canManage() || isBusy()">Rename</button>
+    @if (showRename()) {
+      <button type="button" (click)="onRename()" [disabled]="!canManage() || isBusy()">
+        Rename
+      </button>
+    }
     <button type="button" (click)="onConfigure()" [disabled]="!canManage() || isBusy()">
       Configure
     </button>

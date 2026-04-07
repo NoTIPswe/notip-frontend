@@ -2,145 +2,145 @@
   <h3>{{ mode() === 'stream' ? 'Stream Filters' : 'Query Filters' }}</h3>
 
   @if (mode() === 'stream') {
-    <form (submit)="applyFilters($event, gatewayIds, sensorTypes, sensorIds)">
+    <form (submit)="applyFilters($event)">
       <div class="grid">
-        <label>
-          Gateway
-          <select #gatewayIds multiple size="4">
-            @for (gatewayId of gatewayOptions(); track gatewayId) {
-              <option
-                [value]="gatewayId"
-                [selected]="isSelected(gatewayId, defaultFilters().gatewayIds)"
+        @for (field of multiSelectFields; track field.key) {
+          <div class="field">
+            <span>{{ field.label }}</span>
+            <div class="multi-select">
+              <button
+                type="button"
+                class="multi-select-trigger"
+                [class.open]="isDropdownOpen(field.key)"
+                (click)="toggleDropdown(field.key)"
               >
-                {{ gatewayId }}
-              </option>
-            }
-          </select>
-        </label>
+                <span class="trigger-text">{{ selectionLabel(field.key) }}</span>
+                <span class="trigger-caret" aria-hidden="true"></span>
+              </button>
 
-        <label>
-          Sensor type
-          <select #sensorTypes multiple size="4">
-            @for (sensorType of sensorTypeOptions(); track sensorType) {
-              <option
-                [value]="sensorType"
-                [selected]="isSelected(sensorType, defaultFilters().sensorTypes)"
-              >
-                {{ sensorType }}
-              </option>
-            }
-          </select>
-        </label>
+              @if (isDropdownOpen(field.key)) {
+                <div class="multi-select-menu">
+                  <input
+                    type="search"
+                    class="multi-select-search"
+                    placeholder="Search..."
+                    [value]="searchTerm(field.key)"
+                    (input)="updateSearchTerm(field.key, $any($event.target).value)"
+                  />
 
-        <label>
-          Sensors
-          <select #sensorIds multiple size="4">
-            @for (sensorId of sensorOptions(); track sensorId) {
-              <option
-                [value]="sensorId"
-                [selected]="isSelected(sensorId, defaultFilters().sensorIds)"
-              >
-                {{ sensorId }}
-              </option>
-            }
-          </select>
-        </label>
+                  <ul class="multi-select-options">
+                    @for (option of filteredOptions(field.key); track option) {
+                      <li>
+                        <button
+                          type="button"
+                          class="multi-select-option"
+                          [class.selected]="isOptionSelected(field.key, option)"
+                          (click)="toggleOption(field.key, option)"
+                        >
+                          <span class="option-label">{{ option }}</span>
+                          @if (isOptionSelected(field.key, option)) {
+                            <span class="checkmark" aria-hidden="true">✓</span>
+                          }
+                        </button>
+                      </li>
+                    } @empty {
+                      <li class="multi-select-empty">No results</li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+          </div>
+        }
       </div>
 
-      <p class="hint">Multi-selection: use Ctrl/Cmd + click.</p>
+      <p class="hint">Click once to add and click again to remove.</p>
 
       <div class="actions">
         <button type="submit" class="btn btn-primary">Apply</button>
-        <button
-          type="button"
-          class="btn btn-ghost"
-          (click)="clearFilters(gatewayIds, sensorTypes, sensorIds)"
-        >
-          Clear
-        </button>
+        <button type="button" class="btn btn-ghost" (click)="clearFilters()">Clear</button>
       </div>
     </form>
   }
 
   @if (mode() === 'query') {
-    <form
-      (submit)="
-        applyFilters($event, gatewayIds, sensorTypes, sensorIds, fromInput.value, toInput.value)
-      "
-    >
+    <form (submit)="applyFilters($event)">
       <div class="grid">
-        <label>
-          Gateway
-          <select #gatewayIds multiple size="4">
-            @for (gatewayId of gatewayOptions(); track gatewayId) {
-              <option
-                [value]="gatewayId"
-                [selected]="isSelected(gatewayId, defaultFilters().gatewayIds)"
+        @for (field of multiSelectFields; track field.key) {
+          <div class="field">
+            <span>{{ field.label }}</span>
+            <div class="multi-select">
+              <button
+                type="button"
+                class="multi-select-trigger"
+                [class.open]="isDropdownOpen(field.key)"
+                (click)="toggleDropdown(field.key)"
               >
-                {{ gatewayId }}
-              </option>
-            }
-          </select>
-        </label>
+                <span class="trigger-text">{{ selectionLabel(field.key) }}</span>
+                <span class="trigger-caret" aria-hidden="true"></span>
+              </button>
 
-        <label>
-          Sensor type
-          <select #sensorTypes multiple size="4">
-            @for (sensorType of sensorTypeOptions(); track sensorType) {
-              <option
-                [value]="sensorType"
-                [selected]="isSelected(sensorType, defaultFilters().sensorTypes)"
-              >
-                {{ sensorType }}
-              </option>
-            }
-          </select>
-        </label>
+              @if (isDropdownOpen(field.key)) {
+                <div class="multi-select-menu">
+                  <input
+                    type="search"
+                    class="multi-select-search"
+                    placeholder="Search..."
+                    [value]="searchTerm(field.key)"
+                    (input)="updateSearchTerm(field.key, $any($event.target).value)"
+                  />
 
-        <label>
-          Sensors
-          <select #sensorIds multiple size="4">
-            @for (sensorId of sensorOptions(); track sensorId) {
-              <option
-                [value]="sensorId"
-                [selected]="isSelected(sensorId, defaultFilters().sensorIds)"
-              >
-                {{ sensorId }}
-              </option>
-            }
-          </select>
-        </label>
+                  <ul class="multi-select-options">
+                    @for (option of filteredOptions(field.key); track option) {
+                      <li>
+                        <button
+                          type="button"
+                          class="multi-select-option"
+                          [class.selected]="isOptionSelected(field.key, option)"
+                          (click)="toggleOption(field.key, option)"
+                        >
+                          <span class="option-label">{{ option }}</span>
+                          @if (isOptionSelected(field.key, option)) {
+                            <span class="checkmark" aria-hidden="true">✓</span>
+                          }
+                        </button>
+                      </li>
+                    } @empty {
+                      <li class="multi-select-empty">No results</li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
 
-        <label>
+      <div class="date-grid">
+        <label class="field">
           From
           <input
-            #fromInput
             type="datetime-local"
-            [value]="toLocalDateTimeInput(defaultFilters().from)"
+            [value]="queryFromRaw()"
+            (input)="onQueryFromChanged($any($event.target).value)"
           />
         </label>
 
-        <label>
+        <label class="field">
           To
           <input
-            #toInput
             type="datetime-local"
-            [value]="toLocalDateTimeInput(defaultFilters().to)"
+            [value]="queryToRaw()"
+            (input)="onQueryToChanged($any($event.target).value)"
           />
         </label>
       </div>
 
-      <p class="hint">Multi-selection: use Ctrl/Cmd + click.</p>
+      <p class="hint">Click once to add and click again to remove.</p>
 
       <div class="actions">
         <button type="submit" class="btn btn-primary">Apply</button>
-        <button
-          type="button"
-          class="btn btn-ghost"
-          (click)="clearFilters(gatewayIds, sensorTypes, sensorIds, fromInput, toInput)"
-        >
-          Clear
-        </button>
+        <button type="button" class="btn btn-ghost" (click)="clearFilters()">Clear</button>
       </div>
     </form>
   }

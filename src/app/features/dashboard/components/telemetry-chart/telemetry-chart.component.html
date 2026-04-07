@@ -1,22 +1,16 @@
 <section class="telemetry-chart">
   <div class="chart-header">
-    <h3>Sensor Trend</h3>
-    @if (uniqueSensorIds().length > 1) {
-      <div class="sensor-selector">
-        <select [value]="selectedSensorId()" (change)="onSensorSelected($event)">
-          @for (id of uniqueSensorIds(); track id) {
-            <option [value]="id">{{ id }}</option>
-          }
-        </select>
-      </div>
+    <h3>Sensor Trends</h3>
+    @if (uniqueCheckedSensorIds().length > 0) {
+      <p class="series-count">{{ uniqueCheckedSensorIds().length }} sensors</p>
     }
   </div>
 
   <div class="chart-container">
-    @if (selectedSensorId()) {
+    @if (hasDecryptedMeasures()) {
       <canvas #chartCanvas></canvas>
     } @else {
-      <p class="empty">No sensors available or selected.</p>
+      <p class="empty">No decrypted sensor data available for the current filters.</p>
     }
   </div>
 

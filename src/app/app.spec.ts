@@ -1,25 +1,38 @@
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { of } from 'rxjs';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { IMPERSONATION_STATUS, SESSION_LIFECYCLE } from './core/auth/contracts';
 import { UserRole } from './core/models/enums';
 import { AuthService } from './core/services/auth.service';
 import { App } from './app';
 
 describe('App', () => {
+  let authMock: {
+    getRole: () => UserRole;
+    getToken: () => Promise<string>;
+    getUsername: () => Promise<string>;
+    logout: () => void;
+    openProfile: () => void;
+    openPasswordChange: () => void;
+    stopImpersonation: () => void;
+  };
+
   beforeEach(async () => {
     const isImpersonatingSignal = signal(false);
     const sessionMock = {
       logout$: of(void 0),
       logout: () => undefined,
     };
-    const authMock = {
+    authMock = {
       getRole: () => UserRole.tenant_user,
       getToken: () => Promise.resolve('token'),
       getUsername: () => Promise.resolve('tester'),
       logout: () => undefined,
+      openProfile: () => undefined,
+      openPasswordChange: () => undefined,
+      stopImpersonation: () => undefined,
     };
 
     await TestBed.configureTestingModule({
@@ -48,5 +61,18 @@ describe('App', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('app-sidebar')).toBeTruthy();
     expect(compiled.textContent).toContain('NoTIP');
+  });
+
+  it('stops impersonation and navigates to system admin view', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    const router = TestBed.inject(Router);
+    const stopSpy = vi.spyOn(authMock, 'stopImpersonation');
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    app.onImpersonationStopRequested();
+
+    expect(stopSpy).toHaveBeenCalledOnce();
+    expect(navigateSpy).toHaveBeenCalledWith(['/admin/tenants']);
   });
 });

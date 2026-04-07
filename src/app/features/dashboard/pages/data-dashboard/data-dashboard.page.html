@@ -23,6 +23,7 @@
         [gatewayOptions]="gatewayOptions()"
         [sensorTypeOptions]="sensorTypeOptions()"
         [sensorOptions]="sensorOptions()"
+        [sensorCatalog]="sensorCatalog()"
         [defaultFilters]="activeView() === 'stream' ? streamFilters() : queryFilters()"
         (filtersApplied)="onFiltersApplied($event)"
         (clearRequested)="onFiltersCleared()"

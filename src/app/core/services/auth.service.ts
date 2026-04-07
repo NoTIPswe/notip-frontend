@@ -203,11 +203,16 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
     this.impersonatingSignal.set(value);
   }
 
+  stopImpersonation(): void {
+    this.setImpersonating(false);
+  }
+
   startImpersonation(targetUserId: string): Observable<string> {
     return this.authApi.authControllerImpersonate({ user_id: targetUserId }).pipe(
       map((res) => {
         const token = res.access_token ?? '';
         if (!token) {
+          this.stopImpersonation();
           return '';
         }
         const payload = this.decodeTokenPayload(token);

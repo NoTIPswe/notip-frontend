@@ -38,8 +38,8 @@ export class TenantFormComponent {
   }
 
   readonly tenantStatusOptions: ReadonlyArray<{ value: TenantStatus; label: string }> = [
-    { value: TenantStatus.active, label: 'Attivo' },
-    { value: TenantStatus.suspended, label: 'Sospeso' },
+    { value: TenantStatus.active, label: 'Active' },
+    { value: TenantStatus.suspended, label: 'Suspended' },
   ];
 
   readonly createRequested = output<CreateTenantPayload>();

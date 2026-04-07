@@ -49,6 +49,7 @@ export class SidebarComponent {
   readonly username = input<string>('User');
   readonly role = input<UserRole>(UserRole.tenant_user);
   readonly logoutRequested = output<void>();
+  readonly impersonationStopRequested = output<void>();
   readonly profileRequested = output<void>();
   readonly passwordChangeRequested = output<void>();
 
@@ -72,6 +73,10 @@ export class SidebarComponent {
 
   emitLogout(): void {
     this.logoutRequested.emit();
+  }
+
+  emitImpersonationStopRequested(): void {
+    this.impersonationStopRequested.emit();
   }
 
   emitProfileRequested(): void {

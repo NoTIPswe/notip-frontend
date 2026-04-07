@@ -11,11 +11,12 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { UserRole } from '../../../../core/models/enums';
 import { RomeDateTimePipe } from '../../../../shared/pipes/rome-date-time.pipe';
 import { ModalLayerComponent } from '../../../../shared/components/modal-layer/modal-layer.component';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-alert-config-page',
   standalone: true,
-  imports: [AlertConfigFormComponent, RomeDateTimePipe, ModalLayerComponent],
+  imports: [AlertConfigFormComponent, RomeDateTimePipe, ModalLayerComponent, RouterLink],
   templateUrl: './alert-config.page.html',
   styleUrl: './alert-config.page.css',
 })

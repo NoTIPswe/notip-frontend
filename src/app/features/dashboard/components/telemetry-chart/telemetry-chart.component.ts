@@ -5,13 +5,24 @@ import {
   ElementRef,
   input,
   OnDestroy,
-  signal,
   viewChild,
 } from '@angular/core';
 import { CheckedEnvelope, ObfuscatedEnvelope } from '../../../../core/models/measure';
 import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
+
+const MAX_CHART_POINTS = 120;
+const SERIES_COLORS = [
+  '#0ea5e9',
+  '#f97316',
+  '#22c55e',
+  '#a855f7',
+  '#ef4444',
+  '#06b6d4',
+  '#84cc16',
+  '#f59e0b',
+];
 
 @Component({
   selector: 'app-telemetry-chart',
@@ -21,85 +32,55 @@ Chart.register(...registerables);
 })
 export class TelemetryChartComponent implements OnDestroy {
   readonly measures = input<Array<CheckedEnvelope | ObfuscatedEnvelope>>([]);
-  readonly selectedSensorId = signal<string | null>(null);
+  readonly decryptedMeasures = computed(() =>
+    this.measures()
+      .filter((row): row is CheckedEnvelope => this.isCheckedEnvelope(row))
+      .filter((row) => Number.isFinite(row.value)),
+  );
 
-  readonly uniqueSensorIds = computed(() => {
-    const ids = this.measures()
-      .map((m) => m.sensorId)
-      .filter((id, index, self) => self.indexOf(id) === index);
-    return ids;
-  });
+  readonly uniqueCheckedSensorIds = computed(() =>
+    Array.from(new Set(this.decryptedMeasures().map((row) => row.sensorId))),
+  );
+
+  readonly hasDecryptedMeasures = computed(() => this.decryptedMeasures().length > 0);
 
   readonly chartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('chartCanvas');
   private chartInstance: Chart | undefined;
 
   constructor() {
-    // Auto-select the first sensor when the list of sensors changes and none is selected
     effect(() => {
-      const availableSensors = this.uniqueSensorIds();
-      if (availableSensors.length > 0 && !this.selectedSensorId()) {
-        this.selectedSensorId.set(availableSensors[0]);
-      }
-    });
-
-    // Update chart when data or selection changes
-    effect(() => {
-      const allMeasures = this.measures();
-      const selectedId = this.selectedSensorId();
       const canvasRef = this.chartCanvas();
+      const rows = this.decryptedMeasures();
 
-      if (!canvasRef || !selectedId) {
-        // If there's no canvas or no sensor selected, we can't do anything.
-        // If a chart exists, we can clear it.
+      if (!canvasRef) {
         if (this.chartInstance) {
-          this.chartInstance.data.labels = [];
-          this.chartInstance.data.datasets[0].data = [];
-          this.chartInstance.update('none');
+          this.chartInstance.destroy();
+          this.chartInstance = undefined;
         }
+
         return;
       }
 
+      const chartData = this.toChartData(rows);
+
       const canvas = canvasRef.nativeElement;
 
-      const decrypted = allMeasures
-        .filter((row): row is CheckedEnvelope => this.isCheckedEnvelope(row))
-        .filter((row) => Number.isFinite(row.value) && row.sensorId === selectedId)
-        .slice(-50); // Show up to 50 recent points for the selected sensor
-
-      const labels = decrypted.map((d, i) => i); // Use index for x-axis to show progression
-      const values = decrypted.map((d) => d.value);
-
       if (this.chartInstance) {
-        this.chartInstance.data.labels = labels;
-        this.chartInstance.data.datasets[0].data = values;
+        this.chartInstance.data.labels = chartData.labels;
+        this.chartInstance.data.datasets = chartData.datasets;
         this.chartInstance.update('none');
       } else {
         this.chartInstance = new Chart(canvas, {
           type: 'line',
-          data: {
-            labels,
-            datasets: [
-              {
-                label: 'Valore Decifrato',
-                data: values,
-                borderColor: '#0ea5e9',
-                backgroundColor: 'rgba(14, 165, 233, 0.1)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.3,
-                pointBackgroundColor: '#22c55e',
-                pointBorderColor: '#fff',
-                pointRadius: 4,
-              },
-            ],
-          },
+          data: chartData,
           options: {
             responsive: true,
             maintainAspectRatio: false,
             animation: false,
             plugins: {
               legend: {
-                display: false,
+                display: true,
+                position: 'bottom',
               },
             },
             scales: {
@@ -114,7 +95,23 @@ export class TelemetryChartComponent implements OnDestroy {
                   display: false,
                 },
                 ticks: {
-                  display: false, // Hide x-axis labels for clarity
+                  autoSkip: true,
+                  maxTicksLimit: 6,
+                  callback: (tickValue) => {
+                    const index = Number(tickValue);
+
+                    if (!this.chartInstance || Number.isNaN(index)) {
+                      return '';
+                    }
+
+                    const label = this.chartInstance.data.labels?.[index];
+
+                    if (typeof label !== 'string') {
+                      return '';
+                    }
+
+                    return this.formatTimestamp(label);
+                  },
                 },
               },
             },
@@ -130,13 +127,97 @@ export class TelemetryChartComponent implements OnDestroy {
     }
   }
 
-  onSensorSelected(event: Event): void {
-    const selectElement = event.target as HTMLSelectElement;
-    this.selectedSensorId.set(selectElement.value);
-  }
-
   obfuscatedCount(): number {
     return this.measures().filter((row) => !this.isCheckedEnvelope(row)).length;
+  }
+
+  private toChartData(rows: CheckedEnvelope[]): {
+    labels: string[];
+    datasets: Array<{
+      label: string;
+      data: Array<number | null>;
+      borderColor: string;
+      backgroundColor: string;
+      borderWidth: number;
+      fill: boolean;
+      tension: number;
+      pointRadius: number;
+      pointHoverRadius: number;
+      spanGaps: boolean;
+    }>;
+  } {
+    const sortedRows = [...rows].sort((left, right) => {
+      const leftMs = Date.parse(left.timestamp);
+      const rightMs = Date.parse(right.timestamp);
+
+      if (Number.isNaN(leftMs) || Number.isNaN(rightMs)) {
+        return left.timestamp.localeCompare(right.timestamp);
+      }
+
+      return leftMs - rightMs;
+    });
+
+    const recentRows = sortedRows.slice(-MAX_CHART_POINTS);
+    const labels = Array.from(new Set(recentRows.map((row) => row.timestamp)));
+    const sensorIds = Array.from(new Set(recentRows.map((row) => row.sensorId)));
+
+    const datasets = sensorIds.map((sensorId, index) => {
+      const valuesByTimestamp = new Map<string, number>();
+
+      recentRows.forEach((row) => {
+        if (row.sensorId === sensorId) {
+          valuesByTimestamp.set(row.timestamp, row.value);
+        }
+      });
+
+      const color = SERIES_COLORS[index % SERIES_COLORS.length];
+
+      return {
+        label: sensorId,
+        data: labels.map((timestamp) => valuesByTimestamp.get(timestamp) ?? null),
+        borderColor: color,
+        backgroundColor: this.withAlpha(color, 0.15),
+        borderWidth: 2,
+        fill: false,
+        tension: 0.25,
+        pointRadius: 2,
+        pointHoverRadius: 4,
+        spanGaps: true,
+      };
+    });
+
+    return {
+      labels,
+      datasets,
+    };
+  }
+
+  private withAlpha(color: string, alpha: number): string {
+    const normalized = color.replace('#', '');
+
+    if (normalized.length !== 6) {
+      return color;
+    }
+
+    const red = Number.parseInt(normalized.slice(0, 2), 16);
+    const green = Number.parseInt(normalized.slice(2, 4), 16);
+    const blue = Number.parseInt(normalized.slice(4, 6), 16);
+
+    return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+  }
+
+  private formatTimestamp(value: string): string {
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+
+    return date.toLocaleTimeString('it-IT', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
   }
 
   private isCheckedEnvelope(row: CheckedEnvelope | ObfuscatedEnvelope): row is CheckedEnvelope {

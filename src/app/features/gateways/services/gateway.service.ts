@@ -1,6 +1,6 @@
 import { Injectable, Signal, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { finalize, map, Observable, tap, throwError } from 'rxjs';
+import { finalize, map, Observable, tap } from 'rxjs';
 import {
   GatewayResponseDto,
   GatewaysService as GatewaysApiService,
@@ -8,7 +8,6 @@ import {
 } from '../../../generated/openapi/notip-management-api-openapi';
 import { Gateway, GatewayUpdateResult } from '../../../core/models/gateway';
 import { GatewayStatus } from '../../../core/models/enums';
-import { IMPERSONATION_STATUS, ImpersonationStatus } from '../../../core/auth/contracts';
 
 const DEFAULT_GATEWAY_SEND_FREQUENCY_MS = 30000;
 
@@ -16,7 +15,6 @@ const DEFAULT_GATEWAY_SEND_FREQUENCY_MS = 30000;
 export class GatewayService {
   private readonly gatewaysApi = inject(GatewaysApiService);
   private readonly http = inject(HttpClient);
-  private readonly impersonationStatus = inject<ImpersonationStatus>(IMPERSONATION_STATUS);
 
   private readonly listSignal = signal<Gateway[]>([]);
   private readonly selectedGatewaySignal = signal<Gateway | null>(null);
@@ -35,10 +33,6 @@ export class GatewayService {
   }
 
   getGatewayDetail(gatewayId: string): Observable<Gateway> {
-    if (this.impersonationStatus.isImpersonating()) {
-      return throwError(() => new Error('Gateway detail unavailable during impersonation'));
-    }
-
     this.loadingSignal.set(true);
 
     return this.gatewaysApi.gatewaysControllerGetGatewayById(gatewayId).pipe(
@@ -77,10 +71,6 @@ export class GatewayService {
 
   isLoading(): Signal<boolean> {
     return this.loadingSignal.asReadonly();
-  }
-
-  isImpersonating(): Signal<boolean> {
-    return this.impersonationStatus.isImpersonating;
   }
 
   private toGateway(dto: GatewayResponseDto): Gateway {

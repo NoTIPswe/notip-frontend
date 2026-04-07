@@ -3,6 +3,17 @@
   gap: 1rem;
 }
 
+.back-link {
+  color: #1d4ed8;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
 .summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

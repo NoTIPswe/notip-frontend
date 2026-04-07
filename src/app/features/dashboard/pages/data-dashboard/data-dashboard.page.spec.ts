@@ -105,8 +105,18 @@ describe('DataDashboardPageComponent', () => {
     authServiceMock.isImpersonating.mockReturnValue(false);
     sensorServiceMock.getAllSensors.mockReturnValue(
       of([
-        { sensorId: 's-1', sensorType: 'temperature' },
-        { sensorId: 's-2', sensorType: 'humidity' },
+        {
+          sensorId: 's-1',
+          sensorType: 'temperature',
+          gatewayId: 'gw-1',
+          lastSeen: '2026-04-03T10:00:00.000Z',
+        },
+        {
+          sensorId: 's-2',
+          sensorType: 'humidity',
+          gatewayId: 'gw-2',
+          lastSeen: '2026-04-03T10:05:00.000Z',
+        },
       ]),
     );
 

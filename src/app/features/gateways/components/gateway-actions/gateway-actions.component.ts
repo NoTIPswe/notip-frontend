@@ -8,6 +8,7 @@ import { Component, input, output } from '@angular/core';
 })
 export class GatewayActionsComponent {
   readonly canManage = input<boolean>(false);
+  readonly showRename = input<boolean>(true);
   readonly isBusy = input<boolean>(false);
 
   readonly renameRequested = output<void>();

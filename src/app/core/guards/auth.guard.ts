@@ -1,10 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { CanActivate } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { ThresholdPrefetchService } from '../services/threshold-prefetch.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthGuard implements CanActivate {
   private readonly auth = inject(AuthService);
+  private readonly thresholdPrefetch = inject(ThresholdPrefetchService);
 
   async canActivate(): Promise<boolean> {
     const initialized = await this.auth.init();
@@ -18,6 +20,8 @@ export class AuthGuard implements CanActivate {
       this.auth.login();
       return false;
     }
+
+    this.thresholdPrefetch.start();
 
     return true;
   }

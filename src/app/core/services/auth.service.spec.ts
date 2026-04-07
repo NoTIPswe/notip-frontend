@@ -44,6 +44,7 @@ describe('AuthService', () => {
   };
 
   beforeEach(async () => {
+    sessionStorage.clear();
     eventSignal.set({ type: KeycloakEventType.KeycloakAngularNotInitialized });
     keycloakMock.authenticated = false;
     keycloakMock.token = '';
@@ -258,6 +259,15 @@ describe('AuthService', () => {
     authApiMock.authControllerImpersonate.mockReturnValue(of({}));
 
     await expect(firstValueFrom(service.startImpersonation('target-2'))).resolves.toBe('');
+    expect(service.isImpersonating()).toBe(false);
+  });
+
+  it('stops impersonation explicitly', () => {
+    service.setImpersonating(true);
+    expect(service.isImpersonating()).toBe(true);
+
+    service.stopImpersonation();
+
     expect(service.isImpersonating()).toBe(false);
   });
 });

@@ -1,4 +1,5 @@
 <section class="gateway-detail-page">
+  <a class="back-link" routerLink="/gateways">Back to gateways</a>
   <h2>Gateway Details</h2>
 
   @if (errorMessage()) {
@@ -21,6 +22,7 @@
 
   <app-gateway-actions
     [canManage]="canManage"
+    [showRename]="!isImpersonating()"
     [isBusy]="isBusy()"
     (renameRequested)="requestRename()"
     (configureRequested)="openConfigModal()"

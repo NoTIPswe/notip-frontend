@@ -26,6 +26,14 @@ describe('SidebarComponent', () => {
     expect(emitSpy).toHaveBeenCalledOnce();
   });
 
+  it('emits stop impersonation request', () => {
+    const emitSpy = vi.spyOn(component.impersonationStopRequested, 'emit');
+
+    component.emitImpersonationStopRequested();
+
+    expect(emitSpy).toHaveBeenCalledOnce();
+  });
+
   it('emits profile request', () => {
     const emitSpy = vi.spyOn(component.profileRequested, 'emit');
 

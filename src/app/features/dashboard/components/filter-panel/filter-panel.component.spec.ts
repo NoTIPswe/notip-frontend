@@ -7,6 +7,12 @@ describe('FilterPanelComponent', () => {
   let fixture: ReturnType<typeof TestBed.createComponent<FilterPanelComponent>>;
   let component: FilterPanelComponent;
 
+  const sensorCatalog = [
+    { gatewayId: 'gw-1', sensorType: 'temperature', sensorId: 's-1' },
+    { gatewayId: 'gw-1', sensorType: 'humidity', sensorId: 's-2' },
+    { gatewayId: 'gw-2', sensorType: 'temperature', sensorId: 's-3' },
+  ];
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [FilterPanelComponent],
@@ -18,33 +24,23 @@ describe('FilterPanelComponent', () => {
 
   it('emits selected gateway/sensor ids and query date range', () => {
     fixture.componentRef.setInput('mode', 'query');
+    fixture.componentRef.setInput('defaultFilters', {
+      gatewayIds: ['gw-1', 'gw-2'],
+      sensorTypes: ['temperature', 'humidity'],
+      sensorIds: ['s-1'],
+    });
+    fixture.detectChanges();
 
     const preventDefault = vi.fn();
     const event = { preventDefault } as unknown as Event;
     const emitSpy = vi.spyOn(component.filtersApplied, 'emit');
 
-    const gatewaySelect = document.createElement('select');
-    gatewaySelect.multiple = true;
-    const gw1 = new Option('gw-1', 'gw-1', false, true);
-    const gw2 = new Option('gw-2', 'gw-2', false, true);
-    gatewaySelect.append(gw1, gw2);
-
-    const sensorSelect = document.createElement('select');
-    sensorSelect.multiple = true;
-    const s1 = new Option('s-1', 's-1', false, true);
-    const s2 = new Option('s-2', 's-2', false, false);
-    sensorSelect.append(s1, s2);
-
-    const sensorTypeSelect = document.createElement('select');
-    sensorTypeSelect.multiple = true;
-    const t1 = new Option('temperature', 'temperature', false, true);
-    const t2 = new Option('humidity', 'humidity', false, true);
-    sensorTypeSelect.append(t1, t2);
-
     const fromRaw = '2026-04-04T10:00';
     const toRaw = '2026-04-04T11:00';
+    component.onQueryFromChanged(fromRaw);
+    component.onQueryToChanged(toRaw);
 
-    component.applyFilters(event, gatewaySelect, sensorTypeSelect, sensorSelect, fromRaw, toRaw);
+    component.applyFilters(event);
 
     const payload = emitSpy.mock.calls[0][0] as {
       gatewayIds?: string[];
@@ -66,78 +62,156 @@ describe('FilterPanelComponent', () => {
     const defaultFrom = '2026-04-03T00:00:00.000Z';
     const defaultTo = '2026-04-04T00:00:00.000Z';
 
+    fixture.componentRef.setInput('mode', 'query');
     fixture.componentRef.setInput('defaultFilters', {
-      gatewayIds: [],
-      sensorTypes: [],
-      sensorIds: [],
+      gatewayIds: ['gw-1'],
+      sensorTypes: ['temperature'],
+      sensorIds: ['s-1'],
       from: defaultFrom,
       to: defaultTo,
     });
+    fixture.detectChanges();
 
-    const gatewaySelect = document.createElement('select');
-    gatewaySelect.multiple = true;
-    const gw1 = new Option('gw-1', 'gw-1', false, true);
-    gatewaySelect.append(gw1);
+    component.onQueryFromChanged('2026-04-05T09:00');
+    component.onQueryToChanged('2026-04-05T10:00');
 
-    const sensorSelect = document.createElement('select');
-    sensorSelect.multiple = true;
-    const s1 = new Option('s-1', 's-1', false, true);
-    sensorSelect.append(s1);
+    const clearSpy = vi.spyOn(component.clearRequested, 'emit');
+    const applySpy = vi.spyOn(component.filtersApplied, 'emit');
+    const preventDefault = vi.fn();
+    const event = { preventDefault } as unknown as Event;
 
-    const sensorTypeSelect = document.createElement('select');
-    sensorTypeSelect.multiple = true;
-    const t1 = new Option('temperature', 'temperature', false, true);
-    sensorTypeSelect.append(t1);
+    component.clearFilters();
+    component.applyFilters(event);
 
-    const fromInput = document.createElement('input');
-    const toInput = document.createElement('input');
-    fromInput.value = '2026-04-04T09:00';
-    toInput.value = '2026-04-04T10:00';
+    const payload = applySpy.mock.calls[0][0] as {
+      gatewayIds?: string[];
+      sensorTypes?: string[];
+      sensorIds?: string[];
+      from?: string;
+      to?: string;
+    };
 
-    const emitSpy = vi.spyOn(component.clearRequested, 'emit');
-
-    component.clearFilters(gatewaySelect, sensorTypeSelect, sensorSelect, fromInput, toInput);
-
-    expect(gw1.selected).toBe(false);
-    expect(t1.selected).toBe(false);
-    expect(s1.selected).toBe(false);
-    expect(fromInput.value).toBe(component.toLocalDateTimeInput(defaultFrom));
-    expect(toInput.value).toBe(component.toLocalDateTimeInput(defaultTo));
-    expect(emitSpy).toHaveBeenCalledOnce();
+    expect(payload.gatewayIds).toEqual([]);
+    expect(payload.sensorTypes).toEqual([]);
+    expect(payload.sensorIds).toEqual([]);
+    expect(payload.from).toBe(
+      fromRomeDateTimeInputToIso(component.toLocalDateTimeInput(defaultFrom)),
+    );
+    expect(payload.to).toBe(fromRomeDateTimeInputToIso(component.toLocalDateTimeInput(defaultTo)));
+    expect(clearSpy).toHaveBeenCalledOnce();
   });
 
   it('ignores date range when filter mode is stream', () => {
     fixture.componentRef.setInput('mode', 'stream');
+    fixture.componentRef.setInput('defaultFilters', {
+      gatewayIds: ['gw-1'],
+      sensorTypes: ['temperature'],
+      sensorIds: ['s-1'],
+      from: '2026-04-04T00:00:00.000Z',
+      to: '2026-04-05T00:00:00.000Z',
+    });
+    fixture.detectChanges();
 
     const preventDefault = vi.fn();
     const event = { preventDefault } as unknown as Event;
     const emitSpy = vi.spyOn(component.filtersApplied, 'emit');
 
-    const gatewaySelect = document.createElement('select');
-    gatewaySelect.multiple = true;
-    gatewaySelect.append(new Option('gw-1', 'gw-1', false, true));
+    component.onQueryFromChanged('invalid');
+    component.onQueryToChanged('invalid');
 
-    const sensorSelect = document.createElement('select');
-    sensorSelect.multiple = true;
-    sensorSelect.append(new Option('s-1', 's-1', false, true));
-
-    const sensorTypeSelect = document.createElement('select');
-    sensorTypeSelect.multiple = true;
-    sensorTypeSelect.append(new Option('temperature', 'temperature', false, true));
-
-    component.applyFilters(
-      event,
-      gatewaySelect,
-      sensorTypeSelect,
-      sensorSelect,
-      'invalid',
-      'invalid',
-    );
+    component.applyFilters(event);
 
     expect(emitSpy).toHaveBeenCalledWith({
       gatewayIds: ['gw-1'],
       sensorTypes: ['temperature'],
       sensorIds: ['s-1'],
     });
+  });
+
+  it('toggles options with single click and summarizes multiple selections', () => {
+    fixture.componentRef.setInput('defaultFilters', {
+      gatewayIds: [],
+      sensorTypes: [],
+      sensorIds: [],
+    });
+    fixture.detectChanges();
+
+    expect(component.selectionLabel('gatewayIds')).toBe('Select gateway');
+
+    component.toggleOption('gatewayIds', 'gw-1');
+    expect(component.isOptionSelected('gatewayIds', 'gw-1')).toBe(true);
+    expect(component.selectionLabel('gatewayIds')).toBe('gw-1');
+
+    component.toggleOption('gatewayIds', 'gw-2');
+    expect(component.selectionLabel('gatewayIds')).toBe('2 selected');
+
+    component.toggleOption('gatewayIds', 'gw-1');
+    expect(component.isOptionSelected('gatewayIds', 'gw-1')).toBe(false);
+    expect(component.selectionLabel('gatewayIds')).toBe('gw-2');
+  });
+
+  it('filters options by search term', () => {
+    fixture.componentRef.setInput('sensorOptions', ['sensor-abc', 'sensor-def', 'abc-aux']);
+    fixture.detectChanges();
+
+    component.updateSearchTerm('sensorIds', 'abc');
+
+    expect(component.filteredOptions('sensorIds')).toEqual(['sensor-abc', 'abc-aux']);
+  });
+
+  it('shows dependent sensor type and sensor id options for selected gateway and type', () => {
+    fixture.componentRef.setInput('gatewayOptions', ['gw-1', 'gw-2']);
+    fixture.componentRef.setInput('sensorTypeOptions', ['temperature', 'humidity']);
+    fixture.componentRef.setInput('sensorOptions', ['s-1', 's-2', 's-3']);
+    fixture.componentRef.setInput('sensorCatalog', sensorCatalog);
+    fixture.detectChanges();
+
+    component.toggleOption('gatewayIds', 'gw-2');
+
+    expect(component.filteredOptions('sensorTypes')).toEqual(['temperature']);
+    expect(component.filteredOptions('sensorIds')).toEqual(['s-3']);
+
+    component.toggleOption('gatewayIds', 'gw-1');
+    component.toggleOption('sensorTypes', 'humidity');
+
+    expect(component.filteredOptions('sensorIds')).toEqual(['s-2']);
+  });
+
+  it('removes incompatible parent selections when sensor id is already selected', () => {
+    fixture.componentRef.setInput('gatewayOptions', ['gw-1', 'gw-2']);
+    fixture.componentRef.setInput('sensorTypeOptions', ['temperature', 'humidity']);
+    fixture.componentRef.setInput('sensorOptions', ['s-1', 's-2', 's-3']);
+    fixture.componentRef.setInput('sensorCatalog', sensorCatalog);
+    fixture.componentRef.setInput('defaultFilters', {
+      gatewayIds: [],
+      sensorTypes: [],
+      sensorIds: ['s-1'],
+    });
+    fixture.detectChanges();
+
+    component.toggleOption('gatewayIds', 'gw-2');
+    component.toggleOption('sensorTypes', 'humidity');
+
+    expect(component.isOptionSelected('sensorIds', 's-1')).toBe(true);
+    expect(component.isOptionSelected('gatewayIds', 'gw-2')).toBe(false);
+    expect(component.isOptionSelected('sensorTypes', 'humidity')).toBe(false);
+  });
+
+  it('removes incompatible gateway selection when sensor type is already selected', () => {
+    fixture.componentRef.setInput('gatewayOptions', ['gw-1', 'gw-2']);
+    fixture.componentRef.setInput('sensorTypeOptions', ['temperature', 'humidity']);
+    fixture.componentRef.setInput('sensorOptions', ['s-1', 's-2', 's-3']);
+    fixture.componentRef.setInput('sensorCatalog', sensorCatalog);
+    fixture.componentRef.setInput('defaultFilters', {
+      gatewayIds: [],
+      sensorTypes: ['humidity'],
+      sensorIds: [],
+    });
+    fixture.detectChanges();
+
+    component.toggleOption('gatewayIds', 'gw-2');
+
+    expect(component.isOptionSelected('sensorTypes', 'humidity')).toBe(true);
+    expect(component.isOptionSelected('gatewayIds', 'gw-2')).toBe(false);
   });
 });

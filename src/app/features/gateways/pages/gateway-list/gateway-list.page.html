@@ -13,16 +13,11 @@
     <p class="meta">No gateways available.</p>
   }
 
-  @if (isImpersonating()) {
-    <p class="meta">Gateway details are unavailable during impersonation.</p>
-  }
-
   <div class="cards">
     @for (gateway of gateways(); track gateway.gatewayId) {
       <app-gateway-card
         [gateway]="gateway"
         [selected]="selectedGatewayId() === gateway.gatewayId"
-        [canOpenDetail]="!isImpersonating()"
         (selectedGateway)="onGatewaySelected($event)"
       ></app-gateway-card>
     }

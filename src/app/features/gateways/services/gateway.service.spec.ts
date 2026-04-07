@@ -1,15 +1,12 @@
-import { signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, of, Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { IMPERSONATION_STATUS } from '../../../core/auth/contracts';
 import { GatewaysService as GatewaysApiService } from '../../../generated/openapi/notip-management-api-openapi';
 import { GatewayService } from './gateway.service';
 
 describe('GatewayService', () => {
   let service: GatewayService;
-  const impersonatingSignal = signal(false);
 
   const apiMock = {
     gatewaysControllerGetGateways: vi.fn(),
@@ -22,7 +19,6 @@ describe('GatewayService', () => {
   };
 
   beforeEach(async () => {
-    impersonatingSignal.set(false);
     apiMock.gatewaysControllerGetGateways.mockReset();
     apiMock.gatewaysControllerGetGatewayById.mockReset();
     apiMock.gatewaysControllerUpdateGateway.mockReset();
@@ -34,7 +30,6 @@ describe('GatewayService', () => {
         GatewayService,
         { provide: GatewaysApiService, useValue: apiMock },
         { provide: HttpClient, useValue: httpMock },
-        { provide: IMPERSONATION_STATUS, useValue: { isImpersonating: impersonatingSignal } },
       ],
     }).compileComponents();
 
@@ -121,8 +116,7 @@ describe('GatewayService', () => {
     expect(service.isLoading()()).toBe(false);
   });
 
-  it('loads obfuscated gateway list while impersonating', async () => {
-    impersonatingSignal.set(true);
+  it('loads obfuscated gateway list payload', async () => {
     apiMock.gatewaysControllerGetGateways.mockReturnValue(
       of([
         {
@@ -152,13 +146,25 @@ describe('GatewayService', () => {
     expect(apiMock.gatewaysControllerGetGateways).toHaveBeenCalledOnce();
   });
 
-  it('blocks gateway detail in impersonation mode', async () => {
-    impersonatingSignal.set(true);
-
-    await expect(firstValueFrom(service.getGatewayDetail('gw-9'))).rejects.toThrow(
-      'Gateway detail unavailable during impersonation',
+  it('loads gateway detail when backend returns obfuscated name', async () => {
+    apiMock.gatewaysControllerGetGatewayById.mockReturnValue(
+      of({
+        id: 'gw-9',
+        name: '-',
+        status: 'gateway_online',
+        provisioned: true,
+        firmware_version: '2.0.1',
+        send_frequency_ms: 1500,
+      }),
     );
-    expect(apiMock.gatewaysControllerGetGatewayById).not.toHaveBeenCalled();
+
+    await expect(firstValueFrom(service.getGatewayDetail('gw-9'))).resolves.toMatchObject({
+      gatewayId: 'gw-9',
+      name: '-',
+      status: 'online',
+    });
+
+    expect(apiMock.gatewaysControllerGetGatewayById).toHaveBeenCalledWith('gw-9');
   });
 
   it('maps online gateway status even when backend uses uppercase/camel-case variants', async () => {
@@ -217,12 +223,5 @@ describe('GatewayService', () => {
 
     await expect(firstValueFrom(service.deleteGateway('gw-del'))).resolves.toBe('gw-del');
     expect(apiMock.gatewaysControllerDeleteGateway).toHaveBeenCalledWith('gw-del');
-  });
-
-  it('exposes impersonation signal', () => {
-    expect(service.isImpersonating()()).toBe(false);
-
-    impersonatingSignal.set(true);
-    expect(service.isImpersonating()()).toBe(true);
   });
 });

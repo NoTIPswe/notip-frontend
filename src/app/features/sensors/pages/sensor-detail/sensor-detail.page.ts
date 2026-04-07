@@ -1,5 +1,5 @@
 import { Component, DestroyRef, OnDestroy, OnInit, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription, distinctUntilChanged, filter, firstValueFrom, map } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -20,12 +20,13 @@ import { RomeDateTimePipe } from '../../../../shared/pipes/rome-date-time.pipe';
 @Component({
   selector: 'app-sensor-detail-page',
   standalone: true,
-  imports: [TelemetryTableComponent, TelemetryChartComponent, RomeDateTimePipe],
+  imports: [TelemetryTableComponent, TelemetryChartComponent, RomeDateTimePipe, RouterLink],
   templateUrl: './sensor-detail.page.html',
   styleUrl: './sensor-detail.page.css',
 })
 export class SensorDetailPageComponent implements OnInit, OnDestroy {
   private static readonly QUERY_PAGE_SIZE = 20;
+  private static readonly STREAM_PAGE_SIZE = 20;
   private static readonly DEFAULT_QUERY_WINDOW_HOURS = 24;
 
   private readonly route = inject(ActivatedRoute);
@@ -120,7 +121,7 @@ export class SensorDetailPageComponent implements OnInit, OnDestroy {
           return;
         }
 
-        this.telemetry.set(page.data);
+        this.telemetry.set(this.takeLastRows(page.data));
         this.openObfuscatedStream(streamFilters, runId);
         return;
       }
@@ -131,7 +132,7 @@ export class SensorDetailPageComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.telemetry.set(page.data);
+      this.telemetry.set(this.takeLastRows(page.data));
       this.openValidatedStream(streamFilters, runId);
     } catch {
       if (!this.isCurrentTelemetryRun(runId)) {
@@ -160,7 +161,7 @@ export class SensorDetailPageComponent implements OnInit, OnDestroy {
             return;
           }
 
-          this.telemetry.update((rows) => [...rows, ...batch]);
+          this.telemetry.update((rows) => this.takeLastRows([...rows, ...batch]));
           this.isTelemetryLoading.set(false);
         },
         error: () => {
@@ -183,7 +184,7 @@ export class SensorDetailPageComponent implements OnInit, OnDestroy {
           return;
         }
 
-        this.telemetry.update((rows) => [...rows, row]);
+        this.telemetry.update((rows) => this.takeLastRows([...rows, row]));
         this.isTelemetryLoading.set(false);
       },
       error: () => {
@@ -218,6 +219,16 @@ export class SensorDetailPageComponent implements OnInit, OnDestroy {
       from: fromDate.toISOString(),
       to: toDate.toISOString(),
     };
+  }
+
+  private takeLastRows(
+    rows: Array<CheckedEnvelope | ObfuscatedEnvelope>,
+  ): Array<CheckedEnvelope | ObfuscatedEnvelope> {
+    if (rows.length <= SensorDetailPageComponent.STREAM_PAGE_SIZE) {
+      return rows;
+    }
+
+    return rows.slice(-SensorDetailPageComponent.STREAM_PAGE_SIZE);
   }
 
   private isCurrentTelemetryRun(runId: number): boolean {

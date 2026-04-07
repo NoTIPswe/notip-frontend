@@ -1,5 +1,5 @@
 import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription, distinctUntilChanged, filter, map, tap } from 'rxjs';
 import { Sensor } from '../../../../core/models/sensor';
@@ -35,11 +35,14 @@ import { CommandService } from '../../services/command.service';
     CommandModalComponent,
     DeleteConfirmModalComponent,
     TelemetryTableComponent,
+    RouterLink,
   ],
   templateUrl: './gateway-detail.page.html',
   styleUrl: './gateway-detail.page.css',
 })
 export class GatewayDetailPageComponent implements OnInit, OnDestroy {
+  private static readonly STREAM_PAGE_SIZE = 20;
+
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
@@ -65,6 +68,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
   readonly isBusy = signal<boolean>(false);
 
   readonly canManage = this.authService.getRole() === UserRole.tenant_admin;
+  readonly isImpersonating = this.authService.isImpersonating;
   readonly isLoading = this.gatewayService.isLoading();
   readonly commandModalInitialSendFrequencyMs = computed<number | null>(
     () => this.gateway()?.sendFrequencyMs ?? null,
@@ -86,11 +90,6 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
   readonly telemetry = signal<Array<CheckedEnvelope | ObfuscatedEnvelope>>([]);
 
   ngOnInit(): void {
-    if (this.authService.isImpersonating()) {
-      void this.router.navigate(['/gateways']);
-      return;
-    }
-
     this.route.paramMap
       .pipe(
         map((params) => params.get('id') ?? ''),
@@ -118,7 +117,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
 
   requestRename(): void {
     const current = this.gateway();
-    if (!current || !this.canManage || this.isBusy()) {
+    if (!current || !this.canManage || this.isBusy() || this.isImpersonating()) {
       return;
     }
 
@@ -290,7 +289,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
     if (this.authService.isImpersonating()) {
       this.streamSubscription = this.obfuscatedMeasureService.openStream(filters).subscribe({
         next: (batch) => {
-          this.telemetry.update((rows) => [...rows, ...batch]);
+          this.telemetry.update((rows) => this.takeLastRows([...rows, ...batch]));
           this.isTelemetryLoading.set(false);
         },
         error: () => {
@@ -303,7 +302,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
 
     this.streamSubscription = this.validatedMeasureFacadeService.openStream(filters).subscribe({
       next: (row) => {
-        this.telemetry.update((rows) => [...rows, row]);
+        this.telemetry.update((rows) => this.takeLastRows([...rows, row]));
         this.isTelemetryLoading.set(false);
       },
       error: () => {
@@ -311,6 +310,16 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
         this.errorMessage.set('Unable to receive telemetry stream.');
       },
     });
+  }
+
+  private takeLastRows(
+    rows: Array<CheckedEnvelope | ObfuscatedEnvelope>,
+  ): Array<CheckedEnvelope | ObfuscatedEnvelope> {
+    if (rows.length <= GatewayDetailPageComponent.STREAM_PAGE_SIZE) {
+      return rows;
+    }
+
+    return rows.slice(-GatewayDetailPageComponent.STREAM_PAGE_SIZE);
   }
 
   private stopTelemetryStream(): void {

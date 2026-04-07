@@ -20,7 +20,6 @@ export class GatewayListPageComponent implements OnInit {
   readonly gateways = signal<Gateway[]>([]);
   readonly selectedGatewayId = signal<string | null>(null);
   readonly isLoading = this.gatewayService.isLoading();
-  readonly isImpersonating = this.gatewayService.isImpersonating();
   readonly errorMessage = signal<string | null>(null);
 
   ngOnInit(): void {
@@ -28,10 +27,6 @@ export class GatewayListPageComponent implements OnInit {
   }
 
   onGatewaySelected(gatewayId: string): void {
-    if (this.isImpersonating()) {
-      return;
-    }
-
     this.selectedGatewayId.set(gatewayId);
     void this.router.navigate(['/gateways', gatewayId]);
   }
