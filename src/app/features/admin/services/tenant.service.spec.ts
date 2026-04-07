@@ -52,6 +52,42 @@ describe('TenantService', () => {
     ]);
   });
 
+  it('normalizes unknown statuses and invalid suspension intervals from payload', async () => {
+    apiMock.tenantsControllerGetTenants.mockReturnValue(
+      of([
+        {
+          id: 't-3',
+          name: 'Tenant 3',
+          status: 'archived',
+          created_at: '2026-03-31',
+          suspension_interval_days: 'abc',
+        },
+        {
+          id: 't-4',
+          name: 'Tenant 4',
+          status: 'unknown',
+          created_at: '2026-03-31',
+          suspension_interval_days: '-7',
+        },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.getTenants())).resolves.toEqual([
+      {
+        tenantId: 't-3',
+        name: 'Tenant 3',
+        status: TenantStatus.active,
+        createdAt: '2026-03-31',
+      },
+      {
+        tenantId: 't-4',
+        name: 'Tenant 4',
+        status: TenantStatus.active,
+        createdAt: '2026-03-31',
+      },
+    ]);
+  });
+
   it('creates tenant with correct payload', async () => {
     apiMock.tenantsControllerCreateTenant.mockReturnValue(
       of({
@@ -156,6 +192,60 @@ describe('TenantService', () => {
     expect(apiMock.tenantsControllerUpdateTenant).toHaveBeenCalledWith('t-1', {
       name: 'Tenant Active',
       status: TenantStatus.active,
+      suspension_interval_days: 0,
+    });
+  });
+
+  it('normalizes suspended updates when interval is undefined, non-finite or negative', async () => {
+    apiMock.tenantsControllerUpdateTenant.mockReturnValue(
+      of({
+        id: 't-1',
+        name: 'Tenant Suspended',
+        status: 'suspended',
+        created_at: '2026-03-31',
+        suspension_interval_days: 0,
+      }),
+    );
+
+    await firstValueFrom(
+      service.updateTenant('t-1', {
+        name: 'Tenant Suspended',
+        status: TenantStatus.suspended,
+        suspensionIntervalDays: undefined,
+      }),
+    );
+
+    await firstValueFrom(
+      service.updateTenant('t-1', {
+        name: 'Tenant Suspended',
+        status: TenantStatus.suspended,
+        suspensionIntervalDays: Number.NaN,
+      }),
+    );
+
+    await firstValueFrom(
+      service.updateTenant('t-1', {
+        name: 'Tenant Suspended',
+        status: TenantStatus.suspended,
+        suspensionIntervalDays: -3,
+      }),
+    );
+
+    expect(apiMock.tenantsControllerUpdateTenant).toHaveBeenNthCalledWith(1, 't-1', {
+      name: 'Tenant Suspended',
+      status: TenantStatus.suspended,
+      suspension_interval_days: 0,
+    });
+
+    expect(apiMock.tenantsControllerUpdateTenant).toHaveBeenNthCalledWith(2, 't-1', {
+      name: 'Tenant Suspended',
+      status: TenantStatus.suspended,
+      suspension_interval_days: 0,
+    });
+
+    expect(apiMock.tenantsControllerUpdateTenant).toHaveBeenNthCalledWith(3, 't-1', {
+      name: 'Tenant Suspended',
+      status: TenantStatus.suspended,
       suspension_interval_days: 0,
     });
   });

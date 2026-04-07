@@ -105,4 +105,59 @@ describe('AuditService', () => {
       },
     ]);
   });
+
+  it('maps primitive details values to empty string', async () => {
+    apiMock.auditLogControllerGetAuditLogs.mockReturnValue(
+      of([
+        {
+          id: 'log-3',
+          userId: 'u-3',
+          action: 'UPDATE',
+          timestamp: '2026-03-31T13:00:00.000Z',
+          resource: 'tenant',
+          details: 42,
+        },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.getLogs({ from: 'f', to: 't' }))).resolves.toEqual([
+      {
+        id: 'log-3',
+        userId: 'u-3',
+        action: 'UPDATE',
+        timestamp: '2026-03-31T13:00:00.000Z',
+        resource: 'tenant',
+        details: '',
+      },
+    ]);
+  });
+
+  it('returns empty details when object serialization fails', async () => {
+    const circularDetails: Record<string, unknown> = {};
+    (circularDetails as { self?: unknown }).self = circularDetails;
+
+    apiMock.auditLogControllerGetAuditLogs.mockReturnValue(
+      of([
+        {
+          id: 'log-4',
+          userId: 'u-4',
+          action: 'UPDATE',
+          timestamp: '2026-03-31T14:00:00.000Z',
+          resource: 'gateway',
+          details: circularDetails,
+        },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.getLogs({ from: 'f', to: 't' }))).resolves.toEqual([
+      {
+        id: 'log-4',
+        userId: 'u-4',
+        action: 'UPDATE',
+        timestamp: '2026-03-31T14:00:00.000Z',
+        resource: 'gateway',
+        details: '',
+      },
+    ]);
+  });
 });

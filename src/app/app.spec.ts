@@ -75,4 +75,48 @@ describe('App', () => {
     expect(stopSpy).toHaveBeenCalledOnce();
     expect(navigateSpy).toHaveBeenCalledWith(['/admin/tenants']);
   });
+
+  it('calls logout handler on auth service', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    const logoutSpy = vi.spyOn(authMock, 'logout');
+
+    app.onLogout();
+
+    expect(logoutSpy).toHaveBeenCalledOnce();
+  });
+
+  it('calls profile handler on auth service', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    const openProfileSpy = vi.spyOn(authMock, 'openProfile');
+
+    app.onProfileOpen();
+
+    expect(openProfileSpy).toHaveBeenCalledOnce();
+  });
+
+  it('calls password change handler on auth service', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    const openPasswordChangeSpy = vi.spyOn(authMock, 'openPasswordChange');
+
+    app.onPasswordChange();
+
+    expect(openPasswordChangeSpy).toHaveBeenCalledOnce();
+  });
+
+  it('falls back to default identity when token refresh fails', async () => {
+    authMock.getRole = vi.fn(() => UserRole.system_admin);
+    authMock.getToken = vi.fn(() => Promise.reject(new Error('token error')));
+    authMock.getUsername = vi.fn(() => Promise.resolve('should-not-be-used'));
+
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    await fixture.whenStable();
+
+    expect(app.role()).toBe(UserRole.system_admin);
+    expect(app.username()).toBe('User');
+    expect(authMock.getUsername).not.toHaveBeenCalled();
+  });
 });

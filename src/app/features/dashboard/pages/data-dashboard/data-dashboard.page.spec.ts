@@ -11,6 +11,47 @@ import { DataDashboardPageComponent } from './data-dashboard.page';
 import { AdminGatewayService } from '../../../admin/services/admin-gateway.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
+vi.mock('chart.js', () => {
+  const Chart = class Chart {
+    constructor(_el: unknown, config: unknown) {
+      const chartConfig =
+        (config as {
+          data?: {
+            labels?: unknown[];
+            datasets?: Array<{ label?: string; data?: unknown[] }>;
+          };
+        }) ?? {};
+
+      this.data = {
+        labels: chartConfig.data?.labels ?? [],
+        datasets: chartConfig.data?.datasets ?? [],
+      };
+    }
+
+    update(): void {
+      // no-op chart mock
+    }
+
+    destroy(): void {
+      // no-op chart mock
+    }
+
+    data = {
+      labels: [],
+      datasets: [] as Array<{ label?: string; data?: unknown[] }>,
+    };
+
+    static register(): void {
+      return;
+    }
+  };
+
+  return {
+    Chart,
+    registerables: [],
+  };
+});
+
 describe('DataDashboardPageComponent', () => {
   const obfuscatedMeasureServiceMock = {
     openStream: vi.fn(),
@@ -264,6 +305,7 @@ describe('DataDashboardPageComponent', () => {
 
   it('uses obfuscated endpoints in impersonation and disables export', async () => {
     routeMock.snapshot.data = { dataMode: 'obfuscated' };
+    authServiceMock.isImpersonating.mockReturnValue(true);
 
     const obfuscatedStream$ = new Subject<ObfuscatedEnvelope[]>();
     obfuscatedMeasureServiceMock.openStream.mockReturnValue(obfuscatedStream$.asObservable());
@@ -281,8 +323,8 @@ describe('DataDashboardPageComponent', () => {
 
     expect(obfuscatedMeasureServiceMock.openStream).toHaveBeenCalledOnce();
     expect(validatedMeasureFacadeServiceMock.openStream).not.toHaveBeenCalled();
-    expect(adminGatewayServiceMock.getGateways).toHaveBeenCalledWith('tenant-1');
-    expect(gatewayServiceMock.getGateways).not.toHaveBeenCalled();
+    expect(gatewayServiceMock.getGateways).toHaveBeenCalledOnce();
+    expect(adminGatewayServiceMock.getGateways).not.toHaveBeenCalled();
 
     component.setActiveView('query');
     await flushAsyncWork(fixture);

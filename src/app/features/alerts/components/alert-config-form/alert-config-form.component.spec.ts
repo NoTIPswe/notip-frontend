@@ -86,4 +86,47 @@ describe('AlertConfigFormComponent', () => {
 
     expect(emitSpy).toHaveBeenCalledWith('gw-9');
   });
+
+  it('resets timeout input when gateway selection is empty', () => {
+    const timeoutInput = { value: '1500' } as HTMLInputElement;
+
+    component.onGatewaySelectionChanged('   ', timeoutInput);
+
+    expect(component.selectedGatewayCurrentTimeoutMs()).toBeNull();
+    expect(timeoutInput.value).toBe('');
+  });
+
+  it('uses gateway override timeout when available', () => {
+    fixture.componentRef.setInput('defaultTimeoutMs', 1200);
+    fixture.componentRef.setInput('gatewayOverrides', [{ gatewayId: 'gw-1', timeoutMs: 2200 }]);
+    fixture.detectChanges();
+
+    const timeoutInput = { value: '' } as HTMLInputElement;
+
+    component.onGatewaySelectionChanged(' gw-1 ', timeoutInput);
+
+    expect(component.selectedGatewayCurrentTimeoutMs()).toBe(2200);
+    expect(timeoutInput.value).toBe('2200');
+  });
+
+  it('falls back to default timeout when gateway override is missing', () => {
+    fixture.componentRef.setInput('defaultTimeoutMs', 1800);
+    fixture.componentRef.setInput('gatewayOverrides', [{ gatewayId: 'gw-1', timeoutMs: 2200 }]);
+    fixture.detectChanges();
+
+    const timeoutInput = { value: '' } as HTMLInputElement;
+
+    component.onGatewaySelectionChanged('gw-9', timeoutInput);
+
+    expect(component.selectedGatewayCurrentTimeoutMs()).toBe(1800);
+    expect(timeoutInput.value).toBe('1800');
+  });
+
+  it('emits cancel request', () => {
+    const emitSpy = vi.spyOn(component.cancelRequested, 'emit');
+
+    component.cancel();
+
+    expect(emitSpy).toHaveBeenCalledOnce();
+  });
 });
