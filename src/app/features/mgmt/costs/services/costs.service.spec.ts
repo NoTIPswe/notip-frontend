@@ -11,12 +11,12 @@ describe('CostsService', () => {
     costsControllerGetTenantCost: vi.fn(),
   };
 
-  beforeEach(async () => {
+  beforeEach(() => {
     apiMock.costsControllerGetTenantCost.mockReset();
 
-    await TestBed.configureTestingModule({
+    TestBed.configureTestingModule({
       providers: [CostsService, { provide: CostsApiService, useValue: apiMock }],
-    }).compileComponents();
+    });
 
     service = TestBed.inject(CostsService);
   });
@@ -39,6 +39,17 @@ describe('CostsService', () => {
 
     await expect(firstValueFrom(service.getTenantCosts())).resolves.toEqual({
       storageGb: 0,
+      bandwidthGb: 0,
+    });
+  });
+
+  it('parses numeric strings and falls back on non-finite numbers', async () => {
+    apiMock.costsControllerGetTenantCost.mockReturnValue(
+      of({ storage_gb: '7.75', bandwidth_gb: Number.POSITIVE_INFINITY }),
+    );
+
+    await expect(firstValueFrom(service.getTenantCosts())).resolves.toEqual({
+      storageGb: 7.75,
       bandwidthGb: 0,
     });
   });

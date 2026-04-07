@@ -132,6 +132,32 @@ describe('AuditService', () => {
     ]);
   });
 
+  it('keeps details when payload already provides a string', async () => {
+    apiMock.auditLogControllerGetAuditLogs.mockReturnValue(
+      of([
+        {
+          id: 'log-5',
+          userId: 'u-5',
+          action: 'ACCESS',
+          timestamp: '2026-03-31T15:00:00.000Z',
+          resource: 'dashboard',
+          details: 'plain details',
+        },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.getLogs({ from: 'f', to: 't' }))).resolves.toEqual([
+      {
+        id: 'log-5',
+        userId: 'u-5',
+        action: 'ACCESS',
+        timestamp: '2026-03-31T15:00:00.000Z',
+        resource: 'dashboard',
+        details: 'plain details',
+      },
+    ]);
+  });
+
   it('returns empty details when object serialization fails', async () => {
     const circularDetails: Record<string, unknown> = {};
     (circularDetails as { self?: unknown }).self = circularDetails;

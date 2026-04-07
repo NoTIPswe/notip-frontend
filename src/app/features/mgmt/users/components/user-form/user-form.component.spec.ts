@@ -41,6 +41,22 @@ describe('UserFormComponent', () => {
     });
   });
 
+  it('maps tenant_admin role and keeps empty normalized username when blank', () => {
+    const preventDefault = vi.fn();
+    const event = { preventDefault } as unknown as Event;
+    const emitSpy = vi.spyOn(component.createRequested, 'emit');
+
+    component.create(event, '   ', ' admin@test.dev ', 'tenant_admin', 'pwd-2');
+
+    expect(preventDefault).toHaveBeenCalledOnce();
+    expect(emitSpy).toHaveBeenCalledWith({
+      username: '',
+      email: 'admin@test.dev',
+      role: UserRole.tenant_admin,
+      password: 'pwd-2',
+    });
+  });
+
   it('does not show system_admin among create role options', () => {
     fixture.detectChanges();
 

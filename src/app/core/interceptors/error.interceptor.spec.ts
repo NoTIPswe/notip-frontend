@@ -47,6 +47,49 @@ describe('errorInterceptor', () => {
     expect(routerMock.navigateByUrl).not.toHaveBeenCalled();
   });
 
+  it('does not redirect again on 401 when already on nested error route', async () => {
+    routerMock.url = '/error/forbidden';
+    const req = new HttpRequest('GET', '/api/data');
+    const error = new HttpErrorResponse({ status: 401, url: req.url });
+    const next = vi.fn(() => throwError(() => error));
+
+    await expect(
+      firstValueFrom(TestBed.runInInjectionContext(() => errorInterceptor(req, next))),
+    ).rejects.toBe(error);
+
+    expect(routerMock.navigateByUrl).not.toHaveBeenCalled();
+  });
+
+  it('uses root retry url on 401 when current route is empty', async () => {
+    routerMock.url = '';
+    const req = new HttpRequest('GET', '/api/data');
+    const error = new HttpErrorResponse({ status: 401, url: req.url });
+    const next = vi.fn(() => throwError(() => error));
+
+    await expect(
+      firstValueFrom(TestBed.runInInjectionContext(() => errorInterceptor(req, next))),
+    ).rejects.toBe(error);
+
+    expect(routerMock.navigateByUrl).toHaveBeenCalledWith(
+      '/error?reason=unauthorized&retryUrl=%2F',
+    );
+  });
+
+  it('uses root retry url on 401 when current route is not absolute', async () => {
+    routerMock.url = 'dashboard';
+    const req = new HttpRequest('GET', '/api/data');
+    const error = new HttpErrorResponse({ status: 401, url: req.url });
+    const next = vi.fn(() => throwError(() => error));
+
+    await expect(
+      firstValueFrom(TestBed.runInInjectionContext(() => errorInterceptor(req, next))),
+    ).rejects.toBe(error);
+
+    expect(routerMock.navigateByUrl).toHaveBeenCalledWith(
+      '/error?reason=unauthorized&retryUrl=%2F',
+    );
+  });
+
   it('redirects to forbidden page on 403 from mgmt keys endpoint and rethrows error', async () => {
     const req = new HttpRequest('GET', '/api/mgmt/keys/current');
     const error = new HttpErrorResponse({ status: 403, url: req.url });

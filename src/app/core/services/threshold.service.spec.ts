@@ -68,6 +68,37 @@ describe('ThresholdService', () => {
     ]);
   });
 
+  it('falls back to sensor type when backend marks type as sensor_id but sensor id is empty', async () => {
+    thresholdsApiMock.thresholdsControllerGetThresholds.mockReturnValue(
+      of([{ type: 'sensor_id', sensor_id: ' ', sensor_type: 'temperature', min_value: 3 }]),
+    );
+
+    await expect(firstValueFrom(service.fetchThresholds())).resolves.toEqual([
+      { type: 'sensorType', sensorType: 'temperature', minValue: 3, maxValue: null },
+    ]);
+  });
+
+  it('falls back to sensor id when backend marks type as sensorType but sensor type is empty', async () => {
+    thresholdsApiMock.thresholdsControllerGetThresholds.mockReturnValue(
+      of([{ type: 'sensorType', sensor_id: 's-4', sensor_type: '', min_value: 8 }]),
+    );
+
+    await expect(firstValueFrom(service.fetchThresholds())).resolves.toEqual([
+      { type: 'sensorId', sensorId: 's-4', minValue: 8, maxValue: null },
+    ]);
+  });
+
+  it('drops rows when both sensor id and sensor type are missing', async () => {
+    thresholdsApiMock.thresholdsControllerGetThresholds.mockReturnValue(
+      of([
+        { type: 'sensor_id', sensor_id: ' ', sensor_type: ' ', min_value: 1 },
+        { min_value: 2, max_value: 5 },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.fetchThresholds())).resolves.toEqual([]);
+  });
+
   it('refreshes cache by invalidating and fetching thresholds again', async () => {
     thresholdsApiMock.thresholdsControllerGetThresholds
       .mockReturnValueOnce(of([{ type: 'sensorId', sensor_id: 's-1', min_value: 2, max_value: 4 }]))
@@ -92,6 +123,22 @@ describe('ThresholdService', () => {
       sensor_type: 'temperature',
       min_value: null,
       max_value: null,
+    });
+  });
+
+  it('uses cached bounds when only one default bound is provided', async () => {
+    thresholdsApiMock.thresholdsControllerSetDefaultThreshold.mockReturnValue(of({}));
+    thresholdsApiMock.thresholdsControllerGetThresholds.mockReturnValue(
+      of([{ type: 'sensorType', sensor_type: 'temperature', min_value: 5, max_value: 18 }]),
+    );
+
+    await firstValueFrom(service.fetchThresholds());
+    await firstValueFrom(service.setDefaultThreshold('temperature', undefined, 9));
+
+    expect(thresholdsApiMock.thresholdsControllerSetDefaultThreshold).toHaveBeenCalledWith({
+      sensor_type: 'temperature',
+      min_value: 5,
+      max_value: 9,
     });
   });
 

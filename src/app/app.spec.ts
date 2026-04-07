@@ -63,6 +63,34 @@ describe('App', () => {
     expect(compiled.textContent).toContain('NoTIP');
   });
 
+  it('refreshes identity from auth token flow', async () => {
+    authMock.getRole = vi.fn(() => UserRole.tenant_admin);
+    authMock.getToken = vi.fn(() => Promise.resolve('token'));
+    authMock.getUsername = vi.fn(() => Promise.resolve('Alice'));
+
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    await fixture.whenStable();
+
+    expect(authMock.getToken).toHaveBeenCalled();
+    expect(authMock.getUsername).toHaveBeenCalled();
+    expect(app.role()).toBe(UserRole.tenant_admin);
+    expect(app.username()).toBe('Alice');
+  });
+
+  it('falls back to default username when auth returns empty name', async () => {
+    authMock.getRole = vi.fn(() => UserRole.tenant_user);
+    authMock.getToken = vi.fn(() => Promise.resolve('token'));
+    authMock.getUsername = vi.fn(() => Promise.resolve(''));
+
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    await fixture.whenStable();
+
+    expect(app.role()).toBe(UserRole.tenant_user);
+    expect(app.username()).toBe('User');
+  });
+
   it('stops impersonation and navigates to system admin view', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;
