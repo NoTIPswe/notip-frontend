@@ -29,7 +29,7 @@ export class ImpersonateButtonComponent {
       next: (token) => {
         this.inProgress.set(false);
         if (!token) {
-          this.failed.emit('Impersonazione non avviata: token mancante.');
+          this.failed.emit('Impersonation not started: missing token.');
           return;
         }
 
@@ -37,7 +37,7 @@ export class ImpersonateButtonComponent {
       },
       error: () => {
         this.inProgress.set(false);
-        this.failed.emit('Impersonazione non riuscita.');
+        this.failed.emit('Impersonation failed.');
       },
     });
   }

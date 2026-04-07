@@ -1,8 +1,8 @@
 <section class="alert-list-page">
   <div class="header-row">
-    <h2>Lista Alert</h2>
+    <h2>Alert List</h2>
     <a class="config-link" [routerLink]="'/alerts/config'">
-      {{ canEditAlertsConfig ? '+ Configura Alert' : 'Visualizza Configurazione Alert' }}
+      {{ canEditAlertsConfig ? '+ Configure Alerts' : 'View Alert Configuration' }}
     </a>
   </div>
 
@@ -20,28 +20,28 @@
   }
 
   @if (isLoading()) {
-    <p class="meta">Caricamento alert...</p>
+    <p class="meta">Loading alerts...</p>
   }
 
   @if (!isLoading() && alerts().length === 0) {
-    <p class="meta">Nessun alert trovato nel periodo selezionato.</p>
+    <p class="meta">No alerts found in the selected period.</p>
   }
 
   @if (alerts().length > 0) {
     <table>
       <thead>
         <tr>
-          <th>Timestamp (GMT+1)</th>
+          <th>Timestamp (Europe/Rome)</th>
           <th>Type</th>
           <th>Gateway</th>
           <th>Tenant</th>
-          <th>Dettagli</th>
+          <th>Details</th>
         </tr>
       </thead>
       <tbody>
         @for (row of alerts(); track row.createdAt + row.gatewayId + row.type) {
           <tr>
-            <td>{{ (row.createdAt | date: 'dd/MM/yyyy - HH:mm' : '+0100') || '-' }}</td>
+            <td>{{ (row.createdAt | romeDateTime: false) || '-' }}</td>
             <td>{{ row.type }}</td>
             <td>{{ row.gatewayId }}</td>
             <td>{{ row.tenantId }}</td>

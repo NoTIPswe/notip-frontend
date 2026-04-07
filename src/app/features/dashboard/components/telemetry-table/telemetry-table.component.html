@@ -1,20 +1,20 @@
 <section class="telemetry-table">
   <div class="header-row">
-    <h3>Telemetria</h3>
+    <h3>Telemetry</h3>
     @if (isLoading()) {
-      <span class="status">Aggiornamento...</span>
+      <span class="status">Updating...</span>
     }
   </div>
 
   @if (!isLoading() && measures().length === 0) {
-    <p class="empty">Nessun dato disponibile.</p>
+    <p class="empty">No data available.</p>
   }
 
   @if (measures().length > 0) {
     <table>
       <thead>
         <tr>
-          <th>Timestamp</th>
+          <th>Timestamp (Europe/Rome)</th>
           <th>Gateway</th>
           <th>Sensor</th>
           <th>Type</th>
@@ -22,9 +22,9 @@
         </tr>
       </thead>
       <tbody>
-        @for (row of measures(); track row.timestamp + row.sensorId) {
+        @for (row of reversedMeasures(); track trackMeasure($index, row)) {
           <tr [class]="rowClass(row)">
-            <td>{{ row.timestamp }}</td>
+            <td>{{ (row.timestamp | romeDateTime) || '-' }}</td>
             <td>{{ row.gatewayId }}</td>
             <td>{{ row.sensorId }}</td>
             <td>{{ row.sensorType }}</td>

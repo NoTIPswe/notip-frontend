@@ -1,20 +1,20 @@
 <section class="gateway-list-page">
-  <h2>Lista Gateway</h2>
+  <h2>Gateway List</h2>
 
   @if (errorMessage()) {
     <p class="error">{{ errorMessage() }}</p>
   }
 
   @if (isLoading()) {
-    <p class="meta">Caricamento gateway...</p>
+    <p class="meta">Loading gateways...</p>
   }
 
   @if (!isLoading() && gateways().length === 0) {
-    <p class="meta">Nessun gateway disponibile.</p>
+    <p class="meta">No gateways available.</p>
   }
 
   @if (isImpersonating()) {
-    <p class="meta">Durante l'impersonazione i dettagli gateway non sono disponibili.</p>
+    <p class="meta">Gateway details are unavailable during impersonation.</p>
   }
 
   <div class="cards">

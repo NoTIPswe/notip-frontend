@@ -1,30 +1,30 @@
 <section class="audit-log-table">
   <div class="header-row">
-    <h3>Log Audit</h3>
+    <h3>Audit Log</h3>
     @if (isLoading()) {
-      <span class="status">Caricamento...</span>
+      <span class="status">Loading...</span>
     }
   </div>
 
   @if (!isLoading() && logs().length === 0) {
-    <p class="empty">Nessun log disponibile.</p>
+    <p class="empty">No logs available.</p>
   }
 
   @if (logs().length > 0) {
     <table>
       <thead>
         <tr>
-          <th>Timestamp (GMT+1)</th>
+          <th>Timestamp (Europe/Rome)</th>
           <th>User ID</th>
-          <th>Azione</th>
-          <th>Risorsa</th>
-          <th>Dettagli</th>
+          <th>Action</th>
+          <th>Resource</th>
+          <th>Details</th>
         </tr>
       </thead>
       <tbody>
         @for (log of logs(); track log.id) {
           <tr>
-            <td>{{ (log.timestamp | date: 'dd/MM/yyyy - HH:mm:ss' : '+0100') || '-' }}</td>
+            <td>{{ (log.timestamp | romeDateTime) || '-' }}</td>
             <td>{{ log.userId }}</td>
             <td>{{ log.action }}</td>
             <td>{{ log.resource }}</td>

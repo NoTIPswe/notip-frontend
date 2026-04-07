@@ -46,7 +46,7 @@ const SYSTEM_ADMIN_MENU: ReadonlyArray<MenuItem> = [
 })
 export class SidebarComponent {
   readonly isImpersonating = input<boolean>(false);
-  readonly username = input<string>('Utente');
+  readonly username = input<string>('User');
   readonly role = input<UserRole>(UserRole.tenant_user);
   readonly logoutRequested = output<void>();
   readonly profileRequested = output<void>();

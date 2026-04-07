@@ -2,11 +2,13 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ApiClientTableComponent } from '../../components/api-client-table/api-client-table.component';
 import { SecretClient } from '../../../../../core/models/client';
 import { ClientsService } from '../../services/clients.service';
+import { ModalLayerComponent } from '../../../../../shared/components/modal-layer/modal-layer.component';
+import { DeleteConfirmModalComponent } from '../../../../../shared/components/delete-confirm-modal/delete-confirm-modal.component';
 
 @Component({
   selector: 'app-api-client-list-page',
   standalone: true,
-  imports: [ApiClientTableComponent],
+  imports: [ApiClientTableComponent, ModalLayerComponent, DeleteConfirmModalComponent],
   templateUrl: './api-client-list.page.html',
   styleUrl: './api-client-list.page.css',
 })
@@ -18,6 +20,7 @@ export class ApiClientListPageComponent implements OnInit {
   readonly showCreateForm = signal<boolean>(false);
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
+  readonly deletingClientId = signal<string | null>(null);
   readonly errorMessage = signal<string | null>(null);
   readonly infoMessage = signal<string | null>(null);
 
@@ -48,19 +51,27 @@ export class ApiClientListPageComponent implements OnInit {
         this.isSaving.set(false);
         this.showCreateForm.set(false);
         this.lastCreated.set(client);
-        this.infoMessage.set(`Client creato: ${client.clientId}`);
+        this.infoMessage.set(`Client created: ${client.clientId}`);
         this.loadClients();
       },
       error: () => {
         this.isSaving.set(false);
-        this.errorMessage.set('Impossibile creare il client API.');
+        this.errorMessage.set('Unable to create API client.');
       },
     });
   }
 
   requestDelete(clientId: string): void {
-    const confirmed = globalThis.confirm("Confermi l'eliminazione del client selezionato?");
-    if (!confirmed) {
+    this.deletingClientId.set(clientId);
+  }
+
+  cancelDelete(): void {
+    this.deletingClientId.set(null);
+  }
+
+  confirmDelete(): void {
+    const clientId = this.deletingClientId();
+    if (!clientId) {
       return;
     }
 
@@ -71,12 +82,13 @@ export class ApiClientListPageComponent implements OnInit {
     this.clientsService.deleteClient(clientId).subscribe({
       next: () => {
         this.isSaving.set(false);
-        this.infoMessage.set('Client eliminato.');
+        this.deletingClientId.set(null);
+        this.infoMessage.set('Client deleted.');
         this.loadClients();
       },
       error: () => {
         this.isSaving.set(false);
-        this.errorMessage.set('Impossibile eliminare il client API.');
+        this.errorMessage.set('Unable to delete API client.');
       },
     });
   }
@@ -92,7 +104,7 @@ export class ApiClientListPageComponent implements OnInit {
       },
       error: () => {
         this.isLoading.set(false);
-        this.errorMessage.set('Impossibile caricare i client API.');
+        this.errorMessage.set('Unable to load API clients.');
       },
     });
   }

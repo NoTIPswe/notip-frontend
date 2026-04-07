@@ -1,13 +1,13 @@
 <section class="threshold-table">
   <div class="header-row">
-    <h3>Threshold correnti</h3>
+    <h3>Current thresholds</h3>
     @if (isLoading()) {
-      <span class="status">Caricamento...</span>
+      <span class="status">Loading...</span>
     }
   </div>
 
   @if (!isLoading() && thresholds().length === 0) {
-    <p class="empty">Nessuna soglia configurata.</p>
+    <p class="empty">No thresholds configured.</p>
   }
 
   @if (thresholds().length > 0) {
@@ -15,11 +15,11 @@
       <thead>
         <tr>
           <th>Scope</th>
-          <th>Chiave</th>
+          <th>Key</th>
           <th>Min</th>
           <th>Max</th>
           @if (canDelete()) {
-            <th>Azioni</th>
+            <th>Actions</th>
           }
         </tr>
       </thead>
@@ -32,7 +32,7 @@
             <td>{{ row.maxValue ?? '-' }}</td>
             @if (canDelete()) {
               <td>
-                <button type="button" class="danger" (click)="requestDelete(row)">Elimina</button>
+                <button type="button" class="danger" (click)="requestDelete(row)">Delete</button>
               </td>
             }
           </tr>

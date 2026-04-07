@@ -6,14 +6,19 @@ import { TelemetryChartComponent } from './telemetry-chart.component';
 // Mock for Chart.js
 vi.mock('chart.js', () => {
   const Chart = class Chart {
-    constructor(_el: any, _config: any) {}
+    constructor(el: unknown, config: unknown) {
+      void el;
+      void config;
+    }
     update() {}
     destroy() {}
     data = {
       labels: [],
       datasets: [{ data: [] }],
     };
-    static register(..._args: any[]) {}
+    static register(...args: unknown[]) {
+      void args;
+    }
   };
   return {
     Chart,
@@ -53,7 +58,12 @@ describe('TelemetryChartComponent', () => {
       isOutofBounds: false,
       sensorType: 'temperature',
     },
-    { gatewayId: 'gw-1', sensorId: 'obf-1', sensorType: 'humidity', timestamp: '2026-04-02T10:03:00.000Z' },
+    {
+      gatewayId: 'gw-1',
+      sensorId: 'obf-1',
+      sensorType: 'humidity',
+      timestamp: '2026-04-02T10:03:00.000Z',
+    },
   ];
 
   beforeEach(async () => {

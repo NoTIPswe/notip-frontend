@@ -122,7 +122,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const nextName = globalThis.prompt('Nuovo nome gateway', current.name)?.trim();
+    const nextName = globalThis.prompt('New gateway name', current.name)?.trim();
     if (!nextName || nextName === current.name) {
       return;
     }
@@ -135,11 +135,11 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
         next: (result) => {
           this.isBusy.set(false);
           this.gateway.set({ ...current, name: result.name, status: result.status });
-          this.infoMessage.set('Nome gateway aggiornato.');
+          this.infoMessage.set('Gateway name updated.');
         },
         error: () => {
           this.isBusy.set(false);
-          this.errorMessage.set('Impossibile aggiornare il nome del gateway.');
+          this.errorMessage.set('Unable to update gateway name.');
         },
       });
   }
@@ -173,7 +173,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
         next: (update) => this.handleCommandUpdate(gatewayId, update),
         error: () => {
           this.isBusy.set(false);
-          this.errorMessage.set('Invio comando di configurazione non riuscito.');
+          this.errorMessage.set('Failed to send configuration command.');
         },
       });
   }
@@ -192,7 +192,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
         next: (update) => this.handleCommandUpdate(gatewayId, update),
         error: () => {
           this.isBusy.set(false);
-          this.errorMessage.set('Invio comando firmware non riuscito.');
+          this.errorMessage.set('Failed to send firmware command.');
         },
       });
   }
@@ -247,7 +247,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
         },
         error: () => {
           this.isBusy.set(false);
-          this.errorMessage.set('Eliminazione gateway non riuscita.');
+          this.errorMessage.set('Gateway deletion failed.');
         },
       });
   }
@@ -261,7 +261,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
           this.gateway.set(row);
         },
         error: () => {
-          this.errorMessage.set('Impossibile caricare il dettaglio gateway.');
+          this.errorMessage.set('Unable to load gateway details.');
         },
       });
   }
@@ -275,7 +275,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
           this.sensors.set(rows);
         },
         error: () => {
-          this.errorMessage.set('Impossibile caricare i sensori del gateway.');
+          this.errorMessage.set('Unable to load gateway sensors.');
         },
       });
   }
@@ -295,7 +295,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
         },
         error: () => {
           this.isTelemetryLoading.set(false);
-          this.errorMessage.set('Impossibile ricevere stream telemetria.');
+          this.errorMessage.set('Unable to receive telemetry stream.');
         },
       });
       return;
@@ -308,7 +308,7 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.isTelemetryLoading.set(false);
-        this.errorMessage.set('Impossibile ricevere stream telemetria.');
+        this.errorMessage.set('Unable to receive telemetry stream.');
       },
     });
   }

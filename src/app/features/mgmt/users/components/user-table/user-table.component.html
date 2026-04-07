@@ -1,13 +1,13 @@
 <section class="user-table">
   <div class="header-row">
-    <h3>Utenti</h3>
+    <h3>Users</h3>
     @if (isLoading()) {
-      <span class="status">Caricamento...</span>
+      <span class="status">Loading...</span>
     }
   </div>
 
   @if (!isLoading() && users().length === 0) {
-    <p class="empty">Nessun utente disponibile.</p>
+    <p class="empty">No users available.</p>
   }
 
   @if (users().length > 0) {
@@ -18,9 +18,9 @@
             <th>ID</th>
             <th>Username</th>
             <th>Email</th>
-            <th>Ruolo</th>
-            <th>Ultimo accesso (GMT+1)</th>
-            <th>Azioni</th>
+            <th>Role</th>
+            <th>Last access (Europe/Rome)</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -32,11 +32,9 @@
               <td>{{ user.role }}</td>
               <td>{{ formatLastAccess(user.lastAccess) }}</td>
               <td class="actions-cell">
-                <button type="button" class="ghost" (click)="requestEdit(user.userId)">
-                  Modifica
-                </button>
+                <button type="button" class="ghost" (click)="requestEdit(user.userId)">Edit</button>
                 <button type="button" class="danger" (click)="requestDelete(user.userId)">
-                  Elimina
+                  Delete
                 </button>
               </td>
             </tr>

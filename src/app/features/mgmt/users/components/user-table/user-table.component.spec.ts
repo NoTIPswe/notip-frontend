@@ -24,8 +24,12 @@ describe('UserTableComponent', () => {
     expect(deleteSpy).toHaveBeenCalledWith('user-1');
   });
 
-  it('formats UTC timestamps to GMT+1 for display', () => {
-    expect(component.formatLastAccess('2026-04-07T10:15:30.000Z')).toBe('07/04/2026 11:15:30');
+  it('formats UTC timestamps to Europe/Rome for display', () => {
+    expect(component.formatLastAccess('2026-04-07T10:15:30.000Z')).toBe('07/04/2026 12:15:30');
+  });
+
+  it('applies winter offset in Europe/Rome timezone', () => {
+    expect(component.formatLastAccess('2026-01-07T10:15:30.000Z')).toBe('07/01/2026 11:15:30');
   });
 
   it('returns dash when last access is missing', () => {

@@ -15,7 +15,7 @@ export class App {
   private readonly auth = inject(AuthService);
   private readonly impersonationStatus = inject<ImpersonationStatus>(IMPERSONATION_STATUS);
 
-  readonly username = signal('Utente');
+  readonly username = signal('User');
   readonly role = signal<UserRole>(this.auth.getRole());
   readonly isImpersonating = computed(() => this.impersonationStatus.isImpersonating());
 
@@ -34,11 +34,11 @@ export class App {
         return this.auth.getUsername();
       })
       .then((name) => {
-        this.username.set(name || 'Utente');
+        this.username.set(name || 'User');
       })
       .catch(() => {
         this.role.set(this.auth.getRole());
-        this.username.set('Utente');
+        this.username.set('User');
       });
   }
 

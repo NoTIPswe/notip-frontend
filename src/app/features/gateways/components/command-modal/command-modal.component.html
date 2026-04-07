@@ -1,8 +1,8 @@
-@if (open()) {
+<app-modal-layer [open]="open()">
   <section class="command-modal">
     <div class="header-row">
-      <h3>Invia comando</h3>
-      <button type="button" class="ghost" (click)="close()" [disabled]="busy()">Chiudi</button>
+      <h3>Send command</h3>
+      <button type="button" class="ghost" (click)="close()" [disabled]="busy()">Close</button>
     </div>
 
     @if (mode() === 'config') {
@@ -26,7 +26,7 @@
           </select>
         </label>
 
-        <button type="submit" [disabled]="busy()">Invia config</button>
+        <button type="submit" [disabled]="busy()">Send config</button>
       </form>
     }
 
@@ -42,8 +42,8 @@
           <input #url type="url" required />
         </label>
 
-        <button type="submit" [disabled]="busy()">Invia firmware</button>
+        <button type="submit" [disabled]="busy()">Send firmware</button>
       </form>
     }
   </section>
-}
+</app-modal-layer>

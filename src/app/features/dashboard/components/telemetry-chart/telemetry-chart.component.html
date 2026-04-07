@@ -1,6 +1,6 @@
 <section class="telemetry-chart">
   <div class="chart-header">
-    <h3>Trend Sensore</h3>
+    <h3>Sensor Trend</h3>
     @if (uniqueSensorIds().length > 1) {
       <div class="sensor-selector">
         <select [value]="selectedSensorId()" (change)="onSensorSelected($event)">
@@ -16,9 +16,9 @@
     @if (selectedSensorId()) {
       <canvas #chartCanvas></canvas>
     } @else {
-      <p class="empty">Nessun sensore disponibile o selezionato.</p>
+      <p class="empty">No sensors available or selected.</p>
     }
   </div>
 
-  <p class="meta">Envelope oscurati ricevuti: {{ obfuscatedCount() }}</p>
+  <p class="meta">Obfuscated envelopes received: {{ obfuscatedCount() }}</p>
 </section>

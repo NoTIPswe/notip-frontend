@@ -67,4 +67,24 @@ describe('ThresholdFormComponent', () => {
     expect(fixture.componentInstance.sensorTypes()).toEqual(['temperature', 'humidity']);
     expect(fixture.componentInstance.sensorIds()).toEqual(['sensor-1', 'sensor-2']);
   });
+
+  it('switches mode when requested and options exist', () => {
+    const fixture = TestBed.createComponent(ThresholdFormComponent);
+    fixture.componentRef.setInput('sensorTypes', ['temperature']);
+    fixture.componentRef.setInput('sensorIds', ['sensor-1']);
+    fixture.detectChanges();
+
+    fixture.componentInstance.selectMode('sensor');
+
+    expect(fixture.componentInstance.selectedMode()).toBe('sensor');
+  });
+
+  it('auto-falls back to sensor mode when no type options are available', () => {
+    const fixture = TestBed.createComponent(ThresholdFormComponent);
+    fixture.componentRef.setInput('sensorTypes', []);
+    fixture.componentRef.setInput('sensorIds', ['sensor-1']);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.selectedMode()).toBe('sensor');
+  });
 });

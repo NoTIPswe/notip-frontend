@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -8,11 +7,12 @@ import { ObfuscatedUser } from '../../../../core/models/user';
 import { TenantUserListComponent } from '../../components/tenant-user-list/tenant-user-list.component';
 import { AdminUserService } from '../../services/admin-user.service';
 import { TenantService } from '../../services/tenant.service';
+import { RomeDateTimePipe } from '../../../../shared/pipes/rome-date-time.pipe';
 
 @Component({
   selector: 'app-tenant-detail-page',
   standalone: true,
-  imports: [TenantUserListComponent, DatePipe],
+  imports: [TenantUserListComponent, RomeDateTimePipe],
   templateUrl: './tenant-detail.page.html',
   styleUrl: './tenant-detail.page.css',
 })
@@ -51,7 +51,7 @@ export class TenantDetailPageComponent implements OnInit {
   }
 
   onImpersonationStarted(userId: string): void {
-    this.feedbackMessage.set(`Impersonazione avviata per utente ${userId}.`);
+    this.feedbackMessage.set(`Impersonation started for user ${userId}.`);
     void this.router.navigateByUrl('/dashboard');
   }
 
@@ -69,7 +69,7 @@ export class TenantDetailPageComponent implements OnInit {
       },
       error: () => {
         this.isLoading.set(false);
-        this.errorMessage.set('Impossibile caricare la lista utenti del tenant.');
+        this.errorMessage.set('Unable to load tenant user list.');
       },
     });
   }
@@ -85,12 +85,12 @@ export class TenantDetailPageComponent implements OnInit {
           this.isTenantLoading.set(false);
           this.tenant.set(tenant);
           if (!tenant) {
-            this.errorMessage.set('Impossibile caricare il dettaglio tenant.');
+            this.errorMessage.set('Unable to load tenant details.');
           }
         },
         error: () => {
           this.isTenantLoading.set(false);
-          this.errorMessage.set('Impossibile caricare il dettaglio tenant.');
+          this.errorMessage.set('Unable to load tenant details.');
         },
       });
   }

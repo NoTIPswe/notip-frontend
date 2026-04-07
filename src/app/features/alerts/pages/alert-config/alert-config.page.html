@@ -1,6 +1,6 @@
 <section class="alert-config-page">
   <div class="header-row">
-    <h2>Configurazione Alert</h2>
+    <h2>Alert Configuration</h2>
     @if (canEditConfig && !showForm()) {
       <button
         type="button"
@@ -8,7 +8,7 @@
         [disabled]="isLoading() || !config()"
         (click)="toggleForm()"
       >
-        Modifica configurazione
+        Edit configuration
       </button>
     }
   </div>
@@ -22,45 +22,47 @@
   }
 
   @if (isLoading()) {
-    <p class="meta">Caricamento configurazione...</p>
+    <p class="meta">Loading configuration...</p>
   }
 
   @if (!canEditConfig) {
-    <p class="meta">Modalita sola lettura per ruolo tenant user.</p>
+    <p class="meta">Read-only mode for tenant user role.</p>
   }
 
-  @if (config() && !showForm()) {
+  @if (config()) {
     <p class="meta">
-      Timeout default attuale: {{ config()!.default.timeoutMs }} ms (aggiornato GMT+1:
-      {{ (config()!.default.updatedAt | date: 'dd/MM/yyyy - HH:mm:ss' : '+0100') || '-' }})
+      Current default timeout: {{ config()!.default.timeoutMs }} ms (updated Europe/Rome:
+      {{ (config()!.default.updatedAt | romeDateTime) || '-' }})
     </p>
 
     @if ((config()!.gatewayOverrides ?? []).length > 0) {
       <ul class="current-overrides">
         @for (row of config()!.gatewayOverrides ?? []; track row.gatewayId) {
           <li>
-            {{ row.gatewayId }}: {{ row.timeoutMs }} ms (aggiornato GMT+1:
-            {{ (row.updatedAt | date: 'dd/MM/yyyy - HH:mm:ss' : '+0100') || '-' }})
+            {{ row.gatewayId }}: {{ row.timeoutMs }} ms (updated Europe/Rome:
+            {{ (row.updatedAt | romeDateTime) || '-' }})
           </li>
         }
       </ul>
     }
 
     @if ((config()!.gatewayOverrides ?? []).length === 0) {
-      <p class="meta">Nessun override gateway configurato.</p>
+      <p class="meta">No gateway overrides configured.</p>
     }
   }
 
   @if (canEditConfig && config() && showForm()) {
-    <app-alert-config-form
-      [defaultTimeoutMs]="config()!.default.timeoutMs"
-      [gatewayOverrides]="config()!.gatewayOverrides ?? []"
-      [availableGatewayIds]="availableGatewayIds()"
-      [isSaving]="isSaving()"
-      (defaultSubmitted)="saveDefault($event)"
-      (gatewaySubmitted)="saveGateway($event)"
-      (gatewayDeleteRequested)="deleteGateway($event)"
-      (cancelRequested)="closeForm()"
-    ></app-alert-config-form>
+    <app-modal-layer [open]="true">
+      <app-alert-config-form
+        [defaultTimeoutMs]="config()!.default.timeoutMs"
+        [gatewayOverrides]="config()!.gatewayOverrides ?? []"
+        [availableGatewayIds]="availableGatewayIds()"
+        [isSaving]="isSaving()"
+        (defaultSubmitted)="saveDefault($event)"
+        (gatewaySubmitted)="saveGateway($event)"
+        (gatewayDeleteRequested)="deleteGateway($event)"
+        (cancelRequested)="closeForm()"
+      ></app-alert-config-form>
+    </app-modal-layer>
   }
 </section>

@@ -1,6 +1,6 @@
 <section class="user-form">
   @if (editUser()) {
-    <h3>Modifica utente</h3>
+    <h3>Edit user</h3>
     <form (submit)="update($event, updateUsername.value, updateEmail.value, updateRole.value)">
       <label>
         Username
@@ -13,7 +13,7 @@
       </label>
 
       <label>
-        Ruolo
+        Role
         <select #updateRole [value]="editUser()!.role">
           <option [value]="UserRole.tenant_user">tenant_user</option>
           <option [value]="UserRole.tenant_admin">tenant_admin</option>
@@ -21,14 +21,14 @@
       </label>
 
       <div class="actions">
-        <button type="submit" [disabled]="isSaving()">Salva</button>
+        <button type="submit" [disabled]="isSaving()">Save</button>
         <button type="button" class="ghost" (click)="cancel()" [disabled]="isSaving()">
-          Annulla
+          Cancel
         </button>
       </div>
     </form>
   } @else {
-    <h3>Crea utente</h3>
+    <h3>Create user</h3>
     <form
       (submit)="
         create(
@@ -51,7 +51,7 @@
       </label>
 
       <label>
-        Ruolo
+        Role
         <select #createRole>
           <option [value]="UserRole.tenant_user">tenant_user</option>
           <option [value]="UserRole.tenant_admin">tenant_admin</option>
@@ -64,7 +64,7 @@
       </label>
 
       <div class="actions">
-        <button type="submit" [disabled]="isSaving()">Crea</button>
+        <button type="submit" [disabled]="isSaving()">Create</button>
       </div>
     </form>
   }

@@ -2,12 +2,12 @@
   <div class="header-row">
     <h3>Tenant</h3>
     @if (isLoading()) {
-      <span class="status">Caricamento...</span>
+      <span class="status">Loading...</span>
     }
   </div>
 
   @if (!isLoading() && tenants().length === 0) {
-    <p class="empty">Nessun tenant disponibile.</p>
+    <p class="empty">No tenants available.</p>
   }
 
   @if (tenants().length > 0) {
@@ -16,10 +16,10 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Nome</th>
-            <th>Stato</th>
-            <th>Creato</th>
-            <th>Azioni</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -28,16 +28,16 @@
               <td>{{ tenant.tenantId }}</td>
               <td>{{ tenant.name }}</td>
               <td>{{ tenant.status }}</td>
-              <td>{{ (tenant.createdAt | date: 'dd/MM/yyyy - HH:mm' : '+0100') || '-' }}</td>
+              <td>{{ (tenant.createdAt | romeDateTime: false) || '-' }}</td>
               <td class="actions-cell">
                 <button type="button" class="ghost" (click)="onSelect(tenant.tenantId)">
-                  Apri
+                  Open
                 </button>
                 <button type="button" class="ghost" (click)="onEdit(tenant.tenantId, $event)">
-                  Modifica
+                  Edit
                 </button>
                 <button type="button" class="danger" (click)="onDelete(tenant.tenantId, $event)">
-                  Elimina
+                  Delete
                 </button>
               </td>
             </tr>

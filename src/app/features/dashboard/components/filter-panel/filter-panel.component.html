@@ -1,5 +1,5 @@
 <section class="filter-panel">
-  <h3>{{ mode() === 'stream' ? 'Filtri Stream' : 'Filtri Query' }}</h3>
+  <h3>{{ mode() === 'stream' ? 'Stream Filters' : 'Query Filters' }}</h3>
 
   @if (mode() === 'stream') {
     <form (submit)="applyFilters($event, gatewayIds, sensorTypes, sensorIds)">
@@ -19,7 +19,7 @@
         </label>
 
         <label>
-          Tipo sensore
+          Sensor type
           <select #sensorTypes multiple size="4">
             @for (sensorType of sensorTypeOptions(); track sensorType) {
               <option
@@ -33,7 +33,7 @@
         </label>
 
         <label>
-          Sensori
+          Sensors
           <select #sensorIds multiple size="4">
             @for (sensorId of sensorOptions(); track sensorId) {
               <option
@@ -47,16 +47,16 @@
         </label>
       </div>
 
-      <p class="hint">Selezione multipla: usa Ctrl/Cmd + click.</p>
+      <p class="hint">Multi-selection: use Ctrl/Cmd + click.</p>
 
       <div class="actions">
-        <button type="submit" class="btn btn-primary">Applica</button>
+        <button type="submit" class="btn btn-primary">Apply</button>
         <button
           type="button"
           class="btn btn-ghost"
           (click)="clearFilters(gatewayIds, sensorTypes, sensorIds)"
         >
-          Pulisci
+          Clear
         </button>
       </div>
     </form>
@@ -84,7 +84,7 @@
         </label>
 
         <label>
-          Tipo sensore
+          Sensor type
           <select #sensorTypes multiple size="4">
             @for (sensorType of sensorTypeOptions(); track sensorType) {
               <option
@@ -98,7 +98,7 @@
         </label>
 
         <label>
-          Sensori
+          Sensors
           <select #sensorIds multiple size="4">
             @for (sensorId of sensorOptions(); track sensorId) {
               <option
@@ -112,7 +112,7 @@
         </label>
 
         <label>
-          Da
+          From
           <input
             #fromInput
             type="datetime-local"
@@ -121,7 +121,7 @@
         </label>
 
         <label>
-          A
+          To
           <input
             #toInput
             type="datetime-local"
@@ -130,16 +130,16 @@
         </label>
       </div>
 
-      <p class="hint">Selezione multipla: usa Ctrl/Cmd + click.</p>
+      <p class="hint">Multi-selection: use Ctrl/Cmd + click.</p>
 
       <div class="actions">
-        <button type="submit" class="btn btn-primary">Applica</button>
+        <button type="submit" class="btn btn-primary">Apply</button>
         <button
           type="button"
           class="btn btn-ghost"
           (click)="clearFilters(gatewayIds, sensorTypes, sensorIds, fromInput, toInput)"
         >
-          Pulisci
+          Clear
         </button>
       </div>
     </form>

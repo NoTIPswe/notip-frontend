@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
@@ -9,11 +8,16 @@ import { Alerts } from '../../../../core/models/alert';
 import { AlertService } from '../../services/alert.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { UserRole } from '../../../../core/models/enums';
+import { RomeDateTimePipe } from '../../../../shared/pipes/rome-date-time.pipe';
+import {
+  fromRomeDateTimeInputToIso,
+  toRomeDateTimeInput,
+} from '../../../../shared/utils/rome-timezone.util';
 
 @Component({
   selector: 'app-alert-list-page',
   standalone: true,
-  imports: [AlertFilterPanelComponent, RouterLink, DatePipe],
+  imports: [AlertFilterPanelComponent, RouterLink, RomeDateTimePipe],
   templateUrl: './alert-list.page.html',
   styleUrl: './alert-list.page.css',
 })
@@ -66,25 +70,16 @@ export class AlertListPageComponent implements OnInit {
       },
       error: () => {
         this.isLoading.set(false);
-        this.errorMessage.set('Impossibile caricare gli alert.');
+        this.errorMessage.set('Unable to load alerts.');
       },
     });
   }
 
   private toIsoOrNow(value: string): string {
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) {
-      return new Date().toISOString();
-    }
-    return parsed.toISOString();
+    return fromRomeDateTimeInputToIso(value) ?? new Date().toISOString();
   }
 
   private toDatetimeLocal(value: Date): string {
-    const y = value.getFullYear();
-    const m = String(value.getMonth() + 1).padStart(2, '0');
-    const d = String(value.getDate()).padStart(2, '0');
-    const h = String(value.getHours()).padStart(2, '0');
-    const min = String(value.getMinutes()).padStart(2, '0');
-    return `${y}-${m}-${d}T${h}:${min}`;
+    return toRomeDateTimeInput(value);
   }
 }

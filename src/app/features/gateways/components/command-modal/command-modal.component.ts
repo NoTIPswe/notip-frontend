@@ -1,12 +1,14 @@
 import { Component, input, output } from '@angular/core';
 import { GatewayConfig, GatewayFirmware } from '../../../../core/models/command';
 import { CmdGatewayStatus } from '../../../../core/models/enums';
+import { ModalLayerComponent } from '../../../../shared/components/modal-layer/modal-layer.component';
 
 export type CommandModalMode = 'config' | 'firmware' | null;
 
 @Component({
   selector: 'app-command-modal',
   standalone: true,
+  imports: [ModalLayerComponent],
   templateUrl: './command-modal.component.html',
   styleUrl: './command-modal.component.css',
 })

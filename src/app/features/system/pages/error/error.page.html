@@ -3,11 +3,11 @@
   <p class="message">{{ content().message }}</p>
 
   @if (reason() === 'unauthorized') {
-    <p class="hint">Percorso da ricaricare: {{ retryUrl() }}</p>
+    <p class="hint">Reload path: {{ retryUrl() }}</p>
   }
 
   <div class="actions">
-    <button type="button" (click)="reload()">Ricarica pagina</button>
+    <button type="button" (click)="reload()">Reload page</button>
   </div>
 
   <p class="reason">Reason: {{ reason() }}</p>

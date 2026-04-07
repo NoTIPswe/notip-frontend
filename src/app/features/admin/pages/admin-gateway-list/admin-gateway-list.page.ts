@@ -7,11 +7,12 @@ import { AdminGatewayTableComponent } from '../../components/admin-gateway-table
 import { ObfuscatedGateway } from '../../../../core/models/gateway';
 import { AdminGatewayService } from '../../services/admin-gateway.service';
 import { TenantService } from '../../services/tenant.service';
+import { ModalLayerComponent } from '../../../../shared/components/modal-layer/modal-layer.component';
 
 @Component({
   selector: 'app-admin-gateway-list-page',
   standalone: true,
-  imports: [AdminGatewayTableComponent, AdminGatewayFormComponent],
+  imports: [AdminGatewayTableComponent, AdminGatewayFormComponent, ModalLayerComponent],
   templateUrl: './admin-gateway-list.page.html',
   styleUrl: './admin-gateway-list.page.css',
 })
@@ -68,12 +69,12 @@ export class AdminGatewayListPageComponent implements OnInit {
         next: (id) => {
           this.isSaving.set(false);
           this.showCreateForm.set(false);
-          this.infoMessage.set(`Gateway creato con id ${id}.`);
+          this.infoMessage.set(`Gateway created with id ${id}.`);
           this.loadGateways();
         },
         error: () => {
           this.isSaving.set(false);
-          this.errorMessage.set('Impossibile creare il gateway.');
+          this.errorMessage.set('Unable to create gateway.');
         },
       });
   }
@@ -92,7 +93,7 @@ export class AdminGatewayListPageComponent implements OnInit {
       },
       error: () => {
         this.isLoading.set(false);
-        this.errorMessage.set('Impossibile caricare i gateways admin.');
+        this.errorMessage.set('Unable to load admin gateways.');
       },
     });
   }

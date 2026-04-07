@@ -3,25 +3,27 @@
     <h2>Client API</h2>
     @if (!showCreateForm()) {
       <button type="button" class="create-toggle" (click)="toggleCreateForm()">
-        + Nuovo client API
+        + New API client
       </button>
     }
   </div>
 
   @if (showCreateForm()) {
-    <form
-      class="create-form"
-      (submit)="$event.preventDefault(); createClient(name.value); name.value = ''"
-    >
-      <label>
-        Nome client
-        <input #name type="text" required minlength="2" placeholder="Backoffice integration" />
-      </label>
-      <button type="submit" [disabled]="isSaving()">Crea client</button>
-      <button type="button" class="ghost" [disabled]="isSaving()" (click)="closeCreateForm()">
-        Annulla
-      </button>
-    </form>
+    <app-modal-layer [open]="true">
+      <form
+        class="create-form"
+        (submit)="$event.preventDefault(); createClient(name.value); name.value = ''"
+      >
+        <label>
+          Client name
+          <input #name type="text" required minlength="2" placeholder="Backoffice integration" />
+        </label>
+        <button type="submit" [disabled]="isSaving()">Create client</button>
+        <button type="button" class="ghost" [disabled]="isSaving()" (click)="closeCreateForm()">
+          Cancel
+        </button>
+      </form>
+    </app-modal-layer>
   }
 
   @if (errorMessage()) {
@@ -32,20 +34,27 @@
     <p class="info">{{ infoMessage() }}</p>
   }
 
-  @if (!showCreateForm() && lastCreated()) {
+  @if (lastCreated()) {
     <section class="secret-box">
-      <h3>Nuovo client creato</h3>
+      <h3>New client created</h3>
       <p><strong>Client ID:</strong> {{ lastCreated()!.clientId }}</p>
       <p><strong>Client Secret:</strong> {{ lastCreated()!.clientSecret }}</p>
-      <p class="hint">Conserva il secret: non sara mostrato di nuovo.</p>
+      <p class="hint">Store the secret: it will not be shown again.</p>
     </section>
   }
 
-  @if (!showCreateForm()) {
-    <app-api-client-table
-      [clients]="clients()"
-      [isLoading]="isLoading()"
-      (deleteRequested)="requestDelete($event)"
-    ></app-api-client-table>
-  }
+  <app-api-client-table
+    [clients]="clients()"
+    [isLoading]="isLoading()"
+    (deleteRequested)="requestDelete($event)"
+  ></app-api-client-table>
+
+  <app-delete-confirm-modal
+    [open]="!!deletingClientId()"
+    [title]="'Delete API client'"
+    [message]="'Do you confirm deleting the selected client?'"
+    [busy]="isSaving()"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()"
+  ></app-delete-confirm-modal>
 </section>

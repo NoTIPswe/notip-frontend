@@ -47,7 +47,7 @@ export class GatewayListPageComponent implements OnInit {
           this.gateways.set(rows);
         },
         error: () => {
-          this.errorMessage.set('Impossibile caricare la lista gateway.');
+          this.errorMessage.set('Unable to load gateway list.');
         },
       });
   }

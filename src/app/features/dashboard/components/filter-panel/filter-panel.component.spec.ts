@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fromRomeDateTimeInputToIso } from '../../../../shared/utils/rome-timezone.util';
 import { FilterPanelComponent } from './filter-panel.component';
 
 describe('FilterPanelComponent', () => {
@@ -57,8 +58,8 @@ describe('FilterPanelComponent', () => {
     expect(payload.gatewayIds).toEqual(['gw-1', 'gw-2']);
     expect(payload.sensorTypes).toEqual(['temperature', 'humidity']);
     expect(payload.sensorIds).toEqual(['s-1']);
-    expect(payload.from).toBe(new Date(fromRaw).toISOString());
-    expect(payload.to).toBe(new Date(toRaw).toISOString());
+    expect(payload.from).toBe(fromRomeDateTimeInputToIso(fromRaw));
+    expect(payload.to).toBe(fromRomeDateTimeInputToIso(toRaw));
   });
 
   it('clears selected options, restores default range and emits clear event', () => {

@@ -13,11 +13,18 @@ import { ThresholdService } from '../../../../../core/services/threshold.service
 import { SensorService } from '../../../../sensors/services/sensor.service';
 import { AuthService } from '../../../../../core/services/auth.service';
 import { UserRole } from '../../../../../core/models/enums';
+import { ModalLayerComponent } from '../../../../../shared/components/modal-layer/modal-layer.component';
+import { DeleteConfirmModalComponent } from '../../../../../shared/components/delete-confirm-modal/delete-confirm-modal.component';
 
 @Component({
   selector: 'app-threshold-settings-page',
   standalone: true,
-  imports: [ThresholdTableComponent, ThresholdFormComponent],
+  imports: [
+    ThresholdTableComponent,
+    ThresholdFormComponent,
+    ModalLayerComponent,
+    DeleteConfirmModalComponent,
+  ],
   templateUrl: './threshold-settings.page.html',
   styleUrl: './threshold-settings.page.css',
 })
@@ -31,6 +38,7 @@ export class ThresholdSettingsPageComponent implements OnInit {
   readonly sensorTypeOptions = signal<string[]>([]);
   readonly sensorIdOptions = signal<string[]>([]);
   readonly showForm = signal<boolean>(false);
+  readonly deletingThreshold = signal<ThresholdDeletePayload | null>(null);
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
@@ -69,12 +77,12 @@ export class ThresholdSettingsPageComponent implements OnInit {
         next: () => {
           this.isSaving.set(false);
           this.showForm.set(false);
-          this.infoMessage.set(`Soglia per type ${payload.sensorType} salvata.`);
+          this.infoMessage.set(`Threshold for type ${payload.sensorType} saved.`);
           this.loadThresholds();
         },
         error: () => {
           this.isSaving.set(false);
-          this.errorMessage.set('Impossibile salvare la soglia per type.');
+          this.errorMessage.set('Unable to save threshold by type.');
         },
       });
   }
@@ -86,9 +94,7 @@ export class ThresholdSettingsPageComponent implements OnInit {
 
     const sensorType = this.sensorTypeBySensorId()[payload.sensorId];
     if (!sensorType) {
-      this.errorMessage.set(
-        `Impossibile determinare il sensor type per il sensore ${payload.sensorId}.`,
-      );
+      this.errorMessage.set(`Unable to determine sensor type for sensor ${payload.sensorId}.`);
       return;
     }
 
@@ -102,12 +108,12 @@ export class ThresholdSettingsPageComponent implements OnInit {
         next: () => {
           this.isSaving.set(false);
           this.showForm.set(false);
-          this.infoMessage.set(`Soglia per sensore ${payload.sensorId} salvata.`);
+          this.infoMessage.set(`Threshold for sensor ${payload.sensorId} saved.`);
           this.loadThresholds();
         },
         error: () => {
           this.isSaving.set(false);
-          this.errorMessage.set('Impossibile salvare la soglia per sensore.');
+          this.errorMessage.set('Unable to save threshold for sensor.');
         },
       });
   }
@@ -117,8 +123,16 @@ export class ThresholdSettingsPageComponent implements OnInit {
       return;
     }
 
-    const confirmed = globalThis.confirm('Confermi eliminazione soglia selezionata?');
-    if (!confirmed) {
+    this.deletingThreshold.set(payload);
+  }
+
+  cancelDeleteThreshold(): void {
+    this.deletingThreshold.set(null);
+  }
+
+  confirmDeleteThreshold(): void {
+    const payload = this.deletingThreshold();
+    if (!payload || !this.canEditThresholds) {
       return;
     }
 
@@ -134,12 +148,13 @@ export class ThresholdSettingsPageComponent implements OnInit {
     request.subscribe({
       next: () => {
         this.isSaving.set(false);
-        this.infoMessage.set(`Soglia eliminata: ${payload.key}`);
+        this.deletingThreshold.set(null);
+        this.infoMessage.set(`Threshold deleted: ${payload.key}`);
         this.loadThresholds();
       },
       error: () => {
         this.isSaving.set(false);
-        this.errorMessage.set('Impossibile eliminare la soglia.');
+        this.errorMessage.set('Unable to delete threshold.');
       },
     });
   }
@@ -155,7 +170,7 @@ export class ThresholdSettingsPageComponent implements OnInit {
       },
       error: () => {
         this.isLoading.set(false);
-        this.errorMessage.set('Impossibile caricare la lista soglie.');
+        this.errorMessage.set('Unable to load threshold list.');
       },
     });
   }

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, of, take, toArray } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { SensorService as DataApiSensorService } from '../../../generated/openapi/notip-data-api-openapi/api/sensor.service';
+import { SensorsService as DataApiSensorsService } from '../../../generated/openapi/notip-data-api-openapi/api/sensors.service';
 import { SensorService } from './sensor.service';
 
 describe('SensorService', () => {
@@ -17,7 +17,7 @@ describe('SensorService', () => {
     apiMock.sensorControllerGetSensors.mockReset();
 
     await TestBed.configureTestingModule({
-      providers: [SensorService, { provide: DataApiSensorService, useValue: apiMock }],
+      providers: [SensorService, { provide: DataApiSensorsService, useValue: apiMock }],
     }).compileComponents();
 
     service = TestBed.inject(SensorService);

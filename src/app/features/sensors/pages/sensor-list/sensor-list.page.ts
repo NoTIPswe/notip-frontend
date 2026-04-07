@@ -1,14 +1,14 @@
-import { DatePipe } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Sensor } from '../../../../core/models/sensor';
 import { SensorService } from '../../services/sensor.service';
+import { RomeDateTimePipe } from '../../../../shared/pipes/rome-date-time.pipe';
 
 @Component({
   selector: 'app-sensor-list-page',
   standalone: true,
-  imports: [DatePipe],
+  imports: [RomeDateTimePipe],
   templateUrl: './sensor-list.page.html',
   styleUrl: './sensor-list.page.css',
 })
@@ -68,7 +68,7 @@ export class SensorListPageComponent implements OnInit {
         },
         error: () => {
           this.isLoading.set(false);
-          this.errorMessage.set('Impossibile caricare la lista sensori.');
+          this.errorMessage.set('Unable to load sensor list.');
         },
       });
   }

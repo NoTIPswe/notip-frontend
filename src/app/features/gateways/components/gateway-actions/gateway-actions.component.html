@@ -1,14 +1,12 @@
 <section class="gateway-actions">
-  <h3>Azioni gateway</h3>
+  <h3>Gateway actions</h3>
 
   @if (!canManage()) {
-    <p class="hint">Permessi insufficienti: richiesto tenant_admin.</p>
+    <p class="hint">Insufficient permissions: tenant_admin required.</p>
   }
 
   <div class="actions">
-    <button type="button" (click)="onRename()" [disabled]="!canManage() || isBusy()">
-      Rinomina
-    </button>
+    <button type="button" (click)="onRename()" [disabled]="!canManage() || isBusy()">Rename</button>
     <button type="button" (click)="onConfigure()" [disabled]="!canManage() || isBusy()">
       Configure
     </button>
@@ -16,7 +14,7 @@
       Firmware
     </button>
     <button type="button" class="danger" (click)="onDelete()" [disabled]="!canManage() || isBusy()">
-      Elimina
+      Delete
     </button>
   </div>
 </section>

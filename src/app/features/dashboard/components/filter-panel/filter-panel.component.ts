@@ -1,4 +1,8 @@
 import { Component, input, output } from '@angular/core';
+import {
+  fromRomeDateTimeInputToIso,
+  toRomeDateTimeInput,
+} from '../../../../shared/utils/rome-timezone.util';
 
 export type DashboardFilterMode = 'stream' | 'query';
 
@@ -91,18 +95,7 @@ export class FilterPanelComponent {
   }
 
   toLocalDateTimeInput(value?: string): string {
-    if (!value) {
-      return '';
-    }
-
-    const parsed = new Date(value);
-
-    if (Number.isNaN(parsed.getTime())) {
-      return '';
-    }
-
-    const offsetMs = parsed.getTimezoneOffset() * 60 * 1000;
-    return new Date(parsed.getTime() - offsetMs).toISOString().slice(0, 16);
+    return toRomeDateTimeInput(value);
   }
 
   private selectedValues(select: HTMLSelectElement): string[] {
@@ -118,16 +111,6 @@ export class FilterPanelComponent {
   }
 
   private normalizeDateTime(value?: string): string | undefined {
-    if (!value) {
-      return undefined;
-    }
-
-    const parsed = new Date(value);
-
-    if (Number.isNaN(parsed.getTime())) {
-      return undefined;
-    }
-
-    return parsed.toISOString();
+    return fromRomeDateTimeInputToIso(value);
   }
 }

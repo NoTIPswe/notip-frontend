@@ -1,99 +1,129 @@
 <div class="dashboard-wrapper dashboard-modern">
-  <!-- Sidebar Filtri -->
+  <!-- Sidebar Filters -->
   <aside class="filters-sidebar modern-sidebar">
-    <div class="sidebar-brand">
-      <div class="brand-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path
-            d="M21 12V7a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 7v10a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14">
-          </path>
-          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-          <line x1="12" y1="22.08" x2="12" y2="12"></line>
-        </svg>
-      </div>
-      <h3>Configurazione</h3>
-    </div>
     <div class="view-selector">
-      <button type="button" [class.active]="activeView() === 'stream'" (click)="setActiveView('stream')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2">
-          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-        </svg>
+      <button
+        type="button"
+        [class.active]="activeView() === 'stream'"
+        (click)="setActiveView('stream')"
+      >
         Live Stream
       </button>
-      <button type="button" [class.active]="activeView() === 'query'" (click)="setActiveView('query')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        Analisi Storica
+      <button
+        type="button"
+        [class.active]="activeView() === 'query'"
+        (click)="setActiveView('query')"
+      >
+        Historical Analysis
       </button>
     </div>
     <div class="sidebar-scroll-area">
-      <app-filter-panel [mode]="activeView()" [gatewayOptions]="gatewayOptions()"
-        [sensorTypeOptions]="sensorTypeOptions()" [sensorOptions]="sensorOptions()"
+      <app-filter-panel
+        [mode]="activeView()"
+        [gatewayOptions]="gatewayOptions()"
+        [sensorTypeOptions]="sensorTypeOptions()"
+        [sensorOptions]="sensorOptions()"
         [defaultFilters]="activeView() === 'stream' ? streamFilters() : queryFilters()"
-        (filtersApplied)="onFiltersApplied($event)" (clearRequested)="onFiltersCleared()">
+        (filtersApplied)="onFiltersApplied($event)"
+        (clearRequested)="onFiltersCleared()"
+      >
       </app-filter-panel>
     </div>
   </aside>
-  <!-- Area Contenuti -->
+  <!-- Content Area -->
   <main class="main-content modern-main">
     <header class="main-header modern-header sticky">
       <div class="header-left">
-        <h1>{{ activeView() === 'stream' ? 'Monitoraggio Real-Time' : 'Archivio Telemetria' }}</h1>
+        <h1>{{ activeView() === 'stream' ? 'Real-Time Monitoring' : 'Telemetry Archive' }}</h1>
         @if (activeView() === 'stream') {
-        <div class="live-indicator">
-          <span class="dot"></span>
-          Sincronizzato
-        </div>
+          <div class="live-indicator">
+            <span class="dot"></span>
+            Synchronized
+          </div>
         }
       </div>
       <div class="header-right">
         <div class="data-pill">
           @if (activeView() === 'stream') {
-          <strong>{{ streamMeasures().length }}</strong> campioni mostrati
+            <strong>{{ streamMeasures().length }}</strong> samples shown
           } @else {
-          Pagina <strong>{{ queryPage() }}</strong> • <strong>{{ queryMeasures().length }}</strong> risultati
+            Page <strong>{{ queryPage() }}</strong> •
+            <strong>{{ queryMeasures().length }}</strong> results
           }
         </div>
       </div>
     </header>
     <div class="dashboard-grid modern-grid">
       @if (activeView() === 'stream') {
-      <div class="grid-item chart-card modern-card">
-        <app-telemetry-chart [measures]="streamMeasures()"></app-telemetry-chart>
-      </div>
-      <div class="grid-item table-card modern-card">
-        <app-telemetry-table [measures]="streamMeasures()" [isLoading]="isStreamLoading()"></app-telemetry-table>
-      </div>
+        <div class="grid-item chart-card modern-card">
+          <app-telemetry-chart [measures]="streamMeasures()"></app-telemetry-chart>
+        </div>
+        <div class="grid-item table-card modern-card">
+          <app-telemetry-table
+            [measures]="streamMeasures()"
+            [isLoading]="isStreamLoading()"
+          ></app-telemetry-table>
+        </div>
       }
       @if (activeView() === 'query') {
-      <div class="grid-item chart-card modern-card">
-        <app-telemetry-chart [measures]="queryMeasures()"></app-telemetry-chart>
-      </div>
-      <div class="grid-item actions-card modern-card">
-        <div class="query-actions">
-          @if (canExportQuery()) {
-          <button class="btn btn-primary" [disabled]="isExporting() || isQueryLoading()" (click)="onExportQuery()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            Esporta CSV
-          </button>
-          }
+        <div class="grid-item chart-card modern-card">
+          <app-telemetry-chart [measures]="queryMeasures()"></app-telemetry-chart>
         </div>
-      </div>
-      <div class="grid-item table-card modern-card">
-        <app-telemetry-table [measures]="queryMeasures()" [isLoading]="isQueryLoading()"></app-telemetry-table>
-      </div>
+        <div class="grid-item actions-card modern-card">
+          <div class="query-actions">
+            @if (canExportQuery()) {
+              <button
+                class="btn btn-primary"
+                [disabled]="isExporting() || isQueryLoading()"
+                (click)="onExportQuery()"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Export CSV
+              </button>
+            }
+          </div>
+
+          <div class="query-pagination">
+            <button
+              type="button"
+              class="btn btn-ghost"
+              [disabled]="!canGoToPreviousQueryPage()"
+              (click)="onPreviousQueryPage()"
+            >
+              Previous
+            </button>
+
+            <span class="meta">Page {{ queryPage() }}</span>
+
+            <button
+              type="button"
+              class="btn btn-ghost"
+              [disabled]="!canGoToNextQueryPage()"
+              (click)="onNextQueryPage()"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+        <div class="grid-item table-card modern-card">
+          <app-telemetry-table
+            [measures]="queryMeasures()"
+            [isLoading]="isQueryLoading()"
+          ></app-telemetry-table>
+        </div>
       }
     </div>
-
   </main>
 </div>

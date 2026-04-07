@@ -51,6 +51,7 @@ export class DataDashboardPageComponent implements OnInit, OnDestroy {
   private queryInitialized = false;
   private queryCurrentCursor: string | undefined;
   private queryNextCursor: string | undefined;
+  private queryPreviousCursors: Array<string | undefined> = [];
 
   readonly activeView = signal<DashboardViewMode>('stream');
   readonly dataMode = signal<DashboardDataMode>('clear');
@@ -78,9 +79,11 @@ export class DataDashboardPageComponent implements OnInit, OnDestroy {
   readonly queryHasNextPage = signal(false);
 
   ngOnInit(): void {
-    // Se impersonificazione attiva, forza modalità obfuscated
+    // If impersonation is active, force obfuscated mode
     const isImpersonating = this.authService.isImpersonating();
-    const mode = isImpersonating ? 'obfuscated' : this.asDataMode(this.route.snapshot.data['dataMode']);
+    const mode = isImpersonating
+      ? 'obfuscated'
+      : this.asDataMode(this.route.snapshot.data['dataMode']);
     this.dataMode.set(mode);
 
     void this.loadFilterOptions();
@@ -148,9 +151,24 @@ export class DataDashboardPageComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.queryPreviousCursors.push(this.queryCurrentCursor);
     this.queryCurrentCursor = this.queryNextCursor;
     this.queryPage.update((page) => page + 1);
     void this.loadQueryPage(this.queryCurrentCursor);
+  }
+
+  onPreviousQueryPage(): void {
+    if (!this.canGoToPreviousQueryPage()) {
+      return;
+    }
+
+    this.queryCurrentCursor = this.queryPreviousCursors.pop();
+    this.queryPage.update((page) => Math.max(1, page - 1));
+    void this.loadQueryPage(this.queryCurrentCursor);
+  }
+
+  canGoToPreviousQueryPage(): boolean {
+    return !this.isQueryLoading() && this.queryPreviousCursors.length > 0;
   }
 
   canGoToNextQueryPage(): boolean {
@@ -189,7 +207,7 @@ export class DataDashboardPageComponent implements OnInit, OnDestroy {
   private async loadFilterOptions(): Promise<void> {
     try {
       const sensorsPromise = firstValueFrom(this.sensorService.getAllSensors(0));
-      // In impersonificazione, anche se dataMode è 'obfuscated', NON usare AdminGatewayService (403)
+      // During impersonation, even if dataMode is 'obfuscated', DO NOT use AdminGatewayService (403)
       const gatewaysPromise = firstValueFrom(this.gatewayService.getGateways());
 
       const [gateways, sensors] = await Promise.all([gatewaysPromise, sensorsPromise]);
@@ -270,6 +288,7 @@ export class DataDashboardPageComponent implements OnInit, OnDestroy {
 
     this.queryCurrentCursor = undefined;
     this.queryNextCursor = undefined;
+    this.queryPreviousCursors = [];
     this.queryPage.set(1);
     this.queryMeasures.set([]);
 
@@ -293,7 +312,7 @@ export class DataDashboardPageComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.queryMeasures.set(page.data);
+      this.queryMeasures.set(this.sortByTimestampAsc(page.data));
       this.queryNextCursor = page.nextCursor;
       this.queryHasNextPage.set(Boolean(page.hasMore && page.nextCursor));
     } catch {
@@ -416,6 +435,21 @@ export class DataDashboardPageComponent implements OnInit, OnDestroy {
 
   private uniqueSorted(values: string[]): string[] {
     return Array.from(new Set(values)).sort((left, right) => left.localeCompare(right));
+  }
+
+  private sortByTimestampAsc(
+    rows: Array<CheckedEnvelope | ObfuscatedEnvelope>,
+  ): Array<CheckedEnvelope | ObfuscatedEnvelope> {
+    return [...rows].sort((left, right) => {
+      const leftMs = Date.parse(left.timestamp);
+      const rightMs = Date.parse(right.timestamp);
+
+      if (Number.isNaN(leftMs) || Number.isNaN(rightMs)) {
+        return left.timestamp.localeCompare(right.timestamp);
+      }
+
+      return leftMs - rightMs;
+    });
   }
 
   private downloadAsCsv(rows: CheckedEnvelope[]): void {

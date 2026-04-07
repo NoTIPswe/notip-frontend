@@ -1,11 +1,11 @@
-import { DatePipe } from '@angular/common';
 import { Component, input, output } from '@angular/core';
 import { Client } from '../../../../../core/models/client';
+import { RomeDateTimePipe } from '../../../../../shared/pipes/rome-date-time.pipe';
 
 @Component({
   selector: 'app-api-client-table',
   standalone: true,
-  imports: [DatePipe],
+  imports: [RomeDateTimePipe],
   templateUrl: './api-client-table.component.html',
   styleUrl: './api-client-table.component.css',
 })

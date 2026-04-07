@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component, DestroyRef, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -16,11 +15,12 @@ import { TelemetryTableComponent } from '../../../dashboard/components/telemetry
 import { ObfuscatedMeasureService } from '../../../dashboard/services/obfuscated-measure.service';
 import { ValidatedMeasureFacadeService } from '../../../dashboard/services/validated-measure-facade.service';
 import { SensorService } from '../../services/sensor.service';
+import { RomeDateTimePipe } from '../../../../shared/pipes/rome-date-time.pipe';
 
 @Component({
   selector: 'app-sensor-detail-page',
   standalone: true,
-  imports: [TelemetryTableComponent, TelemetryChartComponent, DatePipe],
+  imports: [TelemetryTableComponent, TelemetryChartComponent, RomeDateTimePipe],
   templateUrl: './sensor-detail.page.html',
   styleUrl: './sensor-detail.page.css',
 })
@@ -77,11 +77,11 @@ export class SensorDetailPageComponent implements OnInit, OnDestroy {
           this.sensor.set(selected);
 
           if (!selected) {
-            this.errorMessage.set('Sensore non trovato.');
+            this.errorMessage.set('Sensor not found.');
           }
         },
         error: () => {
-          this.errorMessage.set('Impossibile caricare il dettaglio sensore.');
+          this.errorMessage.set('Unable to load sensor details.');
         },
       });
   }
@@ -169,7 +169,7 @@ export class SensorDetailPageComponent implements OnInit, OnDestroy {
           }
 
           this.isTelemetryLoading.set(false);
-          this.errorMessage.set('Impossibile ricevere stream telemetria.');
+          this.errorMessage.set('Unable to receive telemetry stream.');
         },
       });
       return;
@@ -192,7 +192,7 @@ export class SensorDetailPageComponent implements OnInit, OnDestroy {
         }
 
         this.isTelemetryLoading.set(false);
-        this.errorMessage.set('Impossibile ricevere stream telemetria.');
+        this.errorMessage.set('Unable to receive telemetry stream.');
       },
     });
   }

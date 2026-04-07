@@ -5,6 +5,8 @@ import { Tenant } from '../../../../core/models/tenant';
 import { TenantFormComponent } from '../../components/tenant-form/tenant-form.component';
 import { TenantTableComponent } from '../../components/tenant-table/tenant-table.component';
 import { TenantService } from '../../services/tenant.service';
+import { ModalLayerComponent } from '../../../../shared/components/modal-layer/modal-layer.component';
+import { DeleteConfirmModalComponent } from '../../../../shared/components/delete-confirm-modal/delete-confirm-modal.component';
 
 type CreateTenantRequestPayload = {
   name: string;
@@ -23,7 +25,12 @@ type UpdateTenantRequestPayload = {
 @Component({
   selector: 'app-tenant-manager-page',
   standalone: true,
-  imports: [TenantTableComponent, TenantFormComponent],
+  imports: [
+    TenantTableComponent,
+    TenantFormComponent,
+    ModalLayerComponent,
+    DeleteConfirmModalComponent,
+  ],
   templateUrl: './tenant-manager.page.html',
   styleUrl: './tenant-manager.page.css',
 })
@@ -36,6 +43,7 @@ export class TenantManagerPageComponent implements OnInit {
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
   readonly selectedTenantId = signal<string | null>(null);
+  readonly deletingTenantId = signal<string | null>(null);
   readonly editingTenant = signal<Tenant | null>(null);
   readonly errorMessage = signal<string | null>(null);
   readonly tenantStatusActive = TenantStatus.active;
@@ -66,8 +74,16 @@ export class TenantManagerPageComponent implements OnInit {
   }
 
   onDeleteTenantRequested(tenantId: string): void {
-    const confirmed = globalThis.confirm('Confermare eliminazione tenant?');
-    if (!confirmed) {
+    this.deletingTenantId.set(tenantId);
+  }
+
+  cancelDeleteTenant(): void {
+    this.deletingTenantId.set(null);
+  }
+
+  confirmDeleteTenant(): void {
+    const tenantId = this.deletingTenantId();
+    if (!tenantId) {
       return;
     }
 
@@ -77,6 +93,7 @@ export class TenantManagerPageComponent implements OnInit {
     this.tenantService.deleteTenant(tenantId).subscribe({
       next: () => {
         this.isSaving.set(false);
+        this.deletingTenantId.set(null);
         if (this.selectedTenantId() === tenantId) {
           this.selectedTenantId.set(null);
         }
@@ -84,7 +101,7 @@ export class TenantManagerPageComponent implements OnInit {
       },
       error: () => {
         this.isSaving.set(false);
-        this.errorMessage.set('Impossibile eliminare il tenant.');
+        this.errorMessage.set('Unable to delete tenant.');
       },
     });
   }
@@ -108,7 +125,7 @@ export class TenantManagerPageComponent implements OnInit {
         },
         error: () => {
           this.isSaving.set(false);
-          this.errorMessage.set('Impossibile creare il tenant.');
+          this.errorMessage.set('Unable to create tenant.');
         },
       });
   }
@@ -132,7 +149,7 @@ export class TenantManagerPageComponent implements OnInit {
         },
         error: () => {
           this.isSaving.set(false);
-          this.errorMessage.set('Impossibile aggiornare il tenant.');
+          this.errorMessage.set('Unable to update tenant.');
         },
       });
   }
@@ -153,7 +170,7 @@ export class TenantManagerPageComponent implements OnInit {
       },
       error: () => {
         this.isLoading.set(false);
-        this.errorMessage.set('Impossibile caricare i tenant.');
+        this.errorMessage.set('Unable to load tenants.');
       },
     });
   }

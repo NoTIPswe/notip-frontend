@@ -1,5 +1,5 @@
 <section class="sensor-list-page">
-  <h2>Lista Sensori</h2>
+  <h2>Sensor List</h2>
 
   <form class="filter-row" (submit)="$event.preventDefault()">
     <label>
@@ -26,7 +26,7 @@
         class="ghost"
         (click)="onClearFilters(gatewayFilterInput, typeFilterInput)"
       >
-        Pulisci
+        Clear
       </button>
     </div>
   </form>
@@ -36,11 +36,11 @@
   }
 
   @if (isLoading()) {
-    <p class="meta">Caricamento sensori...</p>
+    <p class="meta">Loading sensors...</p>
   }
 
   @if (!isLoading() && filteredSensors().length === 0) {
-    <p class="meta">Nessun sensore trovato.</p>
+    <p class="meta">No sensors found.</p>
   }
 
   @if (filteredSensors().length > 0) {
@@ -50,8 +50,8 @@
           <th>Sensor ID</th>
           <th>Gateway ID</th>
           <th>Type</th>
-          <th>Last seen (GMT+1)</th>
-          <th>Azioni</th>
+          <th>Last seen (Europe/Rome)</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -60,9 +60,9 @@
             <td>{{ sensor.sensorId }}</td>
             <td>{{ sensor.gatewayId }}</td>
             <td>{{ sensor.sensorType }}</td>
-            <td>{{ (sensor.lastSeen | date: 'dd/MM/yyyy - HH:mm:ss' : '+0100') || '-' }}</td>
+            <td>{{ (sensor.lastSeen | romeDateTime) || '-' }}</td>
             <td>
-              <button type="button" (click)="openSensorDetail(sensor.sensorId)">Dettaglio</button>
+              <button type="button" (click)="openSensorDetail(sensor.sensorId)">Details</button>
             </td>
           </tr>
         }

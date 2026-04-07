@@ -1,12 +1,12 @@
 <section class="alert-config-form">
-  <h3>Configurazione Alert</h3>
+  <h3>Alert Configuration</h3>
 
   <form class="default-form" (submit)="submitDefault($event, defaultTimeout.value)">
     <label>
-      Timeout default tenant (ms)
+      Tenant default timeout (ms)
       <input #defaultTimeout type="number" min="1000" step="500" [value]="defaultTimeoutMs()" />
     </label>
-    <button type="submit" [disabled]="isSaving()">Salva default</button>
+    <button type="submit" [disabled]="isSaving()">Save default</button>
   </form>
 
   <form
@@ -20,7 +20,7 @@
         required
         (change)="onGatewaySelectionChanged(gatewayId.value, gatewayTimeout)"
       >
-        <option value="" selected>Seleziona gateway</option>
+        <option value="" selected>Select gateway</option>
         @for (id of availableGatewayIds(); track id) {
           <option [value]="id">{{ id }}</option>
         }
@@ -32,22 +32,22 @@
     </label>
     @if (selectedGatewayCurrentTimeoutMs() !== null) {
       <p class="meta">
-        Timeout attuale gateway selezionato: {{ selectedGatewayCurrentTimeoutMs() }} ms
+        Current selected gateway timeout: {{ selectedGatewayCurrentTimeoutMs() }} ms
       </p>
     }
     <button type="submit" [disabled]="isSaving() || availableGatewayIds().length === 0">
-      Salva override gateway
+      Save gateway override
     </button>
   </form>
 
   @if (availableGatewayIds().length === 0) {
-    <p class="meta">Nessun gateway disponibile per questo tenant.</p>
+    <p class="meta">No gateways available for this tenant.</p>
   }
 
   <section class="overrides">
-    <h4>Override attivi</h4>
+    <h4>Active overrides</h4>
     @if (gatewayOverrides().length === 0) {
-      <p class="meta">Nessun override configurato.</p>
+      <p class="meta">No overrides configured.</p>
     }
 
     @if (gatewayOverrides().length > 0) {
@@ -61,7 +61,7 @@
               (click)="deleteGatewayOverride(row.gatewayId)"
               [disabled]="isSaving()"
             >
-              Rimuovi
+              Remove
             </button>
           </li>
         }
@@ -70,6 +70,6 @@
   </section>
 
   <div class="actions">
-    <button type="button" class="ghost" (click)="cancel()" [disabled]="isSaving()">Annulla</button>
+    <button type="button" class="ghost" (click)="cancel()" [disabled]="isSaving()">Cancel</button>
   </div>
 </section>

@@ -1,5 +1,5 @@
 <section class="sensor-detail-page">
-  <h2>Dettaglio Sensore</h2>
+  <h2>Sensor Details</h2>
 
   @if (errorMessage()) {
     <p class="error">{{ errorMessage() }}</p>
@@ -11,8 +11,8 @@
       <p><strong>Gateway ID:</strong> {{ sensor()!.gatewayId }}</p>
       <p><strong>Type:</strong> {{ sensor()!.sensorType }}</p>
       <p>
-        <strong>Last seen (GMT+1):</strong>
-        {{ (sensor()!.lastSeen | date: 'dd/MM/yyyy - HH:mm:ss' : '+0100') || '-' }}
+        <strong>Last seen (Europe/Rome):</strong>
+        {{ (sensor()!.lastSeen | romeDateTime) || '-' }}
       </p>
     </section>
   }

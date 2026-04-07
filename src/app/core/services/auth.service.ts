@@ -19,6 +19,11 @@ interface JwtPayload {
   resource_access?: Record<string, { roles?: string[] }>;
 }
 
+interface StoredImpersonation {
+  token?: unknown;
+  payload?: unknown;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService implements SessionLifeCycle, ImpersonationStatus {
   private readonly keycloak = inject(Keycloak);
@@ -42,12 +47,21 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
     sessionStorage.removeItem(AuthService.STORAGE_KEY);
   }
 
+  private parseStoredImpersonation(raw: string): StoredImpersonation | null {
+    const parsed = JSON.parse(raw) as unknown;
+    if (typeof parsed !== 'object' || parsed === null) {
+      return null;
+    }
+
+    return parsed as StoredImpersonation;
+  }
+
   private loadImpersonating(): boolean {
     const raw = sessionStorage.getItem(AuthService.STORAGE_KEY);
     if (!raw) return false;
     try {
-      const data = JSON.parse(raw);
-      return !!data.token;
+      const data = this.parseStoredImpersonation(raw);
+      return typeof data?.token === 'string' && data.token.length > 0;
     } catch {
       return false;
     }
@@ -57,8 +71,8 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
     const raw = sessionStorage.getItem(AuthService.STORAGE_KEY);
     if (!raw) return null;
     try {
-      const data = JSON.parse(raw);
-      return data.token ?? null;
+      const data = this.parseStoredImpersonation(raw);
+      return typeof data?.token === 'string' ? data.token : null;
     } catch {
       return null;
     }
@@ -68,8 +82,8 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
     const raw = sessionStorage.getItem(AuthService.STORAGE_KEY);
     if (!raw) return null;
     try {
-      const data = JSON.parse(raw);
-      return data.payload ?? null;
+      const data = this.parseStoredImpersonation(raw);
+      return this.asJwtPayload(data?.payload);
     } catch {
       return null;
     }
@@ -179,7 +193,7 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
       this.clearImpersonationContext();
       this.clearImpersonationStorage();
     } else {
-      // Se già in impersonazione, salva lo stato attuale solo se payload non è null
+      // If already impersonating, persist current state only when payload is not null
       const token = this.impersonationTokenSignal();
       const payload = this.impersonationPayloadSignal();
       if (token && payload != null) {

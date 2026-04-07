@@ -159,11 +159,30 @@ describe('DataDashboardPageComponent', () => {
       new Subject<CheckedEnvelope>().asObservable(),
     );
     validatedMeasureFacadeServiceMock.query
-      .mockReturnValueOnce(of({ data: [checkedRow], hasMore: true, nextCursor: 'cursor-1' }))
+      .mockReturnValueOnce(
+        of({
+          data: [
+            { ...checkedRow, sensorId: 's-late', timestamp: '2026-04-03T10:05:00.000Z' },
+            { ...checkedRow, sensorId: 's-early', timestamp: '2026-04-03T10:00:00.000Z' },
+          ],
+          hasMore: true,
+          nextCursor: 'cursor-1',
+        }),
+      )
       .mockReturnValueOnce(
         of({
           data: [{ ...checkedRow, sensorId: 's-2', timestamp: '2026-04-03T10:05:00.000Z' }],
           hasMore: false,
+        }),
+      )
+      .mockReturnValueOnce(
+        of({
+          data: [
+            { ...checkedRow, sensorId: 's-late', timestamp: '2026-04-03T10:05:00.000Z' },
+            { ...checkedRow, sensorId: 's-early', timestamp: '2026-04-03T10:00:00.000Z' },
+          ],
+          hasMore: true,
+          nextCursor: 'cursor-1',
         }),
       );
 
@@ -186,8 +205,14 @@ describe('DataDashboardPageComponent', () => {
       host.querySelectorAll<HTMLButtonElement>('.query-pagination button'),
     );
 
-    expect(paginationButtons).toHaveLength(1);
-    expect(paginationButtons[0]?.textContent?.trim()).toBe('Successiva');
+    expect(paginationButtons).toHaveLength(2);
+    expect(paginationButtons[0]?.textContent?.trim()).toBe('Previous');
+    expect(paginationButtons[1]?.textContent?.trim()).toBe('Next');
+    expect(paginationButtons[0]?.disabled).toBe(true);
+    expect(paginationButtons[1]?.disabled).toBe(false);
+
+    expect(component.queryMeasures()[0]?.sensorId).toBe('s-early');
+    expect(component.queryMeasures()[1]?.sensorId).toBe('s-late');
 
     const firstQueryPayload = validatedMeasureFacadeServiceMock.query.mock.calls[0][0] as {
       from: string;
@@ -213,6 +238,18 @@ describe('DataDashboardPageComponent', () => {
 
     expect(secondQueryPayload.cursor).toBe('cursor-1');
     expect(component.queryPage()).toBe(2);
+
+    component.onPreviousQueryPage();
+    await flushAsyncWork(fixture);
+
+    expect(validatedMeasureFacadeServiceMock.query).toHaveBeenCalledTimes(3);
+    expect(component.queryPage()).toBe(1);
+
+    const thirdQueryPayload = validatedMeasureFacadeServiceMock.query.mock.calls[2][0] as {
+      cursor?: string;
+    };
+
+    expect(thirdQueryPayload.cursor).toBeUndefined();
   });
 
   it('uses obfuscated endpoints in impersonation and disables export', async () => {

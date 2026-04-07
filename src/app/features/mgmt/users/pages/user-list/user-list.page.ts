@@ -8,11 +8,17 @@ import {
 import { UserTableComponent } from '../../components/user-table/user-table.component';
 import { ViewUser } from '../../../../../core/models/user';
 import { UserService } from '../../services/user.service';
+import { ModalLayerComponent } from '../../../../../shared/components/modal-layer/modal-layer.component';
 
 @Component({
   selector: 'app-user-list-page',
   standalone: true,
-  imports: [UserTableComponent, UserFormComponent, DeleteConfirmModalComponent],
+  imports: [
+    UserTableComponent,
+    UserFormComponent,
+    DeleteConfirmModalComponent,
+    ModalLayerComponent,
+  ],
   templateUrl: './user-list.page.html',
   styleUrl: './user-list.page.css',
 })
@@ -78,12 +84,12 @@ export class UserListPageComponent implements OnInit {
       next: (result) => {
         this.isSaving.set(false);
         this.deletingUserId.set(null);
-        this.infoMessage.set(`Utenti eliminati: ${result.deleted}.`);
+        this.infoMessage.set(`Users deleted: ${result.deleted}.`);
         this.loadUsers();
       },
       error: () => {
         this.isSaving.set(false);
-        this.errorMessage.set("Impossibile eliminare l'utente selezionato.");
+        this.errorMessage.set('Unable to delete the selected user.');
       },
     });
   }
@@ -97,12 +103,12 @@ export class UserListPageComponent implements OnInit {
       next: (created) => {
         this.isSaving.set(false);
         this.showCreateForm.set(false);
-        this.infoMessage.set(`Utente creato: ${created.userId}.`);
+        this.infoMessage.set(`User created: ${created.userId}.`);
         this.loadUsers();
       },
       error: () => {
         this.isSaving.set(false);
-        this.errorMessage.set('Impossibile creare il nuovo utente.');
+        this.errorMessage.set('Unable to create the new user.');
       },
     });
   }
@@ -123,12 +129,12 @@ export class UserListPageComponent implements OnInit {
           this.isSaving.set(false);
           this.showCreateForm.set(false);
           this.editingUserId.set(null);
-          this.infoMessage.set(`Utente aggiornato: ${updated.userId}.`);
+          this.infoMessage.set(`User updated: ${updated.userId}.`);
           this.loadUsers();
         },
         error: () => {
           this.isSaving.set(false);
-          this.errorMessage.set('Impossibile aggiornare utente.');
+          this.errorMessage.set('Unable to update user.');
         },
       });
   }
@@ -149,7 +155,7 @@ export class UserListPageComponent implements OnInit {
       },
       error: () => {
         this.isLoading.set(false);
-        this.errorMessage.set('Impossibile caricare la lista utenti.');
+        this.errorMessage.set('Unable to load user list.');
       },
     });
   }

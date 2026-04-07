@@ -1,14 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { map, Observable, switchMap, timer } from 'rxjs';
 import { Sensor } from '../../../core/models/sensor';
-import { SensorService as DataApiSensorService } from '../../../generated/openapi/notip-data-api-openapi/api/sensor.service';
+import { SensorsService as DataApiSensorsService } from '../../../generated/openapi/notip-data-api-openapi/api/sensors.service';
 import { SensorDto } from '../../../generated/openapi/notip-data-api-openapi/model/sensor-dto';
 
 const DEFAULT_SENSORS_REFRESH_MS = 10_000;
 
 @Injectable({ providedIn: 'root' })
 export class SensorService {
-  private readonly sensorApi = inject(DataApiSensorService);
+  private readonly sensorApi = inject(DataApiSensorsService);
 
   getAllSensors(refreshMs = DEFAULT_SENSORS_REFRESH_MS): Observable<Sensor[]> {
     return this.withRefresh(refreshMs, () => this.fetchSensors());
