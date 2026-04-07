@@ -56,7 +56,7 @@ export class CommandService {
 
   sendConfig(id: string, config: GatewayConfig): Observable<CommandStatusUpdate> {
     const body: SendConfigRequestDto = {};
-    if (typeof config.send_frequency_ms === 'number') {
+    if (typeof config.send_frequency_ms === 'number' && Number.isFinite(config.send_frequency_ms)) {
       body.send_frequency_ms = config.send_frequency_ms;
     }
     if (this.isCmdGatewayStatus(config.status)) {
