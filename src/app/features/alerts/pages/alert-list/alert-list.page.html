@@ -28,27 +28,29 @@
   }
 
   @if (alerts().length > 0) {
-    <table>
-      <thead>
-        <tr>
-          <th>Timestamp (Europe/Rome)</th>
-          <th>Type</th>
-          <th>Gateway</th>
-          <th>Tenant</th>
-          <th>Details</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (row of alerts(); track row.createdAt + row.gatewayId + row.type) {
+    <div class="table-scroll">
+      <table>
+        <thead>
           <tr>
-            <td>{{ (row.createdAt | romeDateTime: false) || '-' }}</td>
-            <td>{{ row.type }}</td>
-            <td>{{ row.gatewayId }}</td>
-            <td>{{ row.tenantId }}</td>
-            <td>{{ row.details }}</td>
+            <th>Timestamp (Europe/Rome)</th>
+            <th>Type</th>
+            <th>Gateway</th>
+            <th>Tenant</th>
+            <th class="details-cell">Details</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (row of alerts(); track row.createdAt + row.gatewayId + row.type) {
+            <tr>
+              <td>{{ (row.createdAt | romeDateTime: false) || '-' }}</td>
+              <td>{{ row.type }}</td>
+              <td>{{ row.gatewayId }}</td>
+              <td>{{ row.tenantId }}</td>
+              <td class="details-cell">{{ row.details }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </section>

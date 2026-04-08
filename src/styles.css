@@ -6,6 +6,13 @@ body {
   margin: 0;
 }
 
+:root {
+  --layout-page-max-width: 1200px;
+  --layout-page-gap: 1rem;
+  --layout-header-gap: 0.75rem;
+  --layout-mobile-breakpoint: 768px;
+}
+
 *,
 *::before,
 *::after {

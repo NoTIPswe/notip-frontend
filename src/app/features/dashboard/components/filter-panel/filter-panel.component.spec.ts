@@ -58,6 +58,54 @@ describe('FilterPanelComponent', () => {
     expect(payload.to).toBe(fromRomeDateTimeInputToIso(toRaw));
   });
 
+  it('clamps from date to 24h before to date when query range exceeds max window', () => {
+    fixture.componentRef.setInput('mode', 'query');
+    fixture.detectChanges();
+
+    component.onQueryFromChanged('2026-04-04T00:00');
+    component.onQueryToChanged('2026-04-05T12:30');
+
+    expect(component.queryFromRaw()).toBe('2026-04-04T12:30');
+
+    const preventDefault = vi.fn();
+    const event = { preventDefault } as unknown as Event;
+    const emitSpy = vi.spyOn(component.filtersApplied, 'emit');
+
+    component.applyFilters(event);
+
+    const payload = emitSpy.mock.calls[0][0] as {
+      from?: string;
+      to?: string;
+    };
+
+    expect(payload.from).toBe(fromRomeDateTimeInputToIso('2026-04-04T12:30'));
+    expect(payload.to).toBe(fromRomeDateTimeInputToIso('2026-04-05T12:30'));
+  });
+
+  it('clamps to date to 24h after from date when query range exceeds max window from from-change', () => {
+    fixture.componentRef.setInput('mode', 'query');
+    fixture.detectChanges();
+
+    component.onQueryToChanged('2026-04-05T12:30');
+    component.onQueryFromChanged('2026-04-03T08:00');
+
+    expect(component.queryToRaw()).toBe('2026-04-04T08:00');
+
+    const preventDefault = vi.fn();
+    const event = { preventDefault } as unknown as Event;
+    const emitSpy = vi.spyOn(component.filtersApplied, 'emit');
+
+    component.applyFilters(event);
+
+    const payload = emitSpy.mock.calls[0][0] as {
+      from?: string;
+      to?: string;
+    };
+
+    expect(payload.from).toBe(fromRomeDateTimeInputToIso('2026-04-03T08:00'));
+    expect(payload.to).toBe(fromRomeDateTimeInputToIso('2026-04-04T08:00'));
+  });
+
   it('clears selected options, restores default range and emits clear event', () => {
     const defaultFrom = '2026-04-03T00:00:00.000Z';
     const defaultTo = '2026-04-04T00:00:00.000Z';
@@ -193,7 +241,7 @@ describe('FilterPanelComponent', () => {
       component.onDocumentClick({ target: outsideTarget } as unknown as MouseEvent);
       expect(component.isDropdownOpen('gatewayIds')).toBe(false);
     } finally {
-      document.body.removeChild(outsideTarget);
+      outsideTarget.remove();
     }
   });
 
@@ -251,5 +299,18 @@ describe('FilterPanelComponent', () => {
 
     expect(component.isOptionSelected('sensorTypes', 'humidity')).toBe(true);
     expect(component.isOptionSelected('gatewayIds', 'gw-2')).toBe(false);
+  });
+
+  it('hides incompatible gateway and sensor type options when sensor id is selected', () => {
+    fixture.componentRef.setInput('gatewayOptions', ['gw-1', 'gw-2']);
+    fixture.componentRef.setInput('sensorTypeOptions', ['temperature', 'humidity']);
+    fixture.componentRef.setInput('sensorOptions', ['s-1', 's-2', 's-3']);
+    fixture.componentRef.setInput('sensorCatalog', sensorCatalog);
+    fixture.detectChanges();
+
+    component.toggleOption('sensorIds', 's-2');
+
+    expect(component.filteredOptions('gatewayIds')).toEqual(['gw-1']);
+    expect(component.filteredOptions('sensorTypes')).toEqual(['humidity']);
   });
 });

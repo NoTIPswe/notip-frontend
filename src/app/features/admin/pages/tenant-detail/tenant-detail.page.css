@@ -1,8 +1,11 @@
 .tenant-detail {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
-  max-width: 1100px;
+  gap: var(--layout-page-gap);
+  width: 100%;
+  max-width: var(--layout-page-max-width);
+  margin-inline: auto;
+  min-width: 0;
 }
 
 .back-link {

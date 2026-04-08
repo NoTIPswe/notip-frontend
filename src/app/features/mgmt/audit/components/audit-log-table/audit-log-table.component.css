@@ -21,8 +21,16 @@ h3 {
   font-size: 0.9rem;
 }
 
+.table-scroll {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 table {
   width: 100%;
+  min-width: 980px;
   border-collapse: collapse;
 }
 
@@ -32,4 +40,10 @@ td {
   padding: 0.55rem;
   border-bottom: 1px solid #e5e7eb;
   font-size: 0.86rem;
+}
+
+.details-cell {
+  min-width: 300px;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }

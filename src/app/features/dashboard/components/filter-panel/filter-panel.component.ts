@@ -34,6 +34,8 @@ type MultiSelectKey = 'gatewayIds' | 'sensorTypes' | 'sensorIds';
 type MultiSelectState = Record<MultiSelectKey, string[]>;
 type MultiSelectSearchState = Record<MultiSelectKey, string>;
 
+const MAX_QUERY_WINDOW_MS = 24 * 60 * 60 * 1000;
+
 @Component({
   selector: 'app-filter-panel',
   standalone: true,
@@ -121,6 +123,8 @@ export class FilterPanelComponent {
     };
 
     if (this.mode() === 'query') {
+      this.enforceMaxQueryWindow();
+
       const from = this.normalizeDateTime(this.queryFromRaw());
       const to = this.normalizeDateTime(this.queryToRaw());
 
@@ -208,10 +212,12 @@ export class FilterPanelComponent {
 
   onQueryFromChanged(value: string): void {
     this.queryFromRaw.set(value);
+    this.enforceMaxQueryWindow('from');
   }
 
   onQueryToChanged(value: string): void {
     this.queryToRaw.set(value);
+    this.enforceMaxQueryWindow('to');
   }
 
   toLocalDateTimeInput(value?: string): string {
@@ -220,7 +226,7 @@ export class FilterPanelComponent {
 
   private optionsFor(key: MultiSelectKey): string[] {
     if (key === 'gatewayIds') {
-      return this.gatewayOptions();
+      return this.filteredGatewayOptions();
     }
 
     if (key === 'sensorTypes') {
@@ -266,6 +272,38 @@ export class FilterPanelComponent {
     };
   }
 
+  private filteredGatewayOptions(): string[] {
+    const catalog = this.normalizedCatalog();
+
+    if (catalog.length === 0) {
+      return this.gatewayOptions();
+    }
+
+    const selected = this.selectedFilters();
+
+    if (selected.sensorTypes.length === 0 && selected.sensorIds.length === 0) {
+      return this.gatewayOptions();
+    }
+
+    const allowed = new Set(
+      catalog
+        .filter((entry) => {
+          if (selected.sensorTypes.length > 0 && !selected.sensorTypes.includes(entry.sensorType)) {
+            return false;
+          }
+
+          if (selected.sensorIds.length > 0 && !selected.sensorIds.includes(entry.sensorId)) {
+            return false;
+          }
+
+          return true;
+        })
+        .map((entry) => entry.gatewayId),
+    );
+
+    return this.gatewayOptions().filter((gatewayId) => allowed.has(gatewayId));
+  }
+
   private filteredSensorTypeOptions(): string[] {
     const catalog = this.normalizedCatalog();
 
@@ -275,13 +313,23 @@ export class FilterPanelComponent {
 
     const selected = this.selectedFilters();
 
-    if (selected.gatewayIds.length === 0) {
+    if (selected.gatewayIds.length === 0 && selected.sensorIds.length === 0) {
       return this.sensorTypeOptions();
     }
 
     const allowed = new Set(
       catalog
-        .filter((entry) => selected.gatewayIds.includes(entry.gatewayId))
+        .filter((entry) => {
+          if (selected.gatewayIds.length > 0 && !selected.gatewayIds.includes(entry.gatewayId)) {
+            return false;
+          }
+
+          if (selected.sensorIds.length > 0 && !selected.sensorIds.includes(entry.sensorId)) {
+            return false;
+          }
+
+          return true;
+        })
         .map((entry) => entry.sensorType),
     );
 
@@ -380,5 +428,34 @@ export class FilterPanelComponent {
 
   private normalizeDateTime(value?: string): string | undefined {
     return fromRomeDateTimeInputToIso(value);
+  }
+
+  private enforceMaxQueryWindow(changedField: 'from' | 'to' = 'to'): void {
+    const from = this.normalizeDateTime(this.queryFromRaw());
+    const to = this.normalizeDateTime(this.queryToRaw());
+
+    if (!from || !to) {
+      return;
+    }
+
+    const fromMs = Date.parse(from);
+    const toMs = Date.parse(to);
+
+    if (!Number.isFinite(fromMs) || !Number.isFinite(toMs)) {
+      return;
+    }
+
+    if (toMs - fromMs <= MAX_QUERY_WINDOW_MS) {
+      return;
+    }
+
+    if (changedField === 'from') {
+      const adjustedTo = new Date(fromMs + MAX_QUERY_WINDOW_MS).toISOString();
+      this.queryToRaw.set(this.toLocalDateTimeInput(adjustedTo));
+      return;
+    }
+
+    const adjustedFrom = new Date(toMs - MAX_QUERY_WINDOW_MS).toISOString();
+    this.queryFromRaw.set(this.toLocalDateTimeInput(adjustedFrom));
   }
 }

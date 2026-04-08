@@ -11,27 +11,29 @@
   }
 
   @if (measures().length > 0) {
-    <table>
-      <thead>
-        <tr>
-          <th>Timestamp (Europe/Rome)</th>
-          <th>Gateway</th>
-          <th>Sensor</th>
-          <th>Type</th>
-          <th>Value</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (row of reversedMeasures(); track trackMeasure($index, row)) {
-          <tr [class]="rowClass(row)">
-            <td>{{ (row.timestamp | romeDateTime) || '-' }}</td>
-            <td>{{ row.gatewayId }}</td>
-            <td>{{ row.sensorId }}</td>
-            <td>{{ row.sensorType }}</td>
-            <td>{{ formatValue(row) }}</td>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp (Europe/Rome)</th>
+            <th>Gateway</th>
+            <th>Sensor</th>
+            <th>Type</th>
+            <th>Value</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (row of reversedMeasures(); track trackMeasure($index, row)) {
+            <tr [class]="rowClass(row)">
+              <td>{{ (row.timestamp | romeDateTime) || '-' }}</td>
+              <td>{{ row.gatewayId }}</td>
+              <td>{{ row.sensorId }}</td>
+              <td>{{ row.sensorType }}</td>
+              <td>{{ formatValue(row) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </section>

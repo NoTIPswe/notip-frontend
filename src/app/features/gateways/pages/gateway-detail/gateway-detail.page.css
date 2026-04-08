@@ -1,8 +1,11 @@
 .gateway-detail-page {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
-  max-width: 1200px;
+  gap: var(--layout-page-gap);
+  width: 100%;
+  max-width: var(--layout-page-max-width);
+  margin-inline: auto;
+  min-width: 0;
 }
 
 .back-link {

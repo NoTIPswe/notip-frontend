@@ -44,29 +44,31 @@
   }
 
   @if (filteredSensors().length > 0) {
-    <table>
-      <thead>
-        <tr>
-          <th>Sensor ID</th>
-          <th>Gateway ID</th>
-          <th>Type</th>
-          <th>Last seen (Europe/Rome)</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (sensor of filteredSensors(); track sensor.sensorId) {
+    <div class="table-scroll">
+      <table>
+        <thead>
           <tr>
-            <td>{{ sensor.sensorId }}</td>
-            <td>{{ sensor.gatewayId }}</td>
-            <td>{{ sensor.sensorType }}</td>
-            <td>{{ (sensor.lastSeen | romeDateTime) || '-' }}</td>
-            <td>
-              <button type="button" (click)="openSensorDetail(sensor.sensorId)">Details</button>
-            </td>
+            <th>Sensor ID</th>
+            <th>Gateway ID</th>
+            <th>Type</th>
+            <th>Last seen (Europe/Rome)</th>
+            <th>Actions</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (sensor of filteredSensors(); track sensor.sensorId) {
+            <tr>
+              <td>{{ sensor.sensorId }}</td>
+              <td>{{ sensor.gatewayId }}</td>
+              <td>{{ sensor.sensorType }}</td>
+              <td>{{ (sensor.lastSeen | romeDateTime) || '-' }}</td>
+              <td>
+                <button type="button" (click)="openSensorDetail(sensor.sensorId)">Details</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </section>

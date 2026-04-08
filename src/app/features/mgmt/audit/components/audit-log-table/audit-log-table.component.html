@@ -11,27 +11,29 @@
   }
 
   @if (logs().length > 0) {
-    <table>
-      <thead>
-        <tr>
-          <th>Timestamp (Europe/Rome)</th>
-          <th>User ID</th>
-          <th>Action</th>
-          <th>Resource</th>
-          <th>Details</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (log of logs(); track log.id) {
+    <div class="table-scroll">
+      <table>
+        <thead>
           <tr>
-            <td>{{ (log.timestamp | romeDateTime) || '-' }}</td>
-            <td>{{ log.userId }}</td>
-            <td>{{ log.action }}</td>
-            <td>{{ log.resource }}</td>
-            <td>{{ log.details }}</td>
+            <th>Timestamp (Europe/Rome)</th>
+            <th>User ID</th>
+            <th>Action</th>
+            <th>Resource</th>
+            <th class="details-cell">Details</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (log of logs(); track log.id) {
+            <tr>
+              <td>{{ (log.timestamp | romeDateTime) || '-' }}</td>
+              <td>{{ log.userId }}</td>
+              <td>{{ log.action }}</td>
+              <td>{{ log.resource }}</td>
+              <td class="details-cell">{{ log.details }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </section>
