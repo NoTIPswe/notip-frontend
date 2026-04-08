@@ -85,21 +85,19 @@ export class UserService {
   }
 
   private toCreateRole(role: UserRole): CreateUserRequestDtoRoleEnum {
-    switch (role) {
-      case UserRole.tenant_admin:
-        return CreateUserRequestDtoRoleEnum.TenantAdmin;
-      default:
-        return CreateUserRequestDtoRoleEnum.TenantUser;
+    if (role === UserRole.tenant_admin) {
+      return CreateUserRequestDtoRoleEnum.TenantAdmin;
     }
+
+    return CreateUserRequestDtoRoleEnum.TenantUser;
   }
 
   private toUpdateRole(role: UserRole): UpdateUserRequestDtoRoleEnum {
-    switch (role) {
-      case UserRole.tenant_admin:
-        return UpdateUserRequestDtoRoleEnum.TenantAdmin;
-      default:
-        return UpdateUserRequestDtoRoleEnum.TenantUser;
+    if (role === UserRole.tenant_admin) {
+      return UpdateUserRequestDtoRoleEnum.TenantAdmin;
     }
+
+    return UpdateUserRequestDtoRoleEnum.TenantUser;
   }
 
   private normalizeUsername(value: string): string {

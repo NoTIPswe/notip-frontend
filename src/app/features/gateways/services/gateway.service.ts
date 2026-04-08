@@ -93,7 +93,7 @@ export class GatewayService {
     const normalized = (typeof status === 'string' ? status : '')
       .trim()
       .toLowerCase()
-      .replace(/[\s_-]/g, '');
+      .replaceAll(/[\s_-]/g, '');
 
     if (normalized === 'online' || normalized === 'gatewayonline') {
       return GatewayStatus.online;

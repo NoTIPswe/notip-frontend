@@ -1,13 +1,7 @@
 @if (open()) {
-  <div
-    class="modal-layer"
-    tabindex="0"
-    (click)="onBackdropClick($event)"
-    (keydown.enter)="onBackdropClick($event)"
-    (keydown.space)="onBackdropClick($event)"
-  >
-    <section class="modal-panel" role="dialog" aria-modal="true">
+  <div class="modal-layer">
+    <dialog class="modal-panel" open aria-modal="true">
       <ng-content></ng-content>
-    </section>
+    </dialog>
   </div>
 }

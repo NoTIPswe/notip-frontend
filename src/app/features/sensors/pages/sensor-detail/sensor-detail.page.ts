@@ -173,7 +173,6 @@ export class SensorDetailPageComponent implements OnInit, OnDestroy {
           this.errorMessage.set('Unable to receive telemetry stream.');
         },
       });
-      return;
     }
   }
 

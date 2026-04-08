@@ -1,10 +1,30 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ModalLayerComponent } from './modal-layer.component';
 
 describe('ModalLayerComponent', () => {
-  let fixture: ReturnType<typeof TestBed.createComponent<ModalLayerComponent>>;
+  let fixture: ComponentFixture<ModalLayerComponent>;
   let component: ModalLayerComponent;
+
+  const renderOpenModal = (closeOnBackdrop: boolean): HTMLDialogElement => {
+    fixture.componentRef.setInput('open', true);
+    fixture.componentRef.setInput('closeOnBackdrop', closeOnBackdrop);
+    fixture.detectChanges();
+
+    const hostElement = fixture.nativeElement as HTMLElement;
+    const dialog = hostElement.querySelector('dialog');
+    if (!(dialog instanceof HTMLDialogElement)) {
+      throw new TypeError('Dialog element was not rendered');
+    }
+
+    return dialog;
+  };
+
+  const createClickEvent = (target: EventTarget | null): MouseEvent => {
+    const event = new MouseEvent('click');
+    Object.defineProperty(event, 'target', { value: target });
+    return event;
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -16,39 +36,34 @@ describe('ModalLayerComponent', () => {
   });
 
   it('does not emit when click target is not backdrop', () => {
-    fixture.componentRef.setInput('closeOnBackdrop', true);
-    fixture.detectChanges();
+    renderOpenModal(true);
 
     const emitSpy = vi.spyOn(component.backdropClosed, 'emit');
-    const event = { target: {}, currentTarget: {} } as unknown as Event;
+    const event = createClickEvent(document.createElement('div'));
 
-    component.onBackdropClick(event);
+    component.onHostClick(event);
 
     expect(emitSpy).not.toHaveBeenCalled();
   });
 
   it('does not emit when close on backdrop is disabled', () => {
-    fixture.componentRef.setInput('closeOnBackdrop', false);
-    fixture.detectChanges();
+    const dialog = renderOpenModal(false);
 
     const emitSpy = vi.spyOn(component.backdropClosed, 'emit');
-    const backdrop = {};
-    const event = { target: backdrop, currentTarget: backdrop } as unknown as Event;
+    const event = createClickEvent(dialog);
 
-    component.onBackdropClick(event);
+    component.onHostClick(event);
 
     expect(emitSpy).not.toHaveBeenCalled();
   });
 
   it('emits when clicking backdrop and close on backdrop is enabled', () => {
-    fixture.componentRef.setInput('closeOnBackdrop', true);
-    fixture.detectChanges();
+    const dialog = renderOpenModal(true);
 
     const emitSpy = vi.spyOn(component.backdropClosed, 'emit');
-    const backdrop = {};
-    const event = { target: backdrop, currentTarget: backdrop } as unknown as Event;
+    const event = createClickEvent(dialog);
 
-    component.onBackdropClick(event);
+    component.onHostClick(event);
 
     expect(emitSpy).toHaveBeenCalledOnce();
   });

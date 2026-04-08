@@ -189,16 +189,16 @@ export class AuthService implements SessionLifeCycle, ImpersonationStatus {
   }
 
   setImpersonating(value: boolean): void {
-    if (!value) {
-      this.clearImpersonationContext();
-      this.clearImpersonationStorage();
-    } else {
+    if (value) {
       // If already impersonating, persist current state only when payload is not null
       const token = this.impersonationTokenSignal();
       const payload = this.impersonationPayloadSignal();
       if (token && payload != null) {
         this.saveImpersonationContext(token, payload);
       }
+    } else {
+      this.clearImpersonationContext();
+      this.clearImpersonationStorage();
     }
     this.impersonatingSignal.set(value);
   }

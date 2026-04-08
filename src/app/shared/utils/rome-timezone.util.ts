@@ -1,5 +1,7 @@
 export const ROME_TIME_ZONE = 'Europe/Rome';
 
+type DateInput = string | number | Date | null | undefined;
+
 type RomeDateParts = {
   year: number;
   month: number;
@@ -22,10 +24,7 @@ const romeFormatter = new Intl.DateTimeFormat('en-GB', {
   hourCycle: 'h23',
 });
 
-export function formatRomeDateTime(
-  value: string | number | Date | null | undefined,
-  includeSeconds = true,
-): string | null {
+export function formatRomeDateTime(value: DateInput, includeSeconds = true): string | null {
   const parsed = parseDate(value);
 
   if (!parsed) {
@@ -43,7 +42,7 @@ export function formatRomeDateTime(
   return `${pad(parts.day)}/${pad(parts.month)}/${parts.year} - ${pad(parts.hour)}:${pad(parts.minute)}${secondsPart}`;
 }
 
-export function toRomeDateTimeInput(value: string | number | Date | null | undefined): string {
+export function toRomeDateTimeInput(value: DateInput): string {
   const parsed = parseDate(value);
 
   if (!parsed) {
@@ -110,12 +109,12 @@ export function fromRomeDateTimeInputToIso(value?: string): string | undefined {
   return undefined;
 }
 
-function parseDate(value: string | number | Date | null | undefined): Date | null {
+function parseDate(value: DateInput): Date | null {
   if (value == null || value === '') {
     return null;
   }
 
-  const parsed = value instanceof Date ? new Date(value.getTime()) : new Date(value);
+  const parsed = new Date(value);
 
   if (Number.isNaN(parsed.getTime())) {
     return null;
