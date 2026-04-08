@@ -123,6 +123,28 @@
             [measures]="queryMeasures()"
             [isLoading]="isQueryLoading()"
           ></app-telemetry-table>
+
+          <div class="query-pagination query-pagination-bottom">
+            <button
+              type="button"
+              class="btn btn-ghost"
+              [disabled]="!canGoToPreviousQueryPage()"
+              (click)="onPreviousQueryPage()"
+            >
+              Previous
+            </button>
+
+            <span class="meta">Page {{ queryPage() }}</span>
+
+            <button
+              type="button"
+              class="btn btn-ghost"
+              [disabled]="!canGoToNextQueryPage()"
+              (click)="onNextQueryPage()"
+            >
+              Next
+            </button>
+          </div>
         </div>
       }
     </div>

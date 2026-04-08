@@ -16,8 +16,8 @@
         <thead>
           <tr>
             <th>Timestamp (Europe/Rome)</th>
-            <th>Gateway</th>
-            <th>Sensor</th>
+            <th class="id-col">Gateway</th>
+            <th class="id-col">Sensor</th>
             <th>Type</th>
             <th>Value</th>
           </tr>
@@ -26,8 +26,8 @@
           @for (row of reversedMeasures(); track trackMeasure($index, row)) {
             <tr [class]="rowClass(row)">
               <td>{{ (row.timestamp | romeDateTime) || '-' }}</td>
-              <td>{{ row.gatewayId }}</td>
-              <td>{{ row.sensorId }}</td>
+              <td class="id-col">{{ row.gatewayId }}</td>
+              <td class="id-col">{{ row.sensorId }}</td>
               <td>{{ row.sensorType }}</td>
               <td>{{ formatValue(row) }}</td>
             </tr>
