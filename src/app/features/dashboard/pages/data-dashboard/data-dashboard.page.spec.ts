@@ -36,9 +36,12 @@ vi.mock('chart.js', () => {
       // no-op chart mock
     }
 
-    data = {
+    data: {
+      labels: unknown[];
+      datasets: Array<{ label?: string; data?: unknown[] }>;
+    } = {
       labels: [],
-      datasets: [] as Array<{ label?: string; data?: unknown[] }>,
+      datasets: [],
     };
 
     static register(): void {
@@ -252,8 +255,14 @@ describe('DataDashboardPageComponent', () => {
     expect(validatedMeasureFacadeServiceMock.query).toHaveBeenCalledOnce();
 
     const host = fixture.nativeElement as HTMLElement;
+    const primaryPagination = host.querySelector<HTMLElement>(
+      '.query-pagination:not(.query-pagination-bottom)',
+    );
+
+    expect(primaryPagination).not.toBeNull();
+
     const paginationButtons = Array.from(
-      host.querySelectorAll<HTMLButtonElement>('.query-pagination button'),
+      primaryPagination!.querySelectorAll<HTMLButtonElement>('button'),
     );
 
     expect(paginationButtons).toHaveLength(2);
