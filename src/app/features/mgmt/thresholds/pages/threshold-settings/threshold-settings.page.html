@@ -29,6 +29,7 @@
     <app-modal-layer [open]="true">
       <app-threshold-form
         [isSaving]="isSaving()"
+        [errorMessage]="formErrorMessage()"
         [sensorTypes]="sensorTypeOptions()"
         [sensorIds]="sensorIdOptions()"
         (typeSubmitted)="saveTypeThreshold($event)"

@@ -1,6 +1,10 @@
 <section class="threshold-form">
   <h3>New Threshold</h3>
 
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
   <div class="mode-selector" role="tablist" aria-label="Threshold type selector">
     <button
       type="button"

@@ -1,5 +1,20 @@
 <section class="audit-log-page">
-  <h2>Audit Log</h2>
+  <div class="page-header">
+    <h2>Audit Log</h2>
+    <button
+      type="button"
+      class="export-button"
+      [disabled]="!canExportLogs()"
+      (click)="onExportLogs()"
+    >
+      @if (isExporting()) {
+        Exporting...
+      } @else {
+        Export CSV
+      }
+    </button>
+  </div>
+
   <app-audit-filter-panel
     [from]="from()"
     [to]="to()"

@@ -1,4 +1,8 @@
 <section class="user-form">
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
   @if (editUser()) {
     <h3>Edit user</h3>
     <form (submit)="update($event, updateUsername.value, updateEmail.value, updateRole.value)">

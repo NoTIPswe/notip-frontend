@@ -30,6 +30,7 @@ export class UserListPageComponent implements OnInit {
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly formErrorMessage = signal<string | null>(null);
   readonly infoMessage = signal<string | null>(null);
 
   readonly editingUserId = signal<string | null>(null);
@@ -46,6 +47,7 @@ export class UserListPageComponent implements OnInit {
   requestEdit(userId: string): void {
     this.showCreateForm.set(false);
     this.editingUserId.set(userId);
+    this.formErrorMessage.set(null);
     this.infoMessage.set(null);
   }
 
@@ -53,11 +55,13 @@ export class UserListPageComponent implements OnInit {
     if (this.editingUser()) {
       this.editingUserId.set(null);
       this.showCreateForm.set(true);
+      this.formErrorMessage.set(null);
       this.infoMessage.set(null);
       return;
     }
 
     this.showCreateForm.set(!this.showCreateForm());
+    this.formErrorMessage.set(null);
     this.infoMessage.set(null);
   }
 
@@ -77,7 +81,7 @@ export class UserListPageComponent implements OnInit {
     }
 
     this.isSaving.set(true);
-    this.errorMessage.set(null);
+    this.formErrorMessage.set(null);
     this.infoMessage.set(null);
 
     this.userService.deleteUsers([userId]).subscribe({
@@ -108,14 +112,14 @@ export class UserListPageComponent implements OnInit {
       },
       error: () => {
         this.isSaving.set(false);
-        this.errorMessage.set('Unable to create the new user.');
+        this.formErrorMessage.set('Unable to create the new user.');
       },
     });
   }
 
   updateUser(payload: UpdateUserPayload): void {
     this.isSaving.set(true);
-    this.errorMessage.set(null);
+    this.formErrorMessage.set(null);
     this.infoMessage.set(null);
 
     this.userService
@@ -134,12 +138,13 @@ export class UserListPageComponent implements OnInit {
         },
         error: () => {
           this.isSaving.set(false);
-          this.errorMessage.set('Unable to update user.');
+          this.formErrorMessage.set('Unable to update user.');
         },
       });
   }
 
   cancelEdit(): void {
+    this.formErrorMessage.set(null);
     this.editingUserId.set(null);
     this.showCreateForm.set(false);
   }

@@ -32,21 +32,25 @@
       <table>
         <thead>
           <tr>
-            <th>Timestamp (Europe/Rome)</th>
+            <th>ID</th>
+            <th>Gateway ID</th>
             <th>Type</th>
-            <th>Gateway</th>
-            <th>Tenant</th>
-            <th class="details-cell">Details</th>
+            <th>Last Seen (Europe/Rome)</th>
+            <th>Timeout Configured (ms)</th>
+            <th class="details-cell">Details Message</th>
+            <th>Created At (Europe/Rome)</th>
           </tr>
         </thead>
         <tbody>
-          @for (row of alerts(); track row.createdAt + row.gatewayId + row.type) {
+          @for (row of alerts(); track row.id + row.createdAt) {
             <tr>
-              <td>{{ (row.createdAt | romeDateTime: false) || '-' }}</td>
+              <td>{{ row.id || '-' }}</td>
+              <td>{{ row.gatewayId || '-' }}</td>
               <td>{{ row.type }}</td>
-              <td>{{ row.gatewayId }}</td>
-              <td>{{ row.tenantId }}</td>
-              <td class="details-cell">{{ row.details }}</td>
+              <td>{{ (row.details.lastSeen | romeDateTime: false) || '-' }}</td>
+              <td>{{ row.details.timeoutConfigured ?? '-' }}</td>
+              <td class="details-cell">{{ detailsMessage(row) }}</td>
+              <td>{{ (row.createdAt | romeDateTime: false) || '-' }}</td>
             </tr>
           }
         </tbody>

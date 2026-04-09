@@ -27,6 +27,7 @@ export class UserFormComponent {
 
   readonly editUser = input<ViewUser | null>(null);
   readonly isSaving = input<boolean>(false);
+  readonly errorMessage = input<string | null>(null);
 
   readonly createRequested = output<CreateUserPayload>();
   readonly updateRequested = output<UpdateUserPayload>();

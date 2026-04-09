@@ -29,6 +29,11 @@ h3 {
   display: flex;
   gap: 0.6rem;
   align-items: end;
+  flex-wrap: wrap;
+}
+
+.form-error {
+  width: 100%;
 }
 
 label {
