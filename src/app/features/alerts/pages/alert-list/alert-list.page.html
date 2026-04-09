@@ -37,7 +37,6 @@
             <th>Type</th>
             <th>Last Seen (Europe/Rome)</th>
             <th>Timeout Configured (ms)</th>
-            <th class="details-cell">Details Message</th>
             <th>Created At (Europe/Rome)</th>
           </tr>
         </thead>
@@ -49,7 +48,6 @@
               <td>{{ row.type }}</td>
               <td>{{ (row.details.lastSeen | romeDateTime: false) || '-' }}</td>
               <td>{{ row.details.timeoutConfigured ?? '-' }}</td>
-              <td class="details-cell">{{ detailsMessage(row) }}</td>
               <td>{{ (row.createdAt | romeDateTime: false) || '-' }}</td>
             </tr>
           }

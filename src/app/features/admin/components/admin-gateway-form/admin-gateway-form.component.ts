@@ -16,6 +16,7 @@ export type CreateAdminGatewayPayload = {
 export class AdminGatewayFormComponent {
   readonly isSaving = input<boolean>(false);
   readonly tenantIds = input<string[]>([]);
+  readonly errorMessage = input<string | null>(null);
   readonly createRequested = output<CreateAdminGatewayPayload>();
   readonly cancelRequested = output<void>();
 

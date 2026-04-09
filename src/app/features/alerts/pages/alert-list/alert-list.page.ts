@@ -52,11 +52,6 @@ export class AlertListPageComponent implements OnInit {
     this.loadAlerts();
   }
 
-  detailsMessage(row: Alerts): string {
-    const rawMessage = row.details['message'];
-    return typeof rawMessage === 'string' && rawMessage.length > 0 ? rawMessage : '-';
-  }
-
   private loadAlerts(): void {
     this.errorMessage.set(null);
     this.isLoading.set(true);
