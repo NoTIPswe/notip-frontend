@@ -1,12 +1,14 @@
 import { Component, input, output } from '@angular/core';
 import { GatewayConfig, GatewayFirmware } from '../../../../core/models/command';
 import { CmdGatewayStatus } from '../../../../core/models/enums';
+import { ModalLayerComponent } from '../../../../shared/components/modal-layer/modal-layer.component';
 
 export type CommandModalMode = 'config' | 'firmware' | null;
 
 @Component({
   selector: 'app-command-modal',
   standalone: true,
+  imports: [ModalLayerComponent],
   templateUrl: './command-modal.component.html',
   styleUrl: './command-modal.component.css',
 })
@@ -14,6 +16,8 @@ export class CommandModalComponent {
   readonly open = input<boolean>(false);
   readonly mode = input<CommandModalMode>(null);
   readonly busy = input<boolean>(false);
+  readonly initialSendFrequencyMs = input<number | null>(null);
+  readonly initialStatus = input<CmdGatewayStatus | null>(null);
   readonly cmdStatusOnline = CmdGatewayStatus.online;
   readonly cmdStatusPaused = CmdGatewayStatus.paused;
 

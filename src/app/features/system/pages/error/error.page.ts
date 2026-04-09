@@ -11,21 +11,20 @@ interface ErrorCopy {
 
 const ERROR_COPY: Record<ErrorReason, ErrorCopy> = {
   unauthorized: {
-    title: 'Sessione non autorizzata',
-    message:
-      'Il backend ha rifiutato la richiesta con errore 401. Puoi provare a ricaricare la pagina.',
+    title: 'Unauthorized session',
+    message: 'The backend rejected the request with a 401 error. You can try reloading the page.',
   },
   forbidden: {
-    title: 'Accesso non consentito',
-    message: 'Non hai i permessi necessari per visualizzare questa risorsa.',
+    title: 'Access denied',
+    message: 'You do not have the required permissions to view this resource.',
   },
   'not-found': {
-    title: 'Pagina non trovata',
-    message: 'La risorsa richiesta non esiste o è stata spostata.',
+    title: 'Page not found',
+    message: 'The requested resource does not exist or has been moved.',
   },
   unknown: {
-    title: 'Errore applicativo',
-    message: 'Si è verificato un errore imprevisto.',
+    title: 'Application error',
+    message: 'An unexpected error occurred.',
   },
 };
 

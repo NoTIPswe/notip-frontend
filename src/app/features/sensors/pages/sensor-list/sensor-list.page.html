@@ -1,5 +1,5 @@
 <section class="sensor-list-page">
-  <h2>Lista Sensori</h2>
+  <h2>Sensor List</h2>
 
   <form class="filter-row" (submit)="$event.preventDefault()">
     <label>
@@ -26,7 +26,7 @@
         class="ghost"
         (click)="onClearFilters(gatewayFilterInput, typeFilterInput)"
       >
-        Pulisci
+        Clear
       </button>
     </div>
   </form>
@@ -36,37 +36,39 @@
   }
 
   @if (isLoading()) {
-    <p class="meta">Caricamento sensori...</p>
+    <p class="meta">Loading sensors...</p>
   }
 
   @if (!isLoading() && filteredSensors().length === 0) {
-    <p class="meta">Nessun sensore trovato.</p>
+    <p class="meta">No sensors found.</p>
   }
 
   @if (filteredSensors().length > 0) {
-    <table>
-      <thead>
-        <tr>
-          <th>Sensor ID</th>
-          <th>Gateway ID</th>
-          <th>Type</th>
-          <th>Last seen</th>
-          <th>Azioni</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (sensor of filteredSensors(); track sensor.sensorId) {
+    <div class="table-scroll">
+      <table>
+        <thead>
           <tr>
-            <td>{{ sensor.sensorId }}</td>
-            <td>{{ sensor.gatewayId }}</td>
-            <td>{{ sensor.sensorType }}</td>
-            <td>{{ sensor.lastSeen }}</td>
-            <td>
-              <button type="button" (click)="openSensorDetail(sensor.sensorId)">Dettaglio</button>
-            </td>
+            <th>Sensor ID</th>
+            <th>Gateway ID</th>
+            <th>Type</th>
+            <th>Last seen (Europe/Rome)</th>
+            <th>Actions</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (sensor of filteredSensors(); track sensor.sensorId) {
+            <tr>
+              <td>{{ sensor.sensorId }}</td>
+              <td>{{ sensor.gatewayId }}</td>
+              <td>{{ sensor.sensorType }}</td>
+              <td>{{ (sensor.lastSeen | romeDateTime) || '-' }}</td>
+              <td>
+                <button type="button" (click)="openSensorDetail(sensor.sensorId)">Details</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </section>

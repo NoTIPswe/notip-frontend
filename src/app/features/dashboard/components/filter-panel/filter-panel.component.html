@@ -1,31 +1,147 @@
 <section class="filter-panel">
-  <h3>Filtri stream</h3>
+  <h3>{{ mode() === 'stream' ? 'Stream Filters' : 'Query Filters' }}</h3>
 
-  <form (submit)="applyFilters($event, gatewayIds.value, sensorIds.value, sensorTypes.value)">
-    <label>
-      Gateway IDs (csv)
-      <input #gatewayIds type="text" placeholder="gw-1,gw-2" />
-    </label>
+  @if (mode() === 'stream') {
+    <form (submit)="applyFilters($event)">
+      <div class="grid">
+        @for (field of multiSelectFields; track field.key) {
+          <div class="field">
+            <span>{{ field.label }}</span>
+            <div class="multi-select">
+              <button
+                type="button"
+                class="multi-select-trigger"
+                [class.open]="isDropdownOpen(field.key)"
+                (click)="toggleDropdown(field.key)"
+              >
+                <span class="trigger-text">{{ selectionLabel(field.key) }}</span>
+                <span class="trigger-caret" aria-hidden="true"></span>
+              </button>
 
-    <label>
-      Sensor IDs (csv)
-      <input #sensorIds type="text" placeholder="s1,s2" />
-    </label>
+              @if (isDropdownOpen(field.key)) {
+                <div class="multi-select-menu">
+                  <input
+                    type="search"
+                    class="multi-select-search"
+                    placeholder="Search..."
+                    [value]="searchTerm(field.key)"
+                    (input)="updateSearchTerm(field.key, $any($event.target).value)"
+                  />
 
-    <label>
-      Sensor Types (csv)
-      <input #sensorTypes type="text" placeholder="temperature,humidity" />
-    </label>
+                  <ul class="multi-select-options">
+                    @for (option of filteredOptions(field.key); track option) {
+                      <li>
+                        <button
+                          type="button"
+                          class="multi-select-option"
+                          [class.selected]="isOptionSelected(field.key, option)"
+                          (click)="toggleOption(field.key, option)"
+                        >
+                          <span class="option-label">{{ option }}</span>
+                          @if (isOptionSelected(field.key, option)) {
+                            <span class="checkmark" aria-hidden="true">✓</span>
+                          }
+                        </button>
+                      </li>
+                    } @empty {
+                      <li class="multi-select-empty">No results</li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
 
-    <div class="actions">
-      <button type="submit">Applica</button>
-      <button
-        type="button"
-        class="ghost"
-        (click)="clearFilters(gatewayIds, sensorIds, sensorTypes)"
-      >
-        Pulisci
-      </button>
-    </div>
-  </form>
+      <p class="hint">Click once to add and click again to remove.</p>
+
+      <div class="actions">
+        <button type="submit" class="btn btn-primary">Apply</button>
+        <button type="button" class="btn btn-ghost" (click)="clearFilters()">Clear</button>
+      </div>
+    </form>
+  }
+
+  @if (mode() === 'query') {
+    <form (submit)="applyFilters($event)">
+      <div class="grid">
+        @for (field of multiSelectFields; track field.key) {
+          <div class="field">
+            <span>{{ field.label }}</span>
+            <div class="multi-select">
+              <button
+                type="button"
+                class="multi-select-trigger"
+                [class.open]="isDropdownOpen(field.key)"
+                (click)="toggleDropdown(field.key)"
+              >
+                <span class="trigger-text">{{ selectionLabel(field.key) }}</span>
+                <span class="trigger-caret" aria-hidden="true"></span>
+              </button>
+
+              @if (isDropdownOpen(field.key)) {
+                <div class="multi-select-menu">
+                  <input
+                    type="search"
+                    class="multi-select-search"
+                    placeholder="Search..."
+                    [value]="searchTerm(field.key)"
+                    (input)="updateSearchTerm(field.key, $any($event.target).value)"
+                  />
+
+                  <ul class="multi-select-options">
+                    @for (option of filteredOptions(field.key); track option) {
+                      <li>
+                        <button
+                          type="button"
+                          class="multi-select-option"
+                          [class.selected]="isOptionSelected(field.key, option)"
+                          (click)="toggleOption(field.key, option)"
+                        >
+                          <span class="option-label">{{ option }}</span>
+                          @if (isOptionSelected(field.key, option)) {
+                            <span class="checkmark" aria-hidden="true">✓</span>
+                          }
+                        </button>
+                      </li>
+                    } @empty {
+                      <li class="multi-select-empty">No results</li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="date-grid">
+        <label class="field">
+          From
+          <input
+            type="datetime-local"
+            [value]="queryFromRaw()"
+            (input)="onQueryFromChanged($any($event.target).value)"
+          />
+        </label>
+
+        <label class="field">
+          To
+          <input
+            type="datetime-local"
+            [value]="queryToRaw()"
+            (input)="onQueryToChanged($any($event.target).value)"
+          />
+        </label>
+      </div>
+
+      <p class="hint">Click once to add and click again to remove.</p>
+
+      <div class="actions">
+        <button type="submit" class="btn btn-primary">Apply</button>
+        <button type="button" class="btn btn-ghost" (click)="clearFilters()">Clear</button>
+      </div>
+    </form>
+  }
 </section>

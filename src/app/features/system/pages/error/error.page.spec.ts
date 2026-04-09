@@ -38,9 +38,9 @@ describe('ErrorPageComponent', () => {
     fixture.detectChanges();
 
     const html = fixture.nativeElement as HTMLElement;
-    expect(html.textContent).toContain('Sessione non autorizzata');
-    expect(html.textContent).toContain('Percorso da ricaricare: /dashboard');
-    expect(html.textContent).toContain('Ricarica pagina');
+    expect(html.textContent).toContain('Unauthorized session');
+    expect(html.textContent).toContain('Reload path: /dashboard');
+    expect(html.textContent).toContain('Reload page');
   });
 
   it('falls back to root when retryUrl is external', () => {
@@ -62,7 +62,7 @@ describe('ErrorPageComponent', () => {
     fixture.detectChanges();
 
     let html = fixture.nativeElement as HTMLElement;
-    expect(html.textContent).toContain('Errore applicativo');
+    expect(html.textContent).toContain('Application error');
 
     queryParamMapSubject.next(
       convertToParamMap({
@@ -73,8 +73,8 @@ describe('ErrorPageComponent', () => {
     fixture.detectChanges();
 
     html = fixture.nativeElement as HTMLElement;
-    expect(html.textContent).toContain('Sessione non autorizzata');
-    expect(html.textContent).toContain('Percorso da ricaricare: /dashboard');
+    expect(html.textContent).toContain('Unauthorized session');
+    expect(html.textContent).toContain('Reload path: /dashboard');
     expect(fixture.componentInstance.reason()).toBe('unauthorized');
   });
 });

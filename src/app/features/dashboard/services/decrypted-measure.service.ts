@@ -25,9 +25,16 @@ import { AuthService } from '../../../core/services/auth.service';
 export class DecryptedMeasureService {
   private readonly auth = inject(AuthService);
 
+  private readonly noStoreFetch: typeof fetch = (input, init) =>
+    fetch(input, {
+      ...init,
+      cache: 'no-store',
+    });
+
   private readonly sdk = new DataApiService({
     baseUrl: '/api',
     tokenProvider: () => this.auth.getToken(),
+    fetcher: this.noStoreFetch,
   });
 
   private activeStreamAbortController: AbortController | null = null;

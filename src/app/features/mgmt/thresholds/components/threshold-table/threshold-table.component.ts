@@ -15,6 +15,7 @@ export type ThresholdDeletePayload = {
 export class ThresholdTableComponent {
   readonly thresholds = input<ThresholdConfig[]>([]);
   readonly isLoading = input<boolean>(false);
+  readonly canDelete = input<boolean>(true);
 
   readonly deleteRequested = output<ThresholdDeletePayload>();
 
@@ -27,6 +28,10 @@ export class ThresholdTableComponent {
   }
 
   requestDelete(row: ThresholdConfig): void {
+    if (!this.canDelete()) {
+      return;
+    }
+
     this.deleteRequested.emit({
       type: row.type,
       key: this.keyOf(row),

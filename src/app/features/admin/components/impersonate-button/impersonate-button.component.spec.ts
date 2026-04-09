@@ -63,7 +63,7 @@ describe('ImpersonateButtonComponent', () => {
     component.requestImpersonation();
 
     expect(component.inProgress()).toBe(false);
-    expect(failedSpy).toHaveBeenCalledWith('Impersonazione non avviata: token mancante.');
+    expect(failedSpy).toHaveBeenCalledWith('Impersonation not started: missing token.');
   });
 
   it('emits failure when request errors', () => {
@@ -74,6 +74,6 @@ describe('ImpersonateButtonComponent', () => {
     component.requestImpersonation();
 
     expect(component.inProgress()).toBe(false);
-    expect(failedSpy).toHaveBeenCalledWith('Impersonazione non riuscita.');
+    expect(failedSpy).toHaveBeenCalledWith('Impersonation failed.');
   });
 });

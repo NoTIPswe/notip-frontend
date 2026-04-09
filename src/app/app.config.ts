@@ -3,11 +3,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import {
   AutoRefreshTokenService,
-  type IncludeBearerTokenCondition,
-  INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
   UserActivityService,
-  createInterceptorCondition,
-  includeBearerTokenInterceptor,
   provideKeycloak,
   withAutoRefreshToken,
 } from 'keycloak-angular';
@@ -15,13 +11,10 @@ import { provideApi as provideMgmtApi } from './generated/openapi/notip-manageme
 import { provideApi as provideDataApi } from './generated/openapi/notip-data-api-openapi';
 import { IMPERSONATION_STATUS, SESSION_LIFECYCLE } from './core/auth/contracts';
 import { AuthService } from './core/services/auth.service';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 
 import { routes } from './app.routes';
-
-const bearerTokenCondition = createInterceptorCondition<IncludeBearerTokenCondition>({
-  urlPattern: /^\/api\/(mgmt|data)(\/.*)?$/i,
-});
 
 const keycloakConfig = {
   url: '/auth',
@@ -47,11 +40,7 @@ export const appConfig: ApplicationConfig = {
       ],
       providers: [AutoRefreshTokenService, UserActivityService],
     }),
-    {
-      provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
-      useValue: [bearerTokenCondition],
-    },
-    provideHttpClient(withInterceptors([includeBearerTokenInterceptor, errorInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     provideRouter(routes),
     provideMgmtApi('/api/mgmt'),
     provideDataApi('/api/data'),

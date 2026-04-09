@@ -11,6 +11,6 @@
 export interface CreateTenantRequestDto {
   name: string;
   admin_email: string;
-  admin_name: string;
+  admin_username: string;
   admin_password: string;
 }

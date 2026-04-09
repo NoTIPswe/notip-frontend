@@ -1,9 +1,7 @@
 <section class="admin-gateway-form">
-  <h3>Aggiungi gateway</h3>
+  <h3>Add gateway</h3>
 
-  <form
-    (submit)="onSubmit($event, factoryId.value, tenantId.value, factoryKeyHash.value, model.value)"
-  >
+  <form (submit)="onSubmit($event, factoryId.value, tenantId.value, factoryKey.value, model.value)">
     <label>
       Factory ID
       <input #factoryId type="text" required minlength="3" />
@@ -11,12 +9,17 @@
 
     <label>
       Tenant ID
-      <input #tenantId type="text" required minlength="3" />
+      <select #tenantId required [disabled]="tenantIds().length === 0">
+        <option value="">Select tenant</option>
+        @for (tenantIdOption of tenantIds(); track tenantIdOption) {
+          <option [value]="tenantIdOption">{{ tenantIdOption }}</option>
+        }
+      </select>
     </label>
 
     <label>
-      Factory Key Hash
-      <input #factoryKeyHash type="text" required minlength="12" />
+      Factory Key
+      <input #factoryKey type="text" required minlength="32" />
     </label>
 
     <label>
@@ -25,7 +28,10 @@
     </label>
 
     <div class="actions">
-      <button type="submit" [disabled]="isSaving()">Aggiungi</button>
+      <button type="submit" [disabled]="isSaving()">Add</button>
+      <button type="button" class="ghost" (click)="onCancel()" [disabled]="isSaving()">
+        Cancel
+      </button>
     </div>
   </form>
 </section>

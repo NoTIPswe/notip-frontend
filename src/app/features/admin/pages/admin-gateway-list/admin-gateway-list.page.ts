@@ -6,18 +6,22 @@ import {
 import { AdminGatewayTableComponent } from '../../components/admin-gateway-table/admin-gateway-table.component';
 import { ObfuscatedGateway } from '../../../../core/models/gateway';
 import { AdminGatewayService } from '../../services/admin-gateway.service';
+import { TenantService } from '../../services/tenant.service';
+import { ModalLayerComponent } from '../../../../shared/components/modal-layer/modal-layer.component';
 
 @Component({
   selector: 'app-admin-gateway-list-page',
   standalone: true,
-  imports: [AdminGatewayTableComponent, AdminGatewayFormComponent],
+  imports: [AdminGatewayTableComponent, AdminGatewayFormComponent, ModalLayerComponent],
   templateUrl: './admin-gateway-list.page.html',
   styleUrl: './admin-gateway-list.page.css',
 })
 export class AdminGatewayListPageComponent implements OnInit {
   private readonly adminGatewayService = inject(AdminGatewayService);
+  private readonly tenantService = inject(TenantService);
 
   readonly gateways = signal<ObfuscatedGateway[]>([]);
+  readonly tenantOptions = signal<string[]>([]);
   readonly tenantFilter = signal<string>('');
   readonly showCreateForm = signal<boolean>(false);
   readonly isLoading = signal<boolean>(false);
@@ -27,9 +31,11 @@ export class AdminGatewayListPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadGateways();
+    this.loadTenantOptions();
   }
 
-  onApplyFilter(tenantId: string): void {
+  onApplyFilter(event: Event, tenantId: string): void {
+    event.preventDefault();
     this.tenantFilter.set(tenantId.trim());
     this.loadGateways();
   }
@@ -43,6 +49,10 @@ export class AdminGatewayListPageComponent implements OnInit {
     this.showCreateForm.set(!this.showCreateForm());
   }
 
+  onCreateCancelled(): void {
+    this.showCreateForm.set(false);
+  }
+
   onCreateGateway(payload: CreateAdminGatewayPayload): void {
     this.errorMessage.set(null);
     this.infoMessage.set(null);
@@ -52,19 +62,19 @@ export class AdminGatewayListPageComponent implements OnInit {
       .addGateway({
         factoryId: payload.factoryId,
         tenantId: payload.tenantId,
-        factoryKeyHash: payload.factoryKeyHash,
+        factoryKey: payload.factoryKey,
         model: payload.model,
       })
       .subscribe({
         next: (id) => {
           this.isSaving.set(false);
           this.showCreateForm.set(false);
-          this.infoMessage.set(`Gateway creato con id ${id}.`);
+          this.infoMessage.set(`Gateway created with id ${id}.`);
           this.loadGateways();
         },
         error: () => {
           this.isSaving.set(false);
-          this.errorMessage.set('Impossibile creare il gateway.');
+          this.errorMessage.set('Unable to create gateway.');
         },
       });
   }
@@ -83,7 +93,23 @@ export class AdminGatewayListPageComponent implements OnInit {
       },
       error: () => {
         this.isLoading.set(false);
-        this.errorMessage.set('Impossibile caricare i gateways admin.');
+        this.errorMessage.set('Unable to load admin gateways.');
+      },
+    });
+  }
+
+  private loadTenantOptions(): void {
+    this.tenantService.getTenants().subscribe({
+      next: (rows) => {
+        const tenantIds = rows
+          .map((row) => row.tenantId)
+          .filter((tenantId) => tenantId.length > 0)
+          .sort((a, b) => a.localeCompare(b));
+
+        this.tenantOptions.set(tenantIds);
+      },
+      error: () => {
+        this.tenantOptions.set([]);
       },
     });
   }

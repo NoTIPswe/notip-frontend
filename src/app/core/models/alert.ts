@@ -36,4 +36,5 @@ export interface AlertsConfig {
 export interface GatewayOverride {
   gatewayId: string;
   timeoutMs: number;
+  updatedAt?: string;
 }

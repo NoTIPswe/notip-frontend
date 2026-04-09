@@ -15,17 +15,16 @@ export class AdminGatewayService {
       map((rows) =>
         (rows as Record<string, unknown>[]).map((row) => {
           const mapped: ObfuscatedGateway = {
-            gatewayId: this.asString(row['id']),
-            tenantId: this.asString(row['tenant_id']),
+            gatewayId: this.pickString(row, ['id']),
+            tenantId: this.pickString(row, ['tenant_id']),
             provisioned: Boolean(row['provisioned']),
             model: this.asString(row['model']),
-            factoryId: this.asString(row['factory_id']),
+            factoryId: this.pickString(row, ['factory_id']),
+            createdAt: this.pickString(row, ['created_at']),
           };
-          if (row['firmware']) {
-            mapped.firmware = this.asString(row['firmware']);
-          }
-          if (row['created_at']) {
-            mapped.createdAt = this.asString(row['created_at']);
+          const firmware = this.pickString(row, ['firmware', 'firmware_version']);
+          if (firmware) {
+            mapped.firmware = firmware;
           }
 
           return mapped;
@@ -38,7 +37,7 @@ export class AdminGatewayService {
     const body: AddGatewayRequestDto = {
       factory_id: gp.factoryId,
       tenant_id: gp.tenantId,
-      factory_key_hash: gp.factoryKeyHash,
+      factory_key: gp.factoryKey,
       model: gp.model,
     };
 
@@ -49,5 +48,16 @@ export class AdminGatewayService {
 
   private asString(value: unknown): string {
     return typeof value === 'string' ? value : '';
+  }
+
+  private pickString(row: Record<string, unknown>, keys: string[]): string {
+    for (const key of keys) {
+      const value = row[key];
+      if (typeof value === 'string' && value.length > 0) {
+        return value;
+      }
+    }
+
+    return '';
   }
 }

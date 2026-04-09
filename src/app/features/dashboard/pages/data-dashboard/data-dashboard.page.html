@@ -1,14 +1,152 @@
-<section class="dashboard-page">
-  <h2>Dashboard Dati</h2>
+<div class="dashboard-wrapper dashboard-modern">
+  <!-- Sidebar Filters -->
+  <aside class="filters-sidebar modern-sidebar">
+    <div class="view-selector">
+      <button
+        type="button"
+        [class.active]="activeView() === 'stream'"
+        (click)="setActiveView('stream')"
+      >
+        Live Stream
+      </button>
+      <button
+        type="button"
+        [class.active]="activeView() === 'query'"
+        (click)="setActiveView('query')"
+      >
+        Historical Analysis
+      </button>
+    </div>
+    <div class="sidebar-scroll-area">
+      <app-filter-panel
+        [mode]="activeView()"
+        [gatewayOptions]="gatewayOptions()"
+        [sensorTypeOptions]="sensorTypeOptions()"
+        [sensorOptions]="sensorOptions()"
+        [sensorCatalog]="sensorCatalog()"
+        [defaultFilters]="activeView() === 'stream' ? streamFilters() : queryFilters()"
+        (filtersApplied)="onFiltersApplied($event)"
+        (clearRequested)="onFiltersCleared()"
+      >
+      </app-filter-panel>
+    </div>
+  </aside>
+  <!-- Content Area -->
+  <main class="main-content modern-main">
+    <header class="main-header modern-header sticky">
+      <div class="header-left">
+        <h1>{{ activeView() === 'stream' ? 'Real-Time Monitoring' : 'Telemetry Archive' }}</h1>
+        @if (activeView() === 'stream') {
+          <div class="live-indicator">
+            <span class="dot"></span>
+            Synchronized
+          </div>
+        }
+      </div>
+      <div class="header-right">
+        <div class="data-pill">
+          @if (activeView() === 'stream') {
+            <strong>{{ streamMeasures().length }}</strong> samples shown
+          } @else {
+            Page <strong>{{ queryPage() }}</strong> •
+            <strong>{{ queryMeasures().length }}</strong> results
+          }
+        </div>
+      </div>
+    </header>
+    <div class="dashboard-grid modern-grid">
+      @if (activeView() === 'stream') {
+        <div class="grid-item chart-card modern-card">
+          <app-telemetry-chart [measures]="streamMeasures()"></app-telemetry-chart>
+        </div>
+        <div class="grid-item table-card modern-card">
+          <app-telemetry-table
+            [measures]="streamMeasures()"
+            [isLoading]="isStreamLoading()"
+          ></app-telemetry-table>
+        </div>
+      }
+      @if (activeView() === 'query') {
+        <div class="grid-item chart-card modern-card">
+          <app-telemetry-chart [measures]="queryMeasures()"></app-telemetry-chart>
+        </div>
+        <div class="grid-item actions-card modern-card">
+          <div class="query-actions">
+            @if (canExportQuery()) {
+              <button
+                class="btn btn-primary"
+                [disabled]="isExporting() || isQueryLoading()"
+                (click)="onExportQuery()"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Export CSV
+              </button>
+            }
+          </div>
 
-  <p class="meta">Records: {{ measures().length }}</p>
+          <div class="query-pagination">
+            <button
+              type="button"
+              class="btn btn-ghost"
+              [disabled]="!canGoToPreviousQueryPage()"
+              (click)="onPreviousQueryPage()"
+            >
+              Previous
+            </button>
 
-  <app-filter-panel
-    (filtersApplied)="onFiltersApplied($event)"
-    (clearRequested)="onFiltersCleared()"
-  ></app-filter-panel>
+            <span class="meta">Page {{ queryPage() }}</span>
 
-  <app-telemetry-table [measures]="measures()" [isLoading]="isLoading()"></app-telemetry-table>
+            <button
+              type="button"
+              class="btn btn-ghost"
+              [disabled]="!canGoToNextQueryPage()"
+              (click)="onNextQueryPage()"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+        <div class="grid-item table-card modern-card">
+          <app-telemetry-table
+            [measures]="queryMeasures()"
+            [isLoading]="isQueryLoading()"
+          ></app-telemetry-table>
 
-  <app-telemetry-chart [measures]="measures()"></app-telemetry-chart>
-</section>
+          <div class="query-pagination query-pagination-bottom">
+            <button
+              type="button"
+              class="btn btn-ghost"
+              [disabled]="!canGoToPreviousQueryPage()"
+              (click)="onPreviousQueryPage()"
+            >
+              Previous
+            </button>
+
+            <span class="meta">Page {{ queryPage() }}</span>
+
+            <button
+              type="button"
+              class="btn btn-ghost"
+              [disabled]="!canGoToNextQueryPage()"
+              (click)="onNextQueryPage()"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </main>
+</div>

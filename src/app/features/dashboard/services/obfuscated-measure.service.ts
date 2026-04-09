@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, map, of, switchMap } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import {
   ObfuscatedQueryResPage,
   ObfuscatedEnvelope,
@@ -24,37 +24,37 @@ export class ObfuscatedMeasureService {
       .measureControllerQuery(
         qp.from,
         qp.to,
-        qp.limit ?? 100,
         qp.cursor,
+        qp.limit ?? 100,
         qp.gatewayIds,
         qp.sensorIds,
         qp.sensorTypes,
       )
-      .pipe(switchMap((response) => this.toObfuscatedQueryResPage(response as unknown)));
+      .pipe(map((response) => this.toObfuscatedQueryResPage(response as unknown)));
   }
 
   closeStream(): void {
     this.msm.closeStream();
   }
 
-  private toObfuscatedQueryResPage(response: unknown): Observable<ObfuscatedQueryResPage> {
-    const page = this.asRecord(response);
+  private toObfuscatedQueryResPage(response: unknown): ObfuscatedQueryResPage {
+    const page = this.asRecord(Array.isArray(response) ? response[0] : response);
     const data = Array.isArray(page['data']) ? (page['data'] as TelemetryEnvelope[]) : [];
     const rows = data.map((envelope) => this.toObfuscatedEnvelope(envelope));
     const nextCursor = this.asOptionalString(page['nextCursor']);
 
     if (nextCursor) {
-      return of({
+      return {
         data: rows,
         nextCursor,
         hasMore: Boolean(page['hasMore']),
-      });
+      };
     }
 
-    return of({
+    return {
       data: rows,
       hasMore: Boolean(page['hasMore']),
-    });
+    };
   }
 
   private toObfuscatedEnvelope(envelope: TelemetryEnvelope): ObfuscatedEnvelope {

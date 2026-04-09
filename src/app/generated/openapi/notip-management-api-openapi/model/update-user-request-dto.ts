@@ -9,7 +9,7 @@
  */
 
 export interface UpdateUserRequestDto {
-  name: string;
+  username: string;
   email: string;
   role: UpdateUserRequestDtoRoleEnum;
   permissions: Array<string>;

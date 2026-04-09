@@ -44,6 +44,7 @@ describe('AuthService', () => {
   };
 
   beforeEach(async () => {
+    sessionStorage.clear();
     eventSignal.set({ type: KeycloakEventType.KeycloakAngularNotInitialized });
     keycloakMock.authenticated = false;
     keycloakMock.token = '';
@@ -91,6 +92,28 @@ describe('AuthService', () => {
     expect(logoutEvents.length).toBe(1);
 
     sub.unsubscribe();
+  });
+
+  it('opens Keycloak update profile action', () => {
+    keycloakMock.login.mockResolvedValue(undefined);
+
+    service.openProfile();
+
+    expect(keycloakMock.login).toHaveBeenCalledWith({
+      action: 'UPDATE_PROFILE',
+      redirectUri: globalThis.location.origin,
+    });
+  });
+
+  it('opens Keycloak update password action', () => {
+    keycloakMock.login.mockResolvedValue(undefined);
+
+    service.openPasswordChange();
+
+    expect(keycloakMock.login).toHaveBeenCalledWith({
+      action: 'UPDATE_PASSWORD',
+      redirectUri: globalThis.location.origin,
+    });
   });
 
   it('resets impersonation when Keycloak emits AuthLogout event', () => {
@@ -142,7 +165,7 @@ describe('AuthService', () => {
       role: 'tenant_admin',
     };
 
-    await expect(service.getUsername()).resolves.toBe('Alice Rossi');
+    await expect(service.getUsername()).resolves.toBe('Alice');
     expect(service.getTenantId()).toBe('tenant-1');
     expect(service.getUserId()).toBe('user-1');
     expect(service.getRole()).toBe(UserRole.tenant_admin);
@@ -173,19 +196,31 @@ describe('AuthService', () => {
     expect(service.getRole()).toBe(UserRole.tenant_user);
   });
 
-  it('falls back to name and preferred_username when first and last name are missing', async () => {
+  it('uses preferred_username and falls back to username/name when missing', async () => {
     keycloakMock.tokenParsed = {
       name: 'Mario Bianchi',
       preferred_username: 'mario.bianchi',
     };
 
+    await expect(service.getUsername()).resolves.toBe('Mario.bianchi');
+
+    keycloakMock.tokenParsed = {
+      name: 'Mario Bianchi',
+    };
+
     await expect(service.getUsername()).resolves.toBe('Mario Bianchi');
 
     keycloakMock.tokenParsed = {
-      preferred_username: 'legacy.username',
+      username: 'legacy.username',
     };
 
-    await expect(service.getUsername()).resolves.toBe('legacy.username');
+    await expect(service.getUsername()).resolves.toBe('Legacy.username');
+
+    keycloakMock.tokenParsed = {
+      name: 'Fallback Name',
+    };
+
+    await expect(service.getUsername()).resolves.toBe('Fallback Name');
   });
 
   it('returns empty identity fields when JWT payload is missing', async () => {
@@ -214,7 +249,7 @@ describe('AuthService', () => {
     expect(authApiMock.authControllerImpersonate).toHaveBeenCalledWith({ user_id: 'target-1' });
     expect(service.isImpersonating()).toBe(true);
     await expect(service.getToken()).resolves.toBe(impersonatedToken);
-    await expect(service.getUsername()).resolves.toBe('Impersonated User');
+    await expect(service.getUsername()).resolves.toBe('Impersonated.name');
     expect(service.getTenantId()).toBe('tenant-77');
     expect(service.getUserId()).toBe('impersonated-user');
     expect(service.getRole()).toBe(UserRole.tenant_admin);
@@ -225,5 +260,85 @@ describe('AuthService', () => {
 
     await expect(firstValueFrom(service.startImpersonation('target-2'))).resolves.toBe('');
     expect(service.isImpersonating()).toBe(false);
+  });
+
+  it('stops impersonation explicitly', () => {
+    service.setImpersonating(true);
+    expect(service.isImpersonating()).toBe(true);
+
+    service.stopImpersonation();
+
+    expect(service.isImpersonating()).toBe(false);
+  });
+
+  it('restores impersonation context from session storage on startup', async () => {
+    const token = createUnsignedJwt({
+      sub: 'stored-user',
+      preferred_username: 'stored.user',
+      tenant_id: 'tenant-stored',
+      role: 'tenant_admin',
+    });
+
+    sessionStorage.setItem(
+      'impersonation',
+      JSON.stringify({
+        token,
+        payload: {
+          sub: 'stored-user',
+          preferred_username: 'stored.user',
+          tenant_id: 'tenant-stored',
+          role: 'tenant_admin',
+        },
+      }),
+    );
+
+    const restored = TestBed.runInInjectionContext(() => new AuthService());
+
+    expect(restored.isImpersonating()).toBe(true);
+    await expect(restored.getToken()).resolves.toBe(token);
+    await expect(restored.getUsername()).resolves.toBe('Stored.user');
+    expect(restored.getTenantId()).toBe('tenant-stored');
+    expect(restored.getRole()).toBe(UserRole.tenant_admin);
+  });
+
+  it('ignores invalid impersonation data persisted in session storage', async () => {
+    sessionStorage.setItem('impersonation', 'not-json');
+
+    const restored = TestBed.runInInjectionContext(() => new AuthService());
+
+    expect(restored.isImpersonating()).toBe(false);
+    await expect(restored.getToken()).resolves.toBe('');
+  });
+
+  it('keeps impersonation in memory when token payload is not decodable', async () => {
+    authApiMock.authControllerImpersonate.mockReturnValue(of({ access_token: 'invalid-token' }));
+
+    await expect(firstValueFrom(service.startImpersonation('target-3'))).resolves.toBe(
+      'invalid-token',
+    );
+
+    expect(service.isImpersonating()).toBe(true);
+    await expect(service.getToken()).resolves.toBe('invalid-token');
+    expect(sessionStorage.getItem('impersonation')).toBeNull();
+  });
+
+  it('persists impersonation again when enabled with in-memory token and payload', async () => {
+    const token = createUnsignedJwt({
+      sub: 'persisted-user',
+      preferred_username: 'persisted.user',
+      tenant_id: 'tenant-9',
+      role: 'tenant_admin',
+    });
+    authApiMock.authControllerImpersonate.mockReturnValue(of({ access_token: token }));
+
+    await firstValueFrom(service.startImpersonation('target-4'));
+    sessionStorage.removeItem('impersonation');
+
+    service.setImpersonating(true);
+
+    const persisted = sessionStorage.getItem('impersonation');
+    expect(persisted).toBeTruthy();
+    const parsed = JSON.parse(persisted as string) as { token?: string };
+    expect(parsed.token).toBe(token);
   });
 });

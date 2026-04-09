@@ -1,5 +1,6 @@
 <section class="gateway-detail-page">
-  <h2>Dettaglio Gateway</h2>
+  <a class="back-link" routerLink="/gateways">Back to gateways</a>
+  <h2>Gateway Details</h2>
 
   @if (errorMessage()) {
     <p class="error">{{ errorMessage() }}</p>
@@ -12,15 +13,16 @@
   @if (gateway()) {
     <section class="summary">
       <p><strong>ID:</strong> {{ gateway()!.gatewayId }}</p>
-      <p><strong>Nome:</strong> {{ gateway()!.name }}</p>
+      <p><strong>Name:</strong> {{ gateway()!.name }}</p>
       <p><strong>Status:</strong> {{ gateway()!.status }}</p>
       <p><strong>Firmware:</strong> {{ gateway()!.firmwareVersion ?? '-' }}</p>
-      <p><strong>Frequenza:</strong> {{ gateway()!.sendFrequencyMs }} ms</p>
+      <p><strong>Frequency:</strong> {{ gateway()!.sendFrequencyMs }} ms</p>
     </section>
   }
 
   <app-gateway-actions
     [canManage]="canManage"
+    [showRename]="!isImpersonating()"
     [isBusy]="isBusy()"
     (renameRequested)="requestRename()"
     (configureRequested)="openConfigModal()"
@@ -28,10 +30,20 @@
     (deleteRequested)="openDeleteModal()"
   ></app-gateway-actions>
 
+  <app-gateway-rename-modal
+    [open]="renameModalOpen()"
+    [currentName]="gateway()?.name ?? ''"
+    [busy]="isBusy()"
+    (closed)="closeRenameModal()"
+    (renameSubmitted)="submitRename($event)"
+  ></app-gateway-rename-modal>
+
   <app-command-modal
     [open]="commandModalOpen()"
     [mode]="commandModalMode()"
     [busy]="isBusy()"
+    [initialSendFrequencyMs]="commandModalInitialSendFrequencyMs()"
+    [initialStatus]="commandModalInitialStatus()"
     (closed)="closeCommandModal()"
     (configSubmitted)="submitConfigCommand($event)"
     (firmwareSubmitted)="submitFirmwareCommand($event)"
@@ -39,8 +51,8 @@
 
   <app-delete-confirm-modal
     [open]="deleteModalOpen()"
-    [title]="'Eliminare gateway'"
-    [message]="'Confermi la rimozione del gateway selezionato?'"
+    [title]="'Delete gateway'"
+    [message]="'Do you confirm removing the selected gateway?'"
     [busy]="isBusy()"
     (confirmed)="confirmDeleteGateway()"
     (cancelled)="closeDeleteModal()"
@@ -48,14 +60,14 @@
 
   @if (commandStatus()) {
     <p class="meta">
-      Ultimo comando: {{ commandStatus()!.commandId }} ({{ commandStatus()!.status }})
+      Last command: {{ commandStatus()!.commandId }} ({{ commandStatus()!.status }})
     </p>
   }
 
   <section class="sensor-block">
-    <h3>Sensori</h3>
+    <h3>Sensors</h3>
     @if (sensors().length === 0) {
-      <p class="meta">Nessun sensore disponibile.</p>
+      <p class="meta">No sensors available.</p>
     }
     <ul>
       @for (sensor of sensors(); track sensor.sensorId) {

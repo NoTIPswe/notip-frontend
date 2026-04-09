@@ -1,7 +1,27 @@
 <section class="tenant-detail">
-  <h2>Dettaglio Tenant</h2>
+  <a class="back-link" routerLink="/admin/tenants">Back to tenants</a>
+  <h2>Tenant Details</h2>
 
-  <p class="tenant-id">Tenant ID: {{ tenantId() }}</p>
+  @if (isTenantLoading()) {
+    <p class="meta">Loading tenant information...</p>
+  }
+
+  @if (tenant()) {
+    <section class="summary">
+      <h3>Tenant information</h3>
+      <p><strong>ID:</strong> {{ tenant()!.tenantId }}</p>
+      <p><strong>Name:</strong> {{ tenant()!.name }}</p>
+      <p><strong>Status:</strong> {{ tenant()!.status }}</p>
+      <p>
+        <strong>Created on:</strong>
+        {{ (tenant()!.createdAt | romeDateTime: false) || '-' }}
+      </p>
+      <p>
+        <strong>Suspension interval:</strong>
+        {{ tenant()!.suspensionIntervalDays ?? 0 }} days
+      </p>
+    </section>
+  }
 
   @if (errorMessage()) {
     <p class="error">{{ errorMessage() }}</p>

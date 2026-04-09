@@ -1,23 +1,18 @@
 <section class="telemetry-chart">
-  <h3>Trend (ultimi valori decifrati)</h3>
+  <div class="chart-header">
+    <h3>Sensor Trends</h3>
+    @if (uniqueCheckedSensorIds().length > 0) {
+      <p class="series-count">{{ uniqueCheckedSensorIds().length }} sensors</p>
+    }
+  </div>
 
-  @if (points().length === 0) {
-    <p class="empty">Nessun punto decifrato disponibile.</p>
-  }
+  <div class="chart-container">
+    @if (hasDecryptedMeasures()) {
+      <canvas #chartCanvas></canvas>
+    } @else {
+      <p class="empty">No decrypted sensor data available for the current filters.</p>
+    }
+  </div>
 
-  @if (points().length > 0) {
-    <ul>
-      @for (point of points(); track point.sensorId + point.value) {
-        <li>
-          <span class="label">{{ point.sensorId }}</span>
-          <div class="bar-wrap">
-            <div class="bar" [style.width.%]="point.widthPct"></div>
-          </div>
-          <span class="value">{{ point.value.toFixed(2) }}</span>
-        </li>
-      }
-    </ul>
-  }
-
-  <p class="meta">Envelope oscurati ricevuti: {{ obfuscatedCount() }}</p>
+  <p class="meta">Obfuscated envelopes received: {{ obfuscatedCount() }}</p>
 </section>

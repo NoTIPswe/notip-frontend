@@ -11,6 +11,6 @@
 export interface AddGatewayRequestDto {
   factory_id: string;
   tenant_id: string;
-  factory_key_hash: string;
+  factory_key: string;
   model: string;
 }

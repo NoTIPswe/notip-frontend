@@ -1,5 +1,6 @@
 <section class="sensor-detail-page">
-  <h2>Dettaglio Sensore</h2>
+  <a class="back-link" routerLink="/sensors">Back to sensors</a>
+  <h2>Sensor Details</h2>
 
   @if (errorMessage()) {
     <p class="error">{{ errorMessage() }}</p>
@@ -10,7 +11,10 @@
       <p><strong>Sensor ID:</strong> {{ sensor()!.sensorId }}</p>
       <p><strong>Gateway ID:</strong> {{ sensor()!.gatewayId }}</p>
       <p><strong>Type:</strong> {{ sensor()!.sensorType }}</p>
-      <p><strong>Last seen:</strong> {{ sensor()!.lastSeen }}</p>
+      <p>
+        <strong>Last seen (Europe/Rome):</strong>
+        {{ (sensor()!.lastSeen | romeDateTime) || '-' }}
+      </p>
     </section>
   }
 

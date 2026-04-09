@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GatewayCardComponent } from '../../components/gateway-card/gateway-card.component';
@@ -15,6 +15,7 @@ import { GatewayService } from '../../services/gateway.service';
 export class GatewayListPageComponent implements OnInit {
   private readonly gatewayService = inject(GatewayService);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly gateways = signal<Gateway[]>([]);
   readonly selectedGatewayId = signal<string | null>(null);
@@ -35,13 +36,13 @@ export class GatewayListPageComponent implements OnInit {
 
     this.gatewayService
       .getGateways()
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (rows) => {
           this.gateways.set(rows);
         },
         error: () => {
-          this.errorMessage.set('Impossibile caricare la lista gateway.');
+          this.errorMessage.set('Unable to load gateway list.');
         },
       });
   }

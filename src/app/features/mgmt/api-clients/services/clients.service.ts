@@ -12,10 +12,10 @@ export class ClientsService {
       map((rows) =>
         (rows as Record<string, unknown>[]).map((row) => {
           const mapped: Client = {
-            id: this.asString(row['id']),
-            clientId: this.asString(row['client_id']),
-            name: this.asString(row['name']),
-            createdAt: this.asString(row['created_at']),
+            id: this.pickString(row, ['id']),
+            clientId: this.pickString(row, ['client_id']),
+            name: this.pickString(row, ['name']),
+            createdAt: this.pickString(row, ['created_at']),
           };
 
           return mapped;
@@ -29,11 +29,11 @@ export class ClientsService {
       map((res) => {
         const dict = res as Record<string, unknown>;
         const mapped: SecretClient = {
-          id: this.asString(dict['id']),
-          clientId: this.asString(dict['client_id']),
-          name: this.asString(dict['name']),
-          clientSecret: this.asString(dict['client_secret']),
-          createdAt: this.asString(dict['created_at']),
+          id: this.pickString(dict, ['id']),
+          clientId: this.pickString(dict, ['client_id']),
+          name: this.pickString(dict, ['name']),
+          clientSecret: this.pickString(dict, ['client_secret']),
+          createdAt: this.pickString(dict, ['created_at']),
         };
 
         return mapped;
@@ -47,5 +47,16 @@ export class ClientsService {
 
   private asString(value: unknown): string {
     return typeof value === 'string' ? value : '';
+  }
+
+  private pickString(source: Record<string, unknown>, keys: string[]): string {
+    for (const key of keys) {
+      const value = source[key];
+      if (typeof value === 'string') {
+        return value;
+      }
+    }
+
+    return '';
   }
 }

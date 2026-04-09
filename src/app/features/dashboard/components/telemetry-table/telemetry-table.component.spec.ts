@@ -32,7 +32,7 @@ describe('TelemetryTableComponent', () => {
   });
 
   it('formats obfuscated value as masked text', () => {
-    expect(component.formatValue(obfuscated)).toBe('*** OSCURATO ***');
+    expect(component.formatValue(obfuscated)).toBe('*** OBFUSCATED ***');
   });
 
   it('formats finite checked value with fixed precision', () => {

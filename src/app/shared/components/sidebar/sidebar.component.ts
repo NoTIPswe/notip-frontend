@@ -15,12 +15,12 @@ const TENANT_USER_MENU: ReadonlyArray<MenuItem> = [
   { label: 'Dashboard', path: '/dashboard', exact: true },
   { label: 'Gateways', path: '/gateways' },
   { label: 'Sensors', path: '/sensors' },
+  { label: 'Alerts', path: '/alerts' },
+  { label: 'Threshold Settings', path: '/mgmt/limits' },
 ];
 
 const TENANT_ADMIN_EXTRA_MENU: ReadonlyArray<MenuItem> = [
-  { label: 'Alerts', path: '/alerts' },
   { label: 'Users Management', path: '/mgmt/users' },
-  { label: 'Threshold Settings', path: '/mgmt/limits' },
   { label: 'API Clients', path: '/mgmt/api' },
   { label: 'Audit Log', path: '/mgmt/logs' },
   { label: 'Costs', path: '/mgmt/costs' },
@@ -46,9 +46,12 @@ const SYSTEM_ADMIN_MENU: ReadonlyArray<MenuItem> = [
 })
 export class SidebarComponent {
   readonly isImpersonating = input<boolean>(false);
-  readonly username = input<string>('Utente');
+  readonly username = input<string>('User');
   readonly role = input<UserRole>(UserRole.tenant_user);
   readonly logoutRequested = output<void>();
+  readonly impersonationStopRequested = output<void>();
+  readonly profileRequested = output<void>();
+  readonly passwordChangeRequested = output<void>();
 
   menuItems(): ReadonlyArray<MenuItem> {
     const role = this.currentRole();
@@ -70,5 +73,17 @@ export class SidebarComponent {
 
   emitLogout(): void {
     this.logoutRequested.emit();
+  }
+
+  emitImpersonationStopRequested(): void {
+    this.impersonationStopRequested.emit();
+  }
+
+  emitProfileRequested(): void {
+    this.profileRequested.emit();
+  }
+
+  emitPasswordChangeRequested(): void {
+    this.passwordChangeRequested.emit();
   }
 }

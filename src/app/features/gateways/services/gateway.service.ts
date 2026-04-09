@@ -1,19 +1,20 @@
 import { Injectable, Signal, signal, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { finalize, map, Observable, tap } from 'rxjs';
 import {
   GatewayResponseDto,
   GatewaysService as GatewaysApiService,
   UpdateGatewayRequestDto,
-  UpdateGatewayResponseDto,
 } from '../../../generated/openapi/notip-management-api-openapi';
 import { Gateway, GatewayUpdateResult } from '../../../core/models/gateway';
 import { GatewayStatus } from '../../../core/models/enums';
-import { IMPERSONATION_STATUS, ImpersonationStatus } from '../../../core/auth/contracts';
+
+const DEFAULT_GATEWAY_SEND_FREQUENCY_MS = 30000;
 
 @Injectable({ providedIn: 'root' })
 export class GatewayService {
   private readonly gatewaysApi = inject(GatewaysApiService);
-  private readonly impersonationStatus = inject<ImpersonationStatus>(IMPERSONATION_STATUS);
+  private readonly http = inject(HttpClient);
 
   private readonly listSignal = signal<Gateway[]>([]);
   private readonly selectedGatewaySignal = signal<Gateway | null>(null);
@@ -72,33 +73,95 @@ export class GatewayService {
     return this.loadingSignal.asReadonly();
   }
 
-  isImpersonating(): Signal<boolean> {
-    return this.impersonationStatus.isImpersonating;
-  }
-
   private toGateway(dto: GatewayResponseDto): Gateway {
+    const row = dto as unknown as Record<string, unknown>;
+    const lastSeenAt = this.pickOptionalString(row, ['last_seen_at']);
+    const firmwareVersion = this.pickOptionalString(row, ['firmware_version']);
+
     return {
-      gatewayId: dto.id,
-      name: dto.name,
-      status: this.toGatewayStatus(dto.status),
-      lastSeenAt: dto.last_seen_at,
-      provisioned: dto.provisioned,
-      firmwareVersion: dto.firmware_version,
-      sendFrequencyMs: dto.send_frequency_ms,
+      gatewayId: this.pickString(row, ['id']),
+      name: this.pickString(row, ['name']),
+      status: this.toGatewayStatus(row['status']),
+      provisioned: this.pickBoolean(row, ['provisioned']),
+      sendFrequencyMs: this.pickNumber(row, ['send_frequency_ms']),
+      ...(lastSeenAt ? { lastSeenAt } : {}),
+      ...(firmwareVersion ? { firmwareVersion } : {}),
     };
   }
 
-  private toGatewayStatus(
-    status: GatewayResponseDto['status'] | UpdateGatewayResponseDto['status'],
-  ): GatewayStatus {
-    switch (String(status)) {
-      case 'gateway_online':
-        return GatewayStatus.online;
-      case 'gateway_suspended':
-        return GatewayStatus.paused;
-      case 'gateway_offline':
-      default:
-        return GatewayStatus.offline;
+  private toGatewayStatus(status: unknown): GatewayStatus {
+    const normalized = (typeof status === 'string' ? status : '')
+      .trim()
+      .toLowerCase()
+      .replaceAll(/[\s_-]/g, '');
+
+    if (normalized === 'online' || normalized === 'gatewayonline') {
+      return GatewayStatus.online;
     }
+
+    if (
+      normalized === 'paused' ||
+      normalized === 'suspended' ||
+      normalized === 'gatewaysuspended'
+    ) {
+      return GatewayStatus.paused;
+    }
+
+    if (normalized === 'offline' || normalized === 'gatewayoffline') {
+      return GatewayStatus.offline;
+    }
+
+    return GatewayStatus.offline;
+  }
+
+  private pickString(row: Record<string, unknown>, keys: string[]): string {
+    for (const key of keys) {
+      const value = row[key];
+      if (typeof value === 'string' && value.length > 0) {
+        return value;
+      }
+    }
+
+    return '';
+  }
+
+  private pickOptionalString(row: Record<string, unknown>, keys: string[]): string | undefined {
+    for (const key of keys) {
+      const value = row[key];
+      if (typeof value === 'string' && value.length > 0) {
+        return value;
+      }
+    }
+
+    return undefined;
+  }
+
+  private pickBoolean(row: Record<string, unknown>, keys: string[]): boolean {
+    for (const key of keys) {
+      const value = row[key];
+      if (typeof value === 'boolean') {
+        return value;
+      }
+    }
+
+    return false;
+  }
+
+  private pickNumber(row: Record<string, unknown>, keys: string[]): number {
+    for (const key of keys) {
+      const value = row[key];
+      if (typeof value === 'number' && Number.isFinite(value)) {
+        return value;
+      }
+
+      if (typeof value === 'string') {
+        const parsed = Number(value);
+        if (Number.isFinite(parsed)) {
+          return parsed;
+        }
+      }
+    }
+
+    return DEFAULT_GATEWAY_SEND_FREQUENCY_MS;
   }
 }

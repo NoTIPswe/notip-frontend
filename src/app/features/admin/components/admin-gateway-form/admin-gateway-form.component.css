@@ -27,7 +27,8 @@ label {
   color: #364152;
 }
 
-input {
+input,
+select {
   height: 2.2rem;
   border: 1px solid #d4dae3;
   border-radius: 8px;
@@ -35,6 +36,9 @@ input {
 }
 
 .actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
   margin-top: 0.4rem;
 }
 
@@ -50,4 +54,15 @@ button {
 button:disabled {
   opacity: 0.65;
   cursor: not-allowed;
+}
+
+button.ghost {
+  background: #fff;
+  color: #1e293b;
+}
+
+@media (max-width: 680px) {
+  .actions button {
+    width: 100%;
+  }
 }

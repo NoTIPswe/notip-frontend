@@ -1,5 +1,14 @@
 <section class="threshold-settings-page">
-  <h2>Soglie</h2>
+  <div class="header-row">
+    <h2>Thresholds</h2>
+    @if (canEditThresholds && !showForm()) {
+      <button type="button" class="create-toggle" (click)="toggleForm()">+ New threshold</button>
+    }
+  </div>
+
+  @if (!canEditThresholds) {
+    <p class="info">Read-only mode for tenant user role.</p>
+  }
 
   @if (errorMessage()) {
     <p class="error">{{ errorMessage() }}</p>
@@ -12,12 +21,29 @@
   <app-threshold-table
     [thresholds]="thresholds()"
     [isLoading]="isLoading()"
+    [canDelete]="canEditThresholds"
     (deleteRequested)="deleteThreshold($event)"
   ></app-threshold-table>
 
-  <app-threshold-form
-    [isSaving]="isSaving()"
-    (typeSubmitted)="saveTypeThreshold($event)"
-    (sensorSubmitted)="saveSensorThreshold($event)"
-  ></app-threshold-form>
+  @if (canEditThresholds && showForm()) {
+    <app-modal-layer [open]="true">
+      <app-threshold-form
+        [isSaving]="isSaving()"
+        [sensorTypes]="sensorTypeOptions()"
+        [sensorIds]="sensorIdOptions()"
+        (typeSubmitted)="saveTypeThreshold($event)"
+        (sensorSubmitted)="saveSensorThreshold($event)"
+        (cancelRequested)="closeForm()"
+      ></app-threshold-form>
+    </app-modal-layer>
+  }
+
+  <app-delete-confirm-modal
+    [open]="!!deletingThreshold()"
+    [title]="'Delete threshold'"
+    [message]="'Do you confirm deleting the selected threshold?'"
+    [busy]="isSaving()"
+    (confirmed)="confirmDeleteThreshold()"
+    (cancelled)="cancelDeleteThreshold()"
+  ></app-delete-confirm-modal>
 </section>

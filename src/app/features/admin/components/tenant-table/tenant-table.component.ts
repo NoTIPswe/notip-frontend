@@ -1,9 +1,11 @@
 import { Component, input, output } from '@angular/core';
 import { Tenant } from '../../../../core/models/tenant';
+import { RomeDateTimePipe } from '../../../../shared/pipes/rome-date-time.pipe';
 
 @Component({
   selector: 'app-tenant-table',
   standalone: true,
+  imports: [RomeDateTimePipe],
   templateUrl: './tenant-table.component.html',
   styleUrl: './tenant-table.component.css',
 })

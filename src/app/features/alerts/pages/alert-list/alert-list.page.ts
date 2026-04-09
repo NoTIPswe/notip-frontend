@@ -6,20 +6,29 @@ import {
 } from '../../components/alert-filter-panel/alert-filter-panel.component';
 import { Alerts } from '../../../../core/models/alert';
 import { AlertService } from '../../services/alert.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { UserRole } from '../../../../core/models/enums';
+import { RomeDateTimePipe } from '../../../../shared/pipes/rome-date-time.pipe';
+import {
+  fromRomeDateTimeInputToIso,
+  toRomeDateTimeInput,
+} from '../../../../shared/utils/rome-timezone.util';
 
 @Component({
   selector: 'app-alert-list-page',
   standalone: true,
-  imports: [AlertFilterPanelComponent, RouterLink],
+  imports: [AlertFilterPanelComponent, RouterLink, RomeDateTimePipe],
   templateUrl: './alert-list.page.html',
   styleUrl: './alert-list.page.css',
 })
 export class AlertListPageComponent implements OnInit {
   private readonly alertService = inject(AlertService);
+  private readonly authService = inject(AuthService);
 
   readonly alerts = signal<Alerts[]>([]);
   readonly isLoading = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly canEditAlertsConfig = this.authService.getRole() === UserRole.tenant_admin;
 
   readonly from = signal<string>(this.toDatetimeLocal(new Date(Date.now() - 24 * 60 * 60 * 1000)));
   readonly to = signal<string>(this.toDatetimeLocal(new Date()));
@@ -61,25 +70,16 @@ export class AlertListPageComponent implements OnInit {
       },
       error: () => {
         this.isLoading.set(false);
-        this.errorMessage.set('Impossibile caricare gli alert.');
+        this.errorMessage.set('Unable to load alerts.');
       },
     });
   }
 
   private toIsoOrNow(value: string): string {
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) {
-      return new Date().toISOString();
-    }
-    return parsed.toISOString();
+    return fromRomeDateTimeInputToIso(value) ?? new Date().toISOString();
   }
 
   private toDatetimeLocal(value: Date): string {
-    const y = value.getFullYear();
-    const m = String(value.getMonth() + 1).padStart(2, '0');
-    const d = String(value.getDate()).padStart(2, '0');
-    const h = String(value.getHours()).padStart(2, '0');
-    const min = String(value.getMinutes()).padStart(2, '0');
-    return `${y}-${m}-${d}T${h}:${min}`;
+    return toRomeDateTimeInput(value);
   }
 }

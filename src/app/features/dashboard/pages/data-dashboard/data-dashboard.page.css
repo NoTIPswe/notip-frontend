@@ -1,17 +1,234 @@
-.dashboard-page {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  max-width: 1200px;
+.dashboard-wrapper {
+  display: grid;
+  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+  gap: var(--layout-page-gap);
+  width: 100%;
+  max-width: var(--layout-page-max-width);
+  margin-inline: auto;
+  min-width: 0;
 }
 
-h2 {
+.filters-sidebar,
+.main-content {
+  min-width: 0;
+}
+
+.modern-sidebar {
+  align-self: start;
+  position: sticky;
+  top: 0;
+}
+
+.sidebar-scroll-area {
+  max-height: calc(100dvh - 9.5rem);
+  overflow: auto;
+}
+
+.modern-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--layout-page-gap);
+}
+
+.main-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.header-left,
+.header-right {
+  min-width: 0;
+}
+
+h1 {
   margin: 0;
   font-size: 1.2rem;
+}
+
+.live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+  color: #334155;
+  font-size: 0.85rem;
+}
+
+.dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #16a34a;
+}
+
+.data-pill {
+  padding: 0.35rem 0.65rem;
+  border: 1px solid #d4dae3;
+  border-radius: 999px;
+  color: #334155;
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+.dashboard-grid {
+  display: grid;
+  gap: var(--layout-page-gap);
+  min-width: 0;
+}
+
+.modern-card {
+  min-width: 0;
+}
+
+.table-card {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.query-actions,
+.query-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.query-pagination {
+  margin-top: 0.75rem;
+  justify-content: flex-end;
+}
+
+.query-pagination-bottom {
+  margin-top: 0;
 }
 
 .meta {
   margin: 0;
   color: #576074;
   font-size: 0.9rem;
+}
+
+/* ================================== */
+/* Unified Button Styles
+/* ================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* --- Primary Button --- */
+.btn.primary,
+.btn-primary {
+  background-image: linear-gradient(to right, #3b82f6 0%, #60a5fa 100%);
+  color: #fff;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.btn.primary:hover,
+.btn-primary:hover {
+  box-shadow: 0 4px 8px rgb(0 0 0 / 0.1);
+}
+
+/* --- Ghost Button --- */
+.btn.ghost,
+.btn-ghost {
+  background: transparent;
+  border-color: #cbd5e1;
+  color: #334155;
+  box-shadow: none;
+}
+
+.btn.ghost:hover,
+.btn-ghost:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  box-shadow: none;
+}
+
+/* --- View Selector --- */
+.view-selector {
+  display: flex;
+  gap: 0.45rem;
+  border: 1px solid #d4dae3;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 0.3rem;
+  margin-bottom: 0.9rem;
+}
+
+.view-selector button {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #1f2937;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.view-selector button.active {
+  background: #0f172a;
+  color: #fff;
+  border-color: #0f172a;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2);
+}
+
+.view-selector button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-wrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .modern-sidebar {
+    position: static;
+  }
+
+  .sidebar-scroll-area {
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 768px) {
+  .query-pagination {
+    justify-content: flex-start;
+  }
+
+  .data-pill {
+    white-space: normal;
+  }
 }

@@ -1,5 +1,6 @@
 .threshold-form {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.9rem;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
@@ -12,19 +13,54 @@ h4 {
   margin: 0;
 }
 
+.mode-selector {
+  display: flex;
+  gap: 0.45rem;
+  border: 1px solid #d4dae3;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 0.3rem;
+}
+
+.mode-btn {
+  flex: 1;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #1f2937;
+  padding: 0.45rem 0.6rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mode-btn.active {
+  background: #0f172a;
+  color: #fff;
+  border-color: #0f172a;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2);
+}
+
+.mode-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 form {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.5rem;
 }
 
 label {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.2rem;
   color: #364152;
   font-size: 0.88rem;
 }
 
-input {
+input,
+select {
   height: 2.1rem;
   border: 1px solid #d4dae3;
   border-radius: 8px;
@@ -39,4 +75,14 @@ button {
   color: #fff;
   padding: 0.42rem 0.75rem;
   cursor: pointer;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+button.ghost {
+  background: #fff;
+  color: #1e293b;
 }

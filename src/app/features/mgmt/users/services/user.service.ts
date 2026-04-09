@@ -1,12 +1,17 @@
 import { Injectable, inject } from '@angular/core';
 import { map, Observable } from 'rxjs';
+import { UsersService as UsersApiService } from '../../../../generated/openapi/notip-management-api-openapi/api/users.service';
 import {
   CreateUserRequestDto,
   CreateUserRequestDtoRoleEnum,
+} from '../../../../generated/openapi/notip-management-api-openapi/model/create-user-request-dto';
+import { CreateUserResponseDto } from '../../../../generated/openapi/notip-management-api-openapi/model/create-user-response-dto';
+import {
   UpdateUserRequestDto,
   UpdateUserRequestDtoRoleEnum,
-  UsersService as UsersApiService,
-} from '../../../../generated/openapi/notip-management-api-openapi';
+} from '../../../../generated/openapi/notip-management-api-openapi/model/update-user-request-dto';
+import { UpdateUserResponseDto } from '../../../../generated/openapi/notip-management-api-openapi/model/update-user-response-dto';
+import { UserResponseDto } from '../../../../generated/openapi/notip-management-api-openapi/model/user-response-dto';
 import {
   CreatedUser,
   DeleteUserFeedback,
@@ -23,13 +28,13 @@ export class UserService {
 
   getUsers(): Observable<ViewUser[]> {
     return this.usersApi.usersControllerGetUsers().pipe(
-      map((rows) =>
+      map((rows: UserResponseDto[]) =>
         rows.map((row) => ({
           userId: row.id,
-          name: row.name,
+          username: row.username,
           email: row.email,
           role: this.toUserRole(row.role),
-          lastAccess: row.last_access,
+          lastAccess: this.resolveLastAccess(row),
         })),
       ),
     );
@@ -37,16 +42,16 @@ export class UserService {
 
   createUser(up: UserParameters): Observable<CreatedUser> {
     const body: CreateUserRequestDto = {
-      name: up.name,
+      username: this.normalizeUsername(up.username),
       email: up.email,
       role: this.toCreateRole(up.role),
       password: up.password,
     };
 
     return this.usersApi.usersControllerCreateUser(body).pipe(
-      map((res) => ({
+      map((res: CreateUserResponseDto) => ({
         userId: res.id,
-        name: res.name,
+        username: res.username,
         email: res.email,
         role: this.toUserRole(res.role),
         createdAt: res.created_at,
@@ -56,16 +61,16 @@ export class UserService {
 
   updateUser(userId: string, u: UpdateUserParameters): Observable<UpdatedUser> {
     const body: UpdateUserRequestDto = {
-      name: u.name ?? '',
+      username: this.normalizeUsername(u.username ?? ''),
       email: u.email ?? '',
       role: this.toUpdateRole(u.role ?? UserRole.tenant_user),
       permissions: [],
     };
 
     return this.usersApi.usersControllerUpdateUser(userId, body).pipe(
-      map((res) => ({
+      map((res: UpdateUserResponseDto) => ({
         userId: res.id,
-        name: res.name,
+        username: res.username,
         email: res.email,
         role: this.toUserRole(res.role),
         updatedAt: res.updated_at,
@@ -80,25 +85,35 @@ export class UserService {
   }
 
   private toCreateRole(role: UserRole): CreateUserRequestDtoRoleEnum {
-    switch (role) {
-      case UserRole.system_admin:
-        return CreateUserRequestDtoRoleEnum.SystemAdmin;
-      case UserRole.tenant_admin:
-        return CreateUserRequestDtoRoleEnum.TenantAdmin;
-      default:
-        return CreateUserRequestDtoRoleEnum.TenantUser;
+    if (role === UserRole.tenant_admin) {
+      return CreateUserRequestDtoRoleEnum.TenantAdmin;
     }
+
+    return CreateUserRequestDtoRoleEnum.TenantUser;
   }
 
   private toUpdateRole(role: UserRole): UpdateUserRequestDtoRoleEnum {
-    switch (role) {
-      case UserRole.system_admin:
-        return UpdateUserRequestDtoRoleEnum.SystemAdmin;
-      case UserRole.tenant_admin:
-        return UpdateUserRequestDtoRoleEnum.TenantAdmin;
-      default:
-        return UpdateUserRequestDtoRoleEnum.TenantUser;
+    if (role === UserRole.tenant_admin) {
+      return UpdateUserRequestDtoRoleEnum.TenantAdmin;
     }
+
+    return UpdateUserRequestDtoRoleEnum.TenantUser;
+  }
+
+  private normalizeUsername(value: string): string {
+    const lowered = value.trim().toLowerCase();
+    if (!lowered) {
+      return '';
+    }
+
+    return `${lowered[0].toUpperCase()}${lowered.slice(1)}`;
+  }
+
+  private resolveLastAccess(row: UserResponseDto): string | null {
+    const payload = row as unknown as Record<string, unknown>;
+    const raw = payload['last_access'] ?? payload['lastAccess'];
+
+    return typeof raw === 'string' && raw.length > 0 ? raw : null;
   }
 
   private toUserRole(role: string): UserRole {

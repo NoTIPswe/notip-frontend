@@ -382,11 +382,28 @@ describe('DecryptedMeasureService', () => {
   it('creates sdk with api base and token provider', async () => {
     expect(constructorMock).toHaveBeenCalledOnce();
     const [config] = constructorMock.mock.calls[0] as [
-      { baseUrl: string; tokenProvider: () => Promise<string> },
+      {
+        baseUrl: string;
+        tokenProvider: () => Promise<string>;
+        fetcher?: typeof fetch;
+      },
     ];
 
     expect(config.baseUrl).toBe('/api');
+    expect(config.fetcher).toBeTypeOf('function');
     await expect(config.tokenProvider()).resolves.toBe('token-1');
     expect(authMock.getToken).toHaveBeenCalled();
+
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(null, { status: 200 }));
+
+    await config.fetcher?.('http://localhost/ping');
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'http://localhost/ping',
+      expect.objectContaining({ cache: 'no-store' }),
+    );
+    fetchSpy.mockRestore();
   });
 });

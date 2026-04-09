@@ -32,7 +32,7 @@ export class CostDashboardPageComponent implements OnInit {
       },
       error: () => {
         this.isLoading.set(false);
-        this.errorMessage.set('Impossibile caricare i costi tenant.');
+        this.errorMessage.set('Unable to load tenant costs.');
       },
     });
   }

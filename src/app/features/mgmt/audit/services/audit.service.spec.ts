@@ -26,11 +26,11 @@ describe('AuditService', () => {
       of([
         {
           id: 'log-1',
-          user_id: 'u-1',
+          userId: 'u-1',
           action: 'CREATE',
           timestamp: '2026-03-31T11:00:00.000Z',
           resource: 'tenant',
-          details: 'created tenant',
+          details: { message: 'created tenant' },
         },
       ]),
     );
@@ -51,7 +51,7 @@ describe('AuditService', () => {
         action: 'CREATE',
         timestamp: '2026-03-31T11:00:00.000Z',
         resource: 'tenant',
-        details: 'created tenant',
+        details: '{"message":"created tenant"}',
       },
     ]);
 
@@ -75,6 +75,113 @@ describe('AuditService', () => {
         action: '',
         timestamp: '',
         resource: '',
+        details: '[]',
+      },
+    ]);
+  });
+
+  it('maps user id from snake_case payloads', async () => {
+    apiMock.auditLogControllerGetAuditLogs.mockReturnValue(
+      of([
+        {
+          id: 'log-2',
+          user_id: 'u-2',
+          action: 'DELETE',
+          timestamp: '2026-03-31T12:00:00.000Z',
+          resource: 'gateway',
+          details: { message: 'deleted gateway' },
+        },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.getLogs({ from: 'f', to: 't' }))).resolves.toEqual([
+      {
+        id: 'log-2',
+        userId: 'u-2',
+        action: 'DELETE',
+        timestamp: '2026-03-31T12:00:00.000Z',
+        resource: 'gateway',
+        details: '{"message":"deleted gateway"}',
+      },
+    ]);
+  });
+
+  it('maps primitive details values to empty string', async () => {
+    apiMock.auditLogControllerGetAuditLogs.mockReturnValue(
+      of([
+        {
+          id: 'log-3',
+          userId: 'u-3',
+          action: 'UPDATE',
+          timestamp: '2026-03-31T13:00:00.000Z',
+          resource: 'tenant',
+          details: 42,
+        },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.getLogs({ from: 'f', to: 't' }))).resolves.toEqual([
+      {
+        id: 'log-3',
+        userId: 'u-3',
+        action: 'UPDATE',
+        timestamp: '2026-03-31T13:00:00.000Z',
+        resource: 'tenant',
+        details: '',
+      },
+    ]);
+  });
+
+  it('keeps details when payload already provides a string', async () => {
+    apiMock.auditLogControllerGetAuditLogs.mockReturnValue(
+      of([
+        {
+          id: 'log-5',
+          userId: 'u-5',
+          action: 'ACCESS',
+          timestamp: '2026-03-31T15:00:00.000Z',
+          resource: 'dashboard',
+          details: 'plain details',
+        },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.getLogs({ from: 'f', to: 't' }))).resolves.toEqual([
+      {
+        id: 'log-5',
+        userId: 'u-5',
+        action: 'ACCESS',
+        timestamp: '2026-03-31T15:00:00.000Z',
+        resource: 'dashboard',
+        details: 'plain details',
+      },
+    ]);
+  });
+
+  it('returns empty details when object serialization fails', async () => {
+    const circularDetails: Record<string, unknown> = {};
+    (circularDetails as { self?: unknown }).self = circularDetails;
+
+    apiMock.auditLogControllerGetAuditLogs.mockReturnValue(
+      of([
+        {
+          id: 'log-4',
+          userId: 'u-4',
+          action: 'UPDATE',
+          timestamp: '2026-03-31T14:00:00.000Z',
+          resource: 'gateway',
+          details: circularDetails,
+        },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.getLogs({ from: 'f', to: 't' }))).resolves.toEqual([
+      {
+        id: 'log-4',
+        userId: 'u-4',
+        action: 'UPDATE',
+        timestamp: '2026-03-31T14:00:00.000Z',
+        resource: 'gateway',
         details: '',
       },
     ]);

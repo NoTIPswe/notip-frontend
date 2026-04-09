@@ -214,8 +214,8 @@ export class MeasuresService extends BaseService {
    * @endpoint get /measures/query
    * @param from Inclusive start timestamp in ISO 8601 format
    * @param to Inclusive end timestamp in ISO 8601 format
-   * @param limit Page size. Defaults to 1000 and cannot exceed 1000.
    * @param cursor Opaque cursor returned by a previous query page
+   * @param limit Page size. Defaults to 999 and must be less than 1000.
    * @param gatewayId Repeat the parameter to filter by multiple gateways, for example ?gatewayId&#x3D;gw-1&amp;gatewayId&#x3D;gw-2
    * @param sensorId Repeat the parameter to filter by multiple sensors, for example ?sensorId&#x3D;sensor-1&amp;sensorId&#x3D;sensor-2
    * @param sensorType Repeat the parameter to filter by multiple sensor types, for example ?sensorType&#x3D;temperature&amp;sensorType&#x3D;humidity
@@ -226,8 +226,8 @@ export class MeasuresService extends BaseService {
   public measureControllerQuery(
     from: string,
     to: string,
-    limit?: number,
     cursor?: string,
+    limit?: number,
     gatewayId?: Array<string>,
     sensorId?: Array<string>,
     sensorType?: Array<string>,
@@ -242,8 +242,8 @@ export class MeasuresService extends BaseService {
   public measureControllerQuery(
     from: string,
     to: string,
-    limit?: number,
     cursor?: string,
+    limit?: number,
     gatewayId?: Array<string>,
     sensorId?: Array<string>,
     sensorType?: Array<string>,
@@ -258,8 +258,8 @@ export class MeasuresService extends BaseService {
   public measureControllerQuery(
     from: string,
     to: string,
-    limit?: number,
     cursor?: string,
+    limit?: number,
     gatewayId?: Array<string>,
     sensorId?: Array<string>,
     sensorType?: Array<string>,
@@ -274,8 +274,8 @@ export class MeasuresService extends BaseService {
   public measureControllerQuery(
     from: string,
     to: string,
-    limit?: number,
     cursor?: string,
+    limit?: number,
     gatewayId?: Array<string>,
     sensorId?: Array<string>,
     sensorType?: Array<string>,
@@ -318,16 +318,16 @@ export class MeasuresService extends BaseService {
 
     localVarQueryParameters = this.addToHttpParams(
       localVarQueryParameters,
-      'limit',
-      <any>limit,
+      'cursor',
+      <any>cursor,
       QueryParamStyle.Form,
       true,
     );
 
     localVarQueryParameters = this.addToHttpParams(
       localVarQueryParameters,
-      'cursor',
-      <any>cursor,
+      'limit',
+      <any>limit,
       QueryParamStyle.Form,
       true,
     );
@@ -397,6 +397,7 @@ export class MeasuresService extends BaseService {
    * Open a live measure stream
    * Streams matching encrypted measures as server-sent events using the text/event-stream media type.
    * @endpoint get /measures/stream
+   * @param since Optional timestamp used to replay historical measures before switching to real-time events
    * @param gatewayId Repeat the parameter to filter the stream by multiple gateways, for example ?gatewayId&#x3D;gw-1&amp;gatewayId&#x3D;gw-2
    * @param sensorId Repeat the parameter to filter the stream by multiple sensors
    * @param sensorType Repeat the parameter to filter the stream by multiple sensor types
@@ -405,6 +406,7 @@ export class MeasuresService extends BaseService {
    * @param options additional options
    */
   public measureControllerStream(
+    since?: string,
     gatewayId?: Array<string>,
     sensorId?: Array<string>,
     sensorType?: Array<string>,
@@ -417,6 +419,7 @@ export class MeasuresService extends BaseService {
     },
   ): Observable<string>;
   public measureControllerStream(
+    since?: string,
     gatewayId?: Array<string>,
     sensorId?: Array<string>,
     sensorType?: Array<string>,
@@ -429,6 +432,7 @@ export class MeasuresService extends BaseService {
     },
   ): Observable<HttpResponse<string>>;
   public measureControllerStream(
+    since?: string,
     gatewayId?: Array<string>,
     sensorId?: Array<string>,
     sensorType?: Array<string>,
@@ -441,6 +445,7 @@ export class MeasuresService extends BaseService {
     },
   ): Observable<HttpEvent<string>>;
   public measureControllerStream(
+    since?: string,
     gatewayId?: Array<string>,
     sensorId?: Array<string>,
     sensorType?: Array<string>,
@@ -453,6 +458,14 @@ export class MeasuresService extends BaseService {
     },
   ): Observable<any> {
     let localVarQueryParameters = new OpenApiHttpParams(this.encoder);
+
+    localVarQueryParameters = this.addToHttpParams(
+      localVarQueryParameters,
+      'since',
+      <any>since,
+      QueryParamStyle.Form,
+      true,
+    );
 
     localVarQueryParameters = this.addToHttpParams(
       localVarQueryParameters,

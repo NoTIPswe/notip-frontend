@@ -6,6 +6,10 @@ import {
 import { AuditLogTableComponent } from '../../components/audit-log-table/audit-log-table.component';
 import { Logs } from '../../../../../core/models/audit';
 import { AuditService } from '../../services/audit.service';
+import {
+  fromRomeDateTimeInputToIso,
+  toRomeDateTimeInput,
+} from '../../../../../shared/utils/rome-timezone.util';
 
 @Component({
   selector: 'app-audit-log-page',
@@ -64,7 +68,7 @@ export class AuditLogPageComponent implements OnInit {
         },
         error: () => {
           this.isLoading.set(false);
-          this.errorMessage.set('Impossibile caricare i log audit.');
+          this.errorMessage.set('Unable to load audit logs.');
         },
       });
   }
@@ -77,20 +81,10 @@ export class AuditLogPageComponent implements OnInit {
   }
 
   private toIsoOrNow(value: string): string {
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) {
-      return new Date().toISOString();
-    }
-
-    return parsed.toISOString();
+    return fromRomeDateTimeInputToIso(value) ?? new Date().toISOString();
   }
 
   private toDatetimeLocal(value: Date): string {
-    const y = value.getFullYear();
-    const m = String(value.getMonth() + 1).padStart(2, '0');
-    const d = String(value.getDate()).padStart(2, '0');
-    const h = String(value.getHours()).padStart(2, '0');
-    const min = String(value.getMinutes()).padStart(2, '0');
-    return `${y}-${m}-${d}T${h}:${min}`;
+    return toRomeDateTimeInput(value);
   }
 }

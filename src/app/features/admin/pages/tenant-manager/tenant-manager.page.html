@@ -1,14 +1,11 @@
 <section class="tenant-manager">
   <div class="header-row">
     <h2>Tenant Manager</h2>
-    <button
-      type="button"
-      class="create-toggle"
-      [class.ghost]="showCreateForm()"
-      (click)="openCreateTenantForm()"
-    >
-      {{ showCreateForm() && !editingTenant() ? 'Chiudi creazione' : '+ Nuovo tenant' }}
-    </button>
+    @if (!(showCreateForm() || editingTenant())) {
+      <button type="button" class="create-toggle" (click)="openCreateTenantForm()">
+        + New tenant
+      </button>
+    }
   </div>
 
   @if (errorMessage()) {
@@ -25,15 +22,26 @@
   ></app-tenant-table>
 
   @if (showCreateForm() || editingTenant()) {
-    <app-tenant-form
-      [tenantId]="editingTenant()?.tenantId ?? null"
-      [initialName]="editingTenant()?.name ?? ''"
-      [initialStatus]="editingTenant()?.status ?? tenantStatusActive"
-      [initialSuspensionIntervalDays]="editingTenant()?.suspensionIntervalDays ?? 0"
-      [isSaving]="isSaving()"
-      (createRequested)="onCreateRequested($event)"
-      (updateRequested)="onUpdateRequested($event)"
-      (cancelRequested)="onCancelEdit()"
-    ></app-tenant-form>
+    <app-modal-layer [open]="true">
+      <app-tenant-form
+        [tenantId]="editingTenant()?.tenantId ?? null"
+        [initialName]="editingTenant()?.name ?? ''"
+        [initialStatus]="editingTenant()?.status ?? tenantStatusActive"
+        [initialSuspensionIntervalDays]="editingTenant()?.suspensionIntervalDays ?? 0"
+        [isSaving]="isSaving()"
+        (createRequested)="onCreateRequested($event)"
+        (updateRequested)="onUpdateRequested($event)"
+        (cancelRequested)="onCancelEdit()"
+      ></app-tenant-form>
+    </app-modal-layer>
   }
+
+  <app-delete-confirm-modal
+    [open]="!!deletingTenantId()"
+    [title]="'Delete tenant'"
+    [message]="'Confirm tenant deletion?'"
+    [busy]="isSaving()"
+    (confirmed)="confirmDeleteTenant()"
+    (cancelled)="cancelDeleteTenant()"
+  ></app-delete-confirm-modal>
 </section>

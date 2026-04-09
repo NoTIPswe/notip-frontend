@@ -10,7 +10,7 @@
 
 export interface UserResponseDto {
   id: string;
-  name: string;
+  username: string;
   email: string;
   role: UserResponseDtoRoleEnum;
   last_access: string | null;

@@ -32,8 +32,8 @@ describe('ThresholdService', () => {
   it('fetches, maps and caches thresholds', async () => {
     thresholdsApiMock.thresholdsControllerGetThresholds.mockReturnValue(
       of([
-        { type: 'sensorId', sensor_id: 's-1', min_value: 10, max_value: 20 },
-        { type: 'sensorType', sensor_type: 'temperature', min_value: 1, max_value: 9 },
+        { type: 'sensor_id', sensor_id: 's-1', min_value: 10, max_value: 20 },
+        { type: 'sensor_type', sensor_type: 'temperature', min_value: 1, max_value: 9 },
       ]),
     );
 
@@ -42,6 +42,61 @@ describe('ThresholdService', () => {
       { type: 'sensorType', sensorType: 'temperature', minValue: 1, maxValue: 9 },
     ]);
     expect(service.getCached()).toHaveLength(2);
+  });
+
+  it('infers threshold type when backend omits type field', async () => {
+    thresholdsApiMock.thresholdsControllerGetThresholds.mockReturnValue(
+      of([
+        { sensor_id: 's-2', min_value: '7.5', max_value: '11.9' },
+        { sensorType: 'humidity', minValue: 2, maxValue: 5 },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.fetchThresholds())).resolves.toEqual([
+      { type: 'sensorId', sensorId: 's-2', minValue: 7.5, maxValue: 11.9 },
+      { type: 'sensorType', sensorType: 'humidity', minValue: 2, maxValue: 5 },
+    ]);
+  });
+
+  it('falls back to sensor id when backend marks type as sensor_type but value is null', async () => {
+    thresholdsApiMock.thresholdsControllerGetThresholds.mockReturnValue(
+      of([{ type: 'sensor_type', sensor_id: 's-3', sensor_type: null, min_value: 6 }]),
+    );
+
+    await expect(firstValueFrom(service.fetchThresholds())).resolves.toEqual([
+      { type: 'sensorId', sensorId: 's-3', minValue: 6, maxValue: null },
+    ]);
+  });
+
+  it('falls back to sensor type when backend marks type as sensor_id but sensor id is empty', async () => {
+    thresholdsApiMock.thresholdsControllerGetThresholds.mockReturnValue(
+      of([{ type: 'sensor_id', sensor_id: ' ', sensor_type: 'temperature', min_value: 3 }]),
+    );
+
+    await expect(firstValueFrom(service.fetchThresholds())).resolves.toEqual([
+      { type: 'sensorType', sensorType: 'temperature', minValue: 3, maxValue: null },
+    ]);
+  });
+
+  it('falls back to sensor id when backend marks type as sensorType but sensor type is empty', async () => {
+    thresholdsApiMock.thresholdsControllerGetThresholds.mockReturnValue(
+      of([{ type: 'sensorType', sensor_id: 's-4', sensor_type: '', min_value: 8 }]),
+    );
+
+    await expect(firstValueFrom(service.fetchThresholds())).resolves.toEqual([
+      { type: 'sensorId', sensorId: 's-4', minValue: 8, maxValue: null },
+    ]);
+  });
+
+  it('drops rows when both sensor id and sensor type are missing', async () => {
+    thresholdsApiMock.thresholdsControllerGetThresholds.mockReturnValue(
+      of([
+        { type: 'sensor_id', sensor_id: ' ', sensor_type: ' ', min_value: 1 },
+        { min_value: 2, max_value: 5 },
+      ]),
+    );
+
+    await expect(firstValueFrom(service.fetchThresholds())).resolves.toEqual([]);
   });
 
   it('refreshes cache by invalidating and fetching thresholds again', async () => {
@@ -71,6 +126,22 @@ describe('ThresholdService', () => {
     });
   });
 
+  it('uses cached bounds when only one default bound is provided', async () => {
+    thresholdsApiMock.thresholdsControllerSetDefaultThreshold.mockReturnValue(of({}));
+    thresholdsApiMock.thresholdsControllerGetThresholds.mockReturnValue(
+      of([{ type: 'sensorType', sensor_type: 'temperature', min_value: 5, max_value: 18 }]),
+    );
+
+    await firstValueFrom(service.fetchThresholds());
+    await firstValueFrom(service.setDefaultThreshold('temperature', undefined, 9));
+
+    expect(thresholdsApiMock.thresholdsControllerSetDefaultThreshold).toHaveBeenCalledWith({
+      sensor_type: 'temperature',
+      min_value: 5,
+      max_value: 9,
+    });
+  });
+
   it('uses cached bounds when only one sensor bound is provided', async () => {
     thresholdsApiMock.thresholdsControllerSetSensorThreshold.mockReturnValue(of({}));
     thresholdsApiMock.thresholdsControllerGetThresholds.mockReturnValue(
@@ -79,14 +150,14 @@ describe('ThresholdService', () => {
 
     await firstValueFrom(service.fetchThresholds());
 
-    await firstValueFrom(service.setSensorThreshold('sensor-9', 12));
+    await firstValueFrom(service.setSensorThreshold('sensor-9', 'temperature', 12));
 
     expect(thresholdsApiMock.thresholdsControllerSetSensorThreshold).toHaveBeenCalledWith(
       'sensor-9',
       {
         min_value: 12,
         max_value: 22,
-        sensor_type: '',
+        sensor_type: 'temperature',
       },
     );
   });
@@ -94,14 +165,14 @@ describe('ThresholdService', () => {
   it('allows sensor threshold with one explicit bound and null fallback', async () => {
     thresholdsApiMock.thresholdsControllerSetSensorThreshold.mockReturnValue(of({}));
 
-    await firstValueFrom(service.setSensorThreshold('sensor-9', 12));
+    await firstValueFrom(service.setSensorThreshold('sensor-9', 'temperature', 12));
 
     expect(thresholdsApiMock.thresholdsControllerSetSensorThreshold).toHaveBeenCalledWith(
       'sensor-9',
       {
         min_value: 12,
         max_value: null,
-        sensor_type: '',
+        sensor_type: 'temperature',
       },
     );
   });

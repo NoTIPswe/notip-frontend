@@ -18,12 +18,17 @@
   <section class="account">
     @if (isImpersonating()) {
       <app-impersonation-tag />
+      <button type="button" class="stop-impersonation" (click)="emitImpersonationStopRequested()">
+        Exit impersonation
+      </button>
     }
 
     <app-profile-section
       [username]="username()"
       [role]="role()"
       [showProfileLink]="!isImpersonating()"
+      (profileRequested)="emitProfileRequested()"
+      (passwordChangeRequested)="emitPasswordChangeRequested()"
     />
 
     <app-logout-button (clicked)="emitLogout()" />

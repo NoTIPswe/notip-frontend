@@ -11,12 +11,14 @@ export class CostCardComponent {
   readonly costs = input<Costs | null>(null);
   readonly isLoading = input<boolean>(false);
 
-  readonly totalGb = computed(() => {
-    const value = this.costs();
-    if (!value) {
-      return 0;
-    }
+  readonly storageGb = computed(() => this.toFiniteNumber(this.costs()?.storageGb));
+  readonly bandwidthGb = computed(() => this.toFiniteNumber(this.costs()?.bandwidthGb));
 
-    return value.storageGb + value.bandwidthGb;
+  readonly totalGb = computed(() => {
+    return this.storageGb() + this.bandwidthGb();
   });
+
+  private toFiniteNumber(value: unknown): number {
+    return typeof value === 'number' && Number.isFinite(value) ? value : 0;
+  }
 }

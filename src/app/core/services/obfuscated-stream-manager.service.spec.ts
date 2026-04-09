@@ -14,6 +14,11 @@ describe('ObfuscatedStreamManagerService', () => {
   let service: ObfuscatedStreamManagerService;
   const fetchEventSourceMock = vi.mocked(fetchEventSource);
 
+  const flushPromises = async (): Promise<void> => {
+    await Promise.resolve();
+    await Promise.resolve();
+  };
+
   const authMock = {
     getToken: vi.fn(),
     login: vi.fn(),
@@ -28,7 +33,6 @@ describe('ObfuscatedStreamManagerService', () => {
     encryptedData: 'enc',
     iv: 'iv',
     authTag: 'tag',
-    unit: 'C',
   };
 
   beforeEach(async () => {
@@ -177,21 +181,49 @@ describe('ObfuscatedStreamManagerService', () => {
     );
   });
 
-  it('emits observable error on empty SSE payload', async () => {
+  it('ignores empty SSE payload without emitting errors', async () => {
     authMock.getToken.mockResolvedValue('token-6');
 
     fetchEventSourceMock.mockImplementation(async (_input, init) => {
       if (!init) {
         return;
       }
+
       const options = init;
       await options.onopen?.(new Response(null, { status: 200 }));
       options.onmessage?.({ data: '' } as EventSourceMessage);
+
+      await new Promise<void>((resolve) => {
+        const signal = options.signal;
+        if (!signal || signal.aborted) {
+          resolve();
+          return;
+        }
+
+        signal.addEventListener('abort', () => resolve(), { once: true });
+      });
     });
 
-    await expect(firstValueFrom(service.openStream({}))).rejects.toThrow(
-      'Malformed SSE message rejected',
-    );
+    const nextSpy = vi.fn();
+    const errorSpy = vi.fn();
+    const completeSpy = vi.fn();
+
+    const subscription = service.openStream({}).subscribe({
+      next: nextSpy,
+      error: errorSpy,
+      complete: completeSpy,
+    });
+
+    await flushPromises();
+
+    expect(nextSpy).not.toHaveBeenCalled();
+    expect(errorSpy).not.toHaveBeenCalled();
+
+    service.closeStream();
+    await flushPromises();
+
+    expect(completeSpy).toHaveBeenCalledOnce();
+    subscription.unsubscribe();
   });
 
   it('emits fallback SSE stream error when onerror receives a non-error', async () => {

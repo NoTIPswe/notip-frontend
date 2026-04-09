@@ -15,9 +15,11 @@
 
 .content-layout {
   flex: 1;
-  padding: 1.25rem;
+  min-width: 0;
+  padding: clamp(0.9rem, 2vw, 1.25rem);
   min-height: 0;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 @media (max-width: 900px) {
@@ -32,6 +34,7 @@
   }
 
   .content-layout {
-    overflow: visible;
+    overflow-x: hidden;
+    overflow-y: visible;
   }
 }

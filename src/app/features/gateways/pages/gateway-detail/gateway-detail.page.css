@@ -1,8 +1,23 @@
 .gateway-detail-page {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
-  max-width: 1200px;
+  gap: var(--layout-page-gap);
+  width: 100%;
+  max-width: var(--layout-page-max-width);
+  margin-inline: auto;
+  min-width: 0;
+}
+
+.back-link {
+  align-self: flex-start;
+  color: #1d4ed8;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: underline;
 }
 
 h2 {

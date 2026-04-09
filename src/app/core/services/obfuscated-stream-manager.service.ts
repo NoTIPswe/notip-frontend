@@ -108,7 +108,6 @@ export class ObfuscatedStreamManagerService {
           }
 
           if (!event.data) {
-            this.handleMalformedMessage(abortController, channel, 'Empty SSE payload');
             return;
           }
 
@@ -225,8 +224,7 @@ export class ObfuscatedStreamManagerService {
       typeof row.encryptedData === 'string' &&
       typeof row.iv === 'string' &&
       typeof row.authTag === 'string' &&
-      typeof row.keyVersion === 'number' &&
-      typeof row.unit === 'string'
+      typeof row.keyVersion === 'number'
     );
   }
 

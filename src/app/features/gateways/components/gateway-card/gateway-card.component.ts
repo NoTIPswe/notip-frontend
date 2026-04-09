@@ -12,10 +12,15 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
 export class GatewayCardComponent {
   readonly gateway = input.required<Gateway>();
   readonly selected = input<boolean>(false);
+  readonly canOpenDetail = input<boolean>(true);
 
   readonly selectedGateway = output<string>();
 
   onOpenDetail(): void {
+    if (!this.canOpenDetail()) {
+      return;
+    }
+
     this.selectedGateway.emit(this.gateway().gatewayId);
   }
 }

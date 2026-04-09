@@ -1,14 +1,9 @@
 <section class="user-list-page">
   <div class="header-row">
-    <h2>Gestione Utenti</h2>
-    <button
-      type="button"
-      class="create-toggle"
-      [class.ghost]="showCreateForm()"
-      (click)="openCreateUserForm()"
-    >
-      {{ showCreateForm() && !editingUser() ? 'Chiudi creazione' : '+ Nuovo utente' }}
-    </button>
+    <h2>User Management</h2>
+    @if (!(showCreateForm() || editingUser())) {
+      <button type="button" class="create-toggle" (click)="openCreateUserForm()">+ New user</button>
+    }
   </div>
 
   @if (errorMessage()) {
@@ -28,19 +23,21 @@
   ></app-user-table>
 
   @if (showCreateForm() || editingUser()) {
-    <app-user-form
-      [editUser]="editingUser()"
-      [isSaving]="isSaving()"
-      (createRequested)="createUser($event)"
-      (updateRequested)="updateUser($event)"
-      (cancelRequested)="cancelEdit()"
-    ></app-user-form>
+    <app-modal-layer [open]="true">
+      <app-user-form
+        [editUser]="editingUser()"
+        [isSaving]="isSaving()"
+        (createRequested)="createUser($event)"
+        (updateRequested)="updateUser($event)"
+        (cancelRequested)="cancelEdit()"
+      ></app-user-form>
+    </app-modal-layer>
   }
 
   <app-delete-confirm-modal
     [open]="!!deletingUserId()"
-    [title]="'Eliminare utente'"
-    [message]="'Confermi l\'eliminazione dell\'utente selezionato?'"
+    [title]="'Delete user'"
+    [message]="'Do you confirm deleting the selected user?'"
     [busy]="isSaving()"
     (confirmed)="confirmDelete()"
     (cancelled)="cancelDelete()"

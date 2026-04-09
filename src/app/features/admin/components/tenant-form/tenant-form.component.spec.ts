@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { TenantStatus } from '../../../../core/models/enums';
 import { TenantFormComponent } from './tenant-form.component';
 
 describe('TenantFormComponent', () => {
@@ -58,6 +59,22 @@ describe('TenantFormComponent', () => {
     });
   });
 
+  it('truncates decimal suspension interval when status is suspended', () => {
+    const preventDefault = vi.fn();
+    const event = { preventDefault } as unknown as Event;
+    const emitSpy = vi.spyOn(component.updateRequested, 'emit');
+    fixture.componentRef.setInput('tenantId', 'tenant-4');
+
+    component.onUpdateSubmit(event, ' Tenant Updated ', 'suspended', 15.8);
+
+    expect(emitSpy).toHaveBeenCalledWith({
+      tenantId: 'tenant-4',
+      name: 'Tenant Updated',
+      status: 'suspended',
+      suspensionIntervalDays: 15,
+    });
+  });
+
   it('normalizes invalid update status and suspension interval', () => {
     const preventDefault = vi.fn();
     const event = { preventDefault } as unknown as Event;
@@ -88,6 +105,44 @@ describe('TenantFormComponent', () => {
       status: 'active',
       suspensionIntervalDays: 0,
     });
+  });
+
+  it('syncs current status with input and status changes', () => {
+    fixture.componentRef.setInput('initialStatus', 'suspended');
+    fixture.detectChanges();
+
+    expect(component.currentStatus()).toBe('suspended');
+
+    component.onStatusChange('active');
+    expect(component.currentStatus()).toBe('active');
+
+    component.onStatusChange('unsupported-status');
+    expect(component.currentStatus()).toBe('active');
+  });
+
+  it('preloads selected edit status from current tenant status', () => {
+    fixture.componentRef.setInput('tenantId', 'tenant-5');
+    fixture.componentRef.setInput('initialStatus', TenantStatus.suspended);
+    fixture.detectChanges();
+
+    const statusSelect = (fixture.nativeElement as HTMLElement).querySelector(
+      'select',
+    ) as HTMLSelectElement;
+
+    expect(statusSelect.value).toBe(TenantStatus.suspended);
+  });
+
+  it('normalizes preloaded status casing before selecting edit status', () => {
+    fixture.componentRef.setInput('tenantId', 'tenant-6');
+    fixture.componentRef.setInput('initialStatus', 'SUSPENDED' as unknown as TenantStatus);
+    fixture.detectChanges();
+
+    const statusSelect = (fixture.nativeElement as HTMLElement).querySelector(
+      'select',
+    ) as HTMLSelectElement;
+
+    expect(component.currentStatus()).toBe(TenantStatus.suspended);
+    expect(statusSelect.value).toBe(TenantStatus.suspended);
   });
 
   it('emits cancel request', () => {

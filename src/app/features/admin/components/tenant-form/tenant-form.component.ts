@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, input, output, signal } from '@angular/core';
 import { TenantStatus } from '../../../../core/models/enums';
 
 export interface CreateTenantPayload {
@@ -21,7 +21,7 @@ export interface UpdateTenantPayload {
   templateUrl: './tenant-form.component.html',
   styleUrl: './tenant-form.component.css',
 })
-export class TenantFormComponent {
+export class TenantFormComponent implements OnChanges {
   readonly tenantId = input<string | null>(null);
   readonly initialName = input<string>('');
   readonly initialStatus = input<TenantStatus>(TenantStatus.active);
@@ -29,9 +29,17 @@ export class TenantFormComponent {
   readonly isSaving = input<boolean>(false);
   readonly tenantStatusSuspended = TenantStatus.suspended;
 
+  readonly currentStatus = signal<TenantStatus>(TenantStatus.active);
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['initialStatus']) {
+      this.currentStatus.set(this.normalizeStatus(this.initialStatus()));
+    }
+  }
+
   readonly tenantStatusOptions: ReadonlyArray<{ value: TenantStatus; label: string }> = [
-    { value: TenantStatus.active, label: 'Attivo' },
-    { value: TenantStatus.suspended, label: 'Sospeso' },
+    { value: TenantStatus.active, label: 'Active' },
+    { value: TenantStatus.suspended, label: 'Suspended' },
   ];
 
   readonly createRequested = output<CreateTenantPayload>();
@@ -86,11 +94,17 @@ export class TenantFormComponent {
   }
 
   private normalizeStatus(statusRaw: string): TenantStatus {
-    if (statusRaw === 'suspended') {
+    const normalized = statusRaw.trim().toLowerCase();
+
+    if (normalized === 'suspended') {
       return TenantStatus.suspended;
     }
 
     return TenantStatus.active;
+  }
+
+  onStatusChange(statusRaw: string): void {
+    this.currentStatus.set(this.normalizeStatus(statusRaw));
   }
 
   private normalizeSuspensionIntervalDays(value: number, status: TenantStatus): number {

@@ -3,7 +3,7 @@ import { Component, input, output } from '@angular/core';
 export type CreateAdminGatewayPayload = {
   factoryId: string;
   tenantId: string;
-  factoryKeyHash: string;
+  factoryKey: string;
   model: string;
 };
 
@@ -15,13 +15,15 @@ export type CreateAdminGatewayPayload = {
 })
 export class AdminGatewayFormComponent {
   readonly isSaving = input<boolean>(false);
+  readonly tenantIds = input<string[]>([]);
   readonly createRequested = output<CreateAdminGatewayPayload>();
+  readonly cancelRequested = output<void>();
 
   onSubmit(
     event: Event,
     factoryId: string,
     tenantId: string,
-    factoryKeyHash: string,
+    factoryKey: string,
     model: string,
   ): void {
     event.preventDefault();
@@ -29,8 +31,12 @@ export class AdminGatewayFormComponent {
     this.createRequested.emit({
       factoryId: factoryId.trim(),
       tenantId: tenantId.trim(),
-      factoryKeyHash: factoryKeyHash.trim(),
+      factoryKey: factoryKey.trim(),
       model: model.trim(),
     });
+  }
+
+  onCancel(): void {
+    this.cancelRequested.emit();
   }
 }

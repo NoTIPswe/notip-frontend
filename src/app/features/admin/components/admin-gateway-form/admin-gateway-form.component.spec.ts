@@ -24,8 +24,24 @@ describe('AdminGatewayFormComponent', () => {
     expect(emitSpy).toHaveBeenCalledWith({
       factoryId: 'factory',
       tenantId: 'tenant',
-      factoryKeyHash: 'hash',
+      factoryKey: 'hash',
       model: 'model',
     });
+  });
+
+  it('accepts tenant options input', () => {
+    const fixture = TestBed.createComponent(AdminGatewayFormComponent);
+    fixture.componentRef.setInput('tenantIds', ['tenant-a', 'tenant-b']);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.tenantIds()).toEqual(['tenant-a', 'tenant-b']);
+  });
+
+  it('emits cancel request', () => {
+    const emitSpy = vi.spyOn(component.cancelRequested, 'emit');
+
+    component.onCancel();
+
+    expect(emitSpy).toHaveBeenCalledOnce();
   });
 });

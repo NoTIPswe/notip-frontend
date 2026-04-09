@@ -1,14 +1,14 @@
 <section class="alert-filter-panel">
-  <h3>Filtri Alert</h3>
+  <h3>Alert Filters</h3>
 
   <form (submit)="submit($event, fromInput.value, toInput.value, gatewayInput.value)">
     <label>
-      Da
+      From
       <input #fromInput type="datetime-local" [value]="from()" />
     </label>
 
     <label>
-      A
+      To
       <input #toInput type="datetime-local" [value]="to()" />
     </label>
 
@@ -18,7 +18,7 @@
     </label>
 
     <div class="actions">
-      <button type="submit" [disabled]="isLoading()">Applica</button>
+      <button type="submit" [disabled]="isLoading()">Apply</button>
       <button type="button" class="ghost" (click)="reset()" [disabled]="isLoading()">Reset</button>
     </div>
   </form>

@@ -17,15 +17,21 @@ h1 {
 }
 
 .menu {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   flex: 1;
   gap: 0.4rem;
   margin-top: 1rem;
   min-height: 0;
   overflow: auto;
+  align-content: flex-start;
 }
 
 .menu a {
+  display: flex;
+  align-items: center;
+  min-height: 2.2rem;
   text-decoration: none;
   color: #1f2937;
   border: 1px solid transparent;
@@ -50,6 +56,21 @@ h1 {
   gap: 0.75rem;
   margin-top: 1rem;
   flex-shrink: 0;
+}
+
+.stop-impersonation {
+  border: 1px solid #f59e0b;
+  border-radius: 0.5rem;
+  background: #fffbeb;
+  color: #92400e;
+  padding: 0.4rem 0.55rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.stop-impersonation:hover {
+  background: #fef3c7;
 }
 
 @media (max-width: 900px) {

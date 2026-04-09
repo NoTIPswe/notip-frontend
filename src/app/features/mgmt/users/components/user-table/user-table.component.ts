@@ -1,5 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { ViewUser } from '../../../../../core/models/user';
+import { formatRomeDateTime } from '../../../../../shared/utils/rome-timezone.util';
 
 @Component({
   selector: 'app-user-table',
@@ -21,5 +22,19 @@ export class UserTableComponent {
 
   requestDelete(userId: string): void {
     this.deleteRequested.emit(userId);
+  }
+
+  formatLastAccess(timestamp: string | null): string {
+    if (!timestamp) {
+      return '-';
+    }
+
+    const formatted = formatRomeDateTime(timestamp);
+
+    if (!formatted) {
+      return timestamp;
+    }
+
+    return formatted.replace(' - ', ' ');
   }
 }

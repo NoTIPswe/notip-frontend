@@ -10,7 +10,7 @@ describe('UserFormComponent', () => {
 
   const editUser: ViewUser = {
     userId: 'user-1',
-    name: 'Mario',
+    username: 'Mario',
     email: 'mario@test.dev',
     role: UserRole.tenant_admin,
     lastAccess: null,
@@ -34,11 +34,39 @@ describe('UserFormComponent', () => {
 
     expect(preventDefault).toHaveBeenCalledOnce();
     expect(emitSpy).toHaveBeenCalledWith({
-      name: 'Alice',
+      username: 'Alice',
       email: 'alice@test.dev',
-      role: UserRole.system_admin,
+      role: UserRole.tenant_user,
       password: 'pwd-1',
     });
+  });
+
+  it('maps tenant_admin role and keeps empty normalized username when blank', () => {
+    const preventDefault = vi.fn();
+    const event = { preventDefault } as unknown as Event;
+    const emitSpy = vi.spyOn(component.createRequested, 'emit');
+
+    component.create(event, '   ', ' admin@test.dev ', 'tenant_admin', 'pwd-2');
+
+    expect(preventDefault).toHaveBeenCalledOnce();
+    expect(emitSpy).toHaveBeenCalledWith({
+      username: '',
+      email: 'admin@test.dev',
+      role: UserRole.tenant_admin,
+      password: 'pwd-2',
+    });
+  });
+
+  it('does not show system_admin among create role options', () => {
+    fixture.detectChanges();
+
+    const options = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('select option'),
+    ).map((option) => option.textContent?.trim());
+
+    expect(options).toContain('tenant_user');
+    expect(options).toContain('tenant_admin');
+    expect(options).not.toContain('system_admin');
   });
 
   it('does not emit update when edit user is missing', () => {
@@ -62,7 +90,7 @@ describe('UserFormComponent', () => {
 
     expect(emitSpy).toHaveBeenCalledWith({
       userId: 'user-1',
-      name: 'Alice Updated',
+      username: 'Alice updated',
       email: 'alice-updated@test.dev',
       role: UserRole.tenant_user,
     });

@@ -1,18 +1,21 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Sensor } from '../../../../core/models/sensor';
 import { SensorService } from '../../services/sensor.service';
+import { RomeDateTimePipe } from '../../../../shared/pipes/rome-date-time.pipe';
 
 @Component({
   selector: 'app-sensor-list-page',
   standalone: true,
+  imports: [RomeDateTimePipe],
   templateUrl: './sensor-list.page.html',
   styleUrl: './sensor-list.page.css',
 })
 export class SensorListPageComponent implements OnInit {
   private readonly sensorService = inject(SensorService);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly sensors = signal<Sensor[]>([]);
   readonly isLoading = signal<boolean>(false);
@@ -57,7 +60,7 @@ export class SensorListPageComponent implements OnInit {
 
     this.sensorService
       .getAllSensors()
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (rows) => {
           this.sensors.set(rows);
@@ -65,7 +68,7 @@ export class SensorListPageComponent implements OnInit {
         },
         error: () => {
           this.isLoading.set(false);
-          this.errorMessage.set('Impossibile caricare la lista sensori.');
+          this.errorMessage.set('Unable to load sensor list.');
         },
       });
   }

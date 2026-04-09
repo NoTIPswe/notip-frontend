@@ -1,0 +1,24 @@
+<app-modal-layer [open]="open()">
+  <section class="rename-modal">
+    <h3>Rename gateway</h3>
+
+    <form (submit)="submit($event, gatewayName.value)">
+      <label>
+        New gateway name
+        <input
+          #gatewayName
+          type="text"
+          required
+          minlength="1"
+          maxlength="120"
+          [value]="currentName()"
+        />
+      </label>
+
+      <div class="rename-actions">
+        <button type="button" class="ghost" (click)="close()" [disabled]="busy()">Cancel</button>
+        <button type="submit" [disabled]="busy()">Save</button>
+      </div>
+    </form>
+  </section>
+</app-modal-layer>

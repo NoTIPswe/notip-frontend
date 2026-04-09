@@ -33,4 +33,14 @@ describe('GatewayCardComponent', () => {
 
     expect(emitSpy).toHaveBeenCalledWith('gw-1');
   });
+
+  it('does not emit when detail action is disabled', () => {
+    const emitSpy = vi.spyOn(component.selectedGateway, 'emit');
+    fixture.componentRef.setInput('canOpenDetail', false);
+    fixture.detectChanges();
+
+    component.onOpenDetail();
+
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
 });

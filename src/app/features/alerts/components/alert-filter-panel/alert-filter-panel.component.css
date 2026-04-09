@@ -14,7 +14,7 @@ h3 {
 
 form {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 0.6rem;
 }
 
@@ -36,6 +36,7 @@ input {
   display: flex;
   gap: 0.5rem;
   align-items: end;
+  flex-wrap: wrap;
 }
 
 button {
@@ -50,4 +51,14 @@ button {
 button.ghost {
   background: #fff;
   color: #1e293b;
+}
+
+@media (max-width: 768px) {
+  form {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    align-items: stretch;
+  }
 }

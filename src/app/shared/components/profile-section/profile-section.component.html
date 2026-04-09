@@ -2,6 +2,9 @@
   <p class="name">{{ username() }}</p>
   <p class="role">{{ role() }}</p>
   @if (showProfileLink()) {
-    <a href="#">Apri profilo</a>
+    <div class="profile-actions">
+      <a href="#" (click)="emitProfileRequested($event)">Open profile</a>
+      <a href="#" (click)="emitPasswordChangeRequested($event)">Change password</a>
+    </div>
   }
 </div>

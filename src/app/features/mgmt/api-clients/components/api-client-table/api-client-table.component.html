@@ -2,38 +2,40 @@
   <div class="header-row">
     <h3>Client API</h3>
     @if (isLoading()) {
-      <span class="status">Caricamento...</span>
+      <span class="status">Loading...</span>
     }
   </div>
 
   @if (!isLoading() && clients().length === 0) {
-    <p class="empty">Nessun client registrato.</p>
+    <p class="empty">No clients registered.</p>
   }
 
   @if (clients().length > 0) {
-    <table>
-      <thead>
-        <tr>
-          <th>Client ID</th>
-          <th>Nome</th>
-          <th>Creato</th>
-          <th>Azioni</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (client of clients(); track client.id) {
+    <div class="table-scroll">
+      <table>
+        <thead>
           <tr>
-            <td>{{ client.clientId }}</td>
-            <td>{{ client.name }}</td>
-            <td>{{ client.createdAt }}</td>
-            <td>
-              <button type="button" class="danger" (click)="requestDelete(client.id)">
-                Elimina
-              </button>
-            </td>
+            <th>Client ID</th>
+            <th>Name</th>
+            <th>Created</th>
+            <th>Actions</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (client of clients(); track client.id) {
+            <tr>
+              <td>{{ client.clientId }}</td>
+              <td>{{ client.name }}</td>
+              <td>{{ (client.createdAt | romeDateTime: false) || '-' }}</td>
+              <td>
+                <button type="button" class="danger" (click)="requestDelete(client.id)">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </section>

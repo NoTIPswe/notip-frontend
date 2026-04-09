@@ -1,5 +1,6 @@
 .user-form {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.7rem;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
@@ -13,12 +14,14 @@ h3 {
 }
 
 form {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.55rem;
 }
 
 label {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.2rem;
   font-size: 0.88rem;
   color: #364152;
@@ -35,6 +38,7 @@ select {
 .actions {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 button {
@@ -49,4 +53,10 @@ button {
 button.ghost {
   background: #fff;
   color: #1e293b;
+}
+
+@media (max-width: 680px) {
+  .actions button {
+    width: 100%;
+  }
 }

@@ -11,6 +11,7 @@ import {
   AlertsFilter,
   AlertsType,
   DefaultAlertsConfig,
+  GatewayOverride,
   GatewayAlertsConfig,
 } from '../../../core/models/alert';
 
@@ -22,23 +23,30 @@ export class AlertService {
     return this.alertsApi.alertsControllerGetAlertsConfig().pipe(
       map((row) => {
         const data = this.asRecord(row);
-        const gatewayConfigs = data['gateway_configs'];
+        const gatewayConfigs = data['gateway_overrides'];
 
         const cfg: AlertsConfig = {
           default: {
             tenantId: this.asString(data['tenant_id']),
-            timeoutMs: this.asNumber(data['tenant_unreachable_timeout_ms']),
-            updatedAt: this.asString(data['updated_at']),
+            timeoutMs: this.asNumber(data['default_timeout_ms'], 60000),
+            updatedAt: this.asString(data['default_updated_at']),
           },
         };
 
         if (Array.isArray(gatewayConfigs)) {
           cfg.gatewayOverrides = gatewayConfigs.map((item) => {
             const gatewayConfig = this.asRecord(item);
-            return {
+            const mappedOverride: GatewayOverride = {
               gatewayId: this.asString(gatewayConfig['gateway_id']),
-              timeoutMs: this.asNumber(gatewayConfig['gateway_unreachable_timeout_ms']),
+              timeoutMs: this.asNumber(gatewayConfig['timeout_ms']),
             };
+
+            const updatedAt = this.asString(gatewayConfig['updated_at']);
+            if (updatedAt) {
+              mappedOverride.updatedAt = updatedAt;
+            }
+
+            return mappedOverride;
           });
         }
 
@@ -54,13 +62,12 @@ export class AlertService {
         const data = this.asRecord(row);
         return {
           tenantId: this.asString(data['tenant_id']),
-          timeoutMs: this.asNumber(data['tenant_unreachable_timeout_ms'], timeoutMs),
-          updatedAt: this.asString(data['updated_at']),
+          timeoutMs: this.asNumber(data['default_timeout_ms'], timeoutMs),
+          updatedAt: this.asString(data['default_updated_at']),
         };
       }),
     );
   }
-
   sendGatewayConfig(gatewayId: string, timeoutMs: number): Observable<GatewayAlertsConfig> {
     const body: SetGatewayAlertsConfigRequestDto = {
       gateway_unreachable_timeout_ms: timeoutMs,
@@ -70,7 +77,7 @@ export class AlertService {
         const data = this.asRecord(row);
         return {
           gatewayId: this.asString(data['gateway_id']) || gatewayId,
-          timeoutMs: this.asNumber(data['gateway_unreachable_timeout_ms'], timeoutMs),
+          timeoutMs: this.asNumber(data['timeout_ms'], timeoutMs),
           updatedAt: this.asString(data['updated_at']),
         };
       }),
@@ -100,7 +107,7 @@ export class AlertService {
         tenantId: this.asString(data['tenant_id']),
         type: this.toAlertsType(data['type']),
         gatewayId: this.asString(data['gateway_id']),
-        details: this.asString(data['details']) || this.asString(data['message']),
+        details: this.toAlertDetails(data['details'], data['message']),
         createdAt: this.asString(data['created_at']),
       };
 
@@ -123,5 +130,24 @@ export class AlertService {
 
   private asString(value: unknown): string {
     return typeof value === 'string' ? value : '';
+  }
+
+  private toAlertDetails(details: unknown, message: unknown): string {
+    if (typeof details === 'string' && details.length > 0) {
+      return details;
+    }
+
+    if (typeof details === 'object' && details !== null) {
+      const data = details as Record<string, unknown>;
+      const lastSeen = this.asString(data['last_seen']);
+      const timeout = this.asNumber(data['timeout_configured']);
+      if (lastSeen || timeout > 0) {
+        const lastSeenPart = lastSeen ? `lastSeen=${lastSeen}` : '';
+        const timeoutPart = timeout > 0 ? `timeout=${timeout}ms` : '';
+        return [lastSeenPart, timeoutPart].filter((part) => part.length > 0).join(', ');
+      }
+    }
+
+    return this.asString(message);
   }
 }

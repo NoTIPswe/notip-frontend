@@ -47,6 +47,17 @@ describe('CommandModalComponent', () => {
     });
   });
 
+  it('emits partial config payload when status is left unchanged', () => {
+    const event = { preventDefault: vi.fn() } as unknown as Event;
+    const emitSpy = vi.spyOn(component.configSubmitted, 'emit');
+
+    component.submitConfig(event, '2500', '');
+
+    expect(emitSpy).toHaveBeenCalledWith({
+      send_frequency_ms: 2500,
+    });
+  });
+
   it('emits empty config payload when all config fields are invalid', () => {
     const event = { preventDefault: vi.fn() } as unknown as Event;
     const emitSpy = vi.spyOn(component.configSubmitted, 'emit');

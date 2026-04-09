@@ -1,5 +1,6 @@
 .user-table {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.75rem;
 }
 
@@ -21,8 +22,14 @@ h3 {
   font-size: 0.9rem;
 }
 
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 table {
   width: 100%;
+  min-width: 880px;
   border-collapse: collapse;
 }
 
@@ -41,6 +48,7 @@ td {
 .actions-cell {
   display: flex;
   gap: 0.4rem;
+  flex-wrap: wrap;
 }
 
 button {
@@ -55,4 +63,11 @@ button {
 button.danger {
   border-color: #fecaca;
   color: #b91c1c;
+}
+
+@media (max-width: 680px) {
+  th,
+  td {
+    font-size: 0.82rem;
+  }
 }

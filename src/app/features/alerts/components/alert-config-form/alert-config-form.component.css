@@ -1,5 +1,6 @@
 .alert-config-form {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.9rem;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
@@ -20,13 +21,15 @@ form {
 }
 
 label {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.2rem;
   font-size: 0.88rem;
   color: #364152;
 }
 
-input {
+input,
+select {
   height: 2.1rem;
   border: 1px solid #d4dae3;
   border-radius: 8px;
@@ -59,7 +62,8 @@ ul {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.45rem;
 }
 
@@ -71,4 +75,27 @@ li {
   padding: 0.45rem 0.55rem;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+@media (max-width: 680px) {
+  form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  input,
+  select {
+    min-width: 0;
+    width: 100%;
+  }
+
+  li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

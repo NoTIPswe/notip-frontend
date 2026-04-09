@@ -1,5 +1,18 @@
 <section class="alert-config-page">
-  <h2>Configurazione Alert</h2>
+  <a class="back-link" routerLink="/alerts">Back to alerts</a>
+  <div class="header-row">
+    <h2>Alert Configuration</h2>
+    @if (canEditConfig && !showForm()) {
+      <button
+        type="button"
+        class="create-toggle"
+        [disabled]="isLoading() || !config()"
+        (click)="toggleForm()"
+      >
+        Edit configuration
+      </button>
+    }
+  </div>
 
   @if (errorMessage()) {
     <p class="error">{{ errorMessage() }}</p>
@@ -10,22 +23,47 @@
   }
 
   @if (isLoading()) {
-    <p class="meta">Caricamento configurazione...</p>
+    <p class="meta">Loading configuration...</p>
+  }
+
+  @if (!canEditConfig) {
+    <p class="meta">Read-only mode for tenant user role.</p>
   }
 
   @if (config()) {
     <p class="meta">
-      Timeout default attuale: {{ config()!.default.timeoutMs }} ms (aggiornato:
-      {{ config()!.default.updatedAt || '-' }})
+      Current default timeout: {{ config()!.default.timeoutMs }} ms (updated Europe/Rome:
+      {{ (config()!.default.updatedAt | romeDateTime) || '-' }})
     </p>
 
-    <app-alert-config-form
-      [defaultTimeoutMs]="config()!.default.timeoutMs"
-      [gatewayOverrides]="config()!.gatewayOverrides ?? []"
-      [isSaving]="isSaving()"
-      (defaultSubmitted)="saveDefault($event)"
-      (gatewaySubmitted)="saveGateway($event)"
-      (gatewayDeleteRequested)="deleteGateway($event)"
-    ></app-alert-config-form>
+    @if ((config()!.gatewayOverrides ?? []).length > 0) {
+      <ul class="current-overrides">
+        @for (row of config()!.gatewayOverrides ?? []; track row.gatewayId) {
+          <li>
+            {{ row.gatewayId }}: {{ row.timeoutMs }} ms (updated Europe/Rome:
+            {{ (row.updatedAt | romeDateTime) || '-' }})
+          </li>
+        }
+      </ul>
+    }
+
+    @if ((config()!.gatewayOverrides ?? []).length === 0) {
+      <p class="meta">No gateway overrides configured.</p>
+    }
+  }
+
+  @if (canEditConfig && config() && showForm()) {
+    <app-modal-layer [open]="true">
+      <app-alert-config-form
+        [defaultTimeoutMs]="config()!.default.timeoutMs"
+        [gatewayOverrides]="config()!.gatewayOverrides ?? []"
+        [availableGatewayIds]="availableGatewayIds()"
+        [isSaving]="isSaving()"
+        (defaultSubmitted)="saveDefault($event)"
+        (gatewaySubmitted)="saveGateway($event)"
+        (gatewayDeleteRequested)="deleteGateway($event)"
+        (cancelRequested)="closeForm()"
+      ></app-alert-config-form>
+    </app-modal-layer>
   }
 </section>
