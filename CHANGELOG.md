@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/NoTIPswe/notip-frontend/compare/v1.6.0...v1.6.1) (2026-04-09)
+
+
+### Bug Fixes
+
+* resolved bug that doesn't make the cancel button appear during user creation ([d05d48b](https://github.com/NoTIPswe/notip-frontend/commit/d05d48b4c75cdf08063d6be2243ca1adc3b78e3f))
+
 # [1.6.0](https://github.com/NoTIPswe/notip-frontend/compare/v1.5.0...v1.6.0) (2026-04-09)
 
 
