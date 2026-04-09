@@ -42,4 +42,5 @@ export enum GatewayResponseDtoStatusEnum {
   GatewayOnline = 'gateway_online',
   GatewayOffline = 'gateway_offline',
   GatewaySuspended = 'gateway_suspended',
+  GatewayProvisioning = 'gateway_provisioning',
 }

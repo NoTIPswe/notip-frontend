@@ -214,7 +214,7 @@ export class MeasuresService extends BaseService {
    * @endpoint get /measures/query
    * @param from Inclusive start timestamp in ISO 8601 format
    * @param to Inclusive end timestamp in ISO 8601 format
-   * @param cursor Opaque cursor returned by a previous query page
+   * @param cursor Opaque cursor returned by a previous query page. Current format: &lt;timestamp&gt;|&lt;sensorId&gt;.
    * @param limit Page size. Defaults to 999 and must be less than 1000.
    * @param gatewayId Repeat the parameter to filter by multiple gateways, for example ?gatewayId&#x3D;gw-1&amp;gatewayId&#x3D;gw-2
    * @param sensorId Repeat the parameter to filter by multiple sensors, for example ?sensorId&#x3D;sensor-1&amp;sensorId&#x3D;sensor-2

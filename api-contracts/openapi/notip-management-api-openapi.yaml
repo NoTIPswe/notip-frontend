@@ -9,6 +9,15 @@ paths:
           description: ''
       tags:
         - App
+  /health:
+    get:
+      operationId: AppController_getHealth
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - App
   /admin/gateways:
     get:
       operationId: GatewaysController_getAdminGateways
@@ -297,6 +306,8 @@ paths:
           schema:
             type: string
       responses:
+        '200':
+          description: API client deleted
         '404':
           description: API client not found
       summary: Delete an API client for the tenant
@@ -754,7 +765,7 @@ paths:
 info:
   title: NoTIP Management API
   description: NoTIP Management API OpenAPI specification
-  version: 1.4.4
+  version: 1.4.10
   contact: {}
 tags: []
 servers: []
@@ -794,8 +805,8 @@ components:
             - active
             - suspended
         created_at:
-          format: date-time
           type: string
+          format: date-time
         suspension_interval_days:
           type: object
       required:
@@ -945,6 +956,7 @@ components:
             - gateway_online
             - gateway_offline
             - gateway_suspended
+            - gateway_provisioning
           example: gateway_online
         last_seen_at:
           type: string
@@ -991,6 +1003,7 @@ components:
             - gateway_online
             - gateway_offline
             - gateway_suspended
+            - gateway_provisioning
         updated_at:
           type: string
           format: date-time
