@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/NoTIPswe/notip-frontend/compare/v1.6.1...v2.0.0) (2026-04-09)
+
+
+### Features
+
+* **api:** update openapi specs ([4005582](https://github.com/NoTIPswe/notip-frontend/commit/40055822a12eefa74493de23bbb048a4076c8c53))
+
+
+### BREAKING CHANGES
+
+* **api:** new api contracts
+
 ## [1.6.1](https://github.com/NoTIPswe/notip-frontend/compare/v1.6.0...v1.6.1) (2026-04-09)
 
 
