@@ -157,13 +157,13 @@ export class AlertService {
 
     const detailsAsString = this.asString(details);
     if (detailsAsString) {
-      mappedDetails.message = detailsAsString;
+      mappedDetails['message'] = detailsAsString;
       return mappedDetails;
     }
 
     const messageAsString = this.asString(message);
     if (messageAsString) {
-      mappedDetails.message = messageAsString;
+      mappedDetails['message'] = messageAsString;
     }
 
     return mappedDetails;
