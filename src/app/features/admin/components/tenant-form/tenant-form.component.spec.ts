@@ -152,4 +152,31 @@ describe('TenantFormComponent', () => {
 
     expect(emitSpy).toHaveBeenCalledOnce();
   });
+
+  it('rejects password shorter than 8 characters on create', () => {
+    const fixture = TestBed.createComponent(TenantFormComponent);
+    fixture.detectChanges();
+    const form = fixture.nativeElement as HTMLElement;
+    const passwordInput = form.querySelector('input[type="password"]') as HTMLInputElement;
+
+    expect(passwordInput).toBeTruthy();
+    expect(passwordInput.minLength).toBe(8);
+
+    passwordInput.value = 'short';
+    expect(passwordInput.checkValidity()).toBe(false);
+    expect(passwordInput.validity.patternMismatch).toBe(true);
+  });
+
+  it('accepts password with at least 8 characters on create', () => {
+    const fixture = TestBed.createComponent(TenantFormComponent);
+    fixture.detectChanges();
+    const form = fixture.nativeElement as HTMLElement;
+    const passwordInput = form.querySelector('input[type="password"]') as HTMLInputElement;
+
+    expect(passwordInput).toBeTruthy();
+
+    passwordInput.value = 'validpassword';
+    expect(passwordInput.checkValidity()).toBe(true);
+    expect(passwordInput.validity.patternMismatch).toBe(false);
+  });
 });
