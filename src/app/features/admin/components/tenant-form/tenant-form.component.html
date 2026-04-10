@@ -1,4 +1,8 @@
 <section class="tenant-form">
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
   @if (tenantId()) {
     <h3>Edit tenant</h3>
     <form

@@ -6,6 +6,7 @@ import {
   SetGatewayAlertsConfigRequestDto,
 } from '../../../generated/openapi/notip-management-api-openapi';
 import {
+  AlertDetails,
   Alerts,
   AlertsConfig,
   AlertsFilter,
@@ -104,7 +105,7 @@ export class AlertService {
     return rows.map((row) => {
       const data = this.asRecord(row);
       const mapped: Alerts = {
-        tenantId: this.asString(data['tenant_id']),
+        id: this.asString(data['id']),
         type: this.toAlertsType(data['type']),
         gatewayId: this.asString(data['gateway_id']),
         details: this.toAlertDetails(data['details'], data['message']),
@@ -132,22 +133,39 @@ export class AlertService {
     return typeof value === 'string' ? value : '';
   }
 
-  private toAlertDetails(details: unknown, message: unknown): string {
-    if (typeof details === 'string' && details.length > 0) {
-      return details;
-    }
+  private toAlertDetails(details: unknown, message: unknown): AlertDetails {
+    const mappedDetails: AlertDetails = {};
 
     if (typeof details === 'object' && details !== null) {
       const data = details as Record<string, unknown>;
-      const lastSeen = this.asString(data['last_seen']);
-      const timeout = this.asNumber(data['timeout_configured']);
-      if (lastSeen || timeout > 0) {
-        const lastSeenPart = lastSeen ? `lastSeen=${lastSeen}` : '';
-        const timeoutPart = timeout > 0 ? `timeout=${timeout}ms` : '';
-        return [lastSeenPart, timeoutPart].filter((part) => part.length > 0).join(', ');
+      const normalized: AlertDetails = { ...data };
+
+      const lastSeen = this.asString(data['lastSeen']) || this.asString(data['last_seen']);
+      if (lastSeen) {
+        normalized.lastSeen = lastSeen;
       }
+
+      const timeoutFromCamel = this.asNumber(data['timeoutConfigured'], Number.NaN);
+      const timeoutFromSnake = this.asNumber(data['timeout_configured'], Number.NaN);
+      const timeout = Number.isFinite(timeoutFromCamel) ? timeoutFromCamel : timeoutFromSnake;
+      if (Number.isFinite(timeout)) {
+        normalized.timeoutConfigured = timeout;
+      }
+
+      return normalized;
     }
 
-    return this.asString(message);
+    const detailsAsString = this.asString(details);
+    if (detailsAsString) {
+      mappedDetails['message'] = detailsAsString;
+      return mappedDetails;
+    }
+
+    const messageAsString = this.asString(message);
+    if (messageAsString) {
+      mappedDetails['message'] = messageAsString;
+    }
+
+    return mappedDetails;
   }
 }

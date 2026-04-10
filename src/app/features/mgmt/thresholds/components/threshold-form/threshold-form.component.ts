@@ -24,6 +24,7 @@ export class ThresholdFormComponent {
   readonly isSaving = input<boolean>(false);
   readonly sensorTypes = input<string[]>([]);
   readonly sensorIds = input<string[]>([]);
+  readonly errorMessage = input<string | null>(null);
   readonly selectedMode = signal<ThresholdFormMode>('type');
 
   readonly typeSubmitted = output<TypeThresholdPayload>();

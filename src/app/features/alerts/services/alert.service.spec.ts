@@ -108,17 +108,17 @@ describe('AlertService', () => {
     apiMock.alertsControllerGetAlerts.mockReturnValue(
       of([
         {
-          tenant_id: 'tenant-1',
+          id: '63fb4141-b508-4327-be8c-99611eac4e6b',
           type: AlertsType.GATEWAY_OFFLINE,
           gateway_id: 'gw-1',
           details: {
-            last_seen: '2026-03-31T11:50:00.000Z',
-            timeout_configured: 9000,
+            lastSeen: '2026-03-31T11:50:00.000Z',
+            timeoutConfigured: 9000,
           },
           created_at: '2026-03-31T12:00:00.000Z',
         },
         {
-          tenant_id: 'tenant-1',
+          id: '8f954d5e-434f-495d-9585-99ca4550c3ef',
           type: 'UNKNOWN',
           gateway_id: 'gw-2',
           message: 'fallback-message',
@@ -131,17 +131,20 @@ describe('AlertService', () => {
       firstValueFrom(service.getAlerts({ from: 'f', to: 't', gatewayId: ['gw-1'] })),
     ).resolves.toEqual([
       {
-        tenantId: 'tenant-1',
+        id: '63fb4141-b508-4327-be8c-99611eac4e6b',
         type: AlertsType.GATEWAY_OFFLINE,
         gatewayId: 'gw-1',
-        details: 'lastSeen=2026-03-31T11:50:00.000Z, timeout=9000ms',
+        details: {
+          lastSeen: '2026-03-31T11:50:00.000Z',
+          timeoutConfigured: 9000,
+        },
         createdAt: '2026-03-31T12:00:00.000Z',
       },
       {
-        tenantId: 'tenant-1',
+        id: '8f954d5e-434f-495d-9585-99ca4550c3ef',
         type: AlertsType.GATEWAY_OFFLINE,
         gatewayId: 'gw-2',
-        details: 'fallback-message',
+        details: { message: 'fallback-message' },
         createdAt: '2026-03-31T12:10:00.000Z',
       },
     ]);
@@ -153,14 +156,14 @@ describe('AlertService', () => {
     apiMock.alertsControllerGetAlerts.mockReturnValue(
       of([
         {
-          tenant_id: 'tenant-3',
+          id: '2f20f670-1f5e-4f81-a2cf-dcafe6e45163',
           type: AlertsType.GATEWAY_OFFLINE,
           gateway_id: 'gw-7',
           details: 'string-details',
           created_at: '2026-03-31T12:20:00.000Z',
         },
         {
-          tenant_id: 'tenant-3',
+          id: '32cb57ef-b46a-43ad-ba9d-a4f2f9a503e4',
           type: AlertsType.GATEWAY_OFFLINE,
           gateway_id: 'gw-8',
           details: {
@@ -173,17 +176,20 @@ describe('AlertService', () => {
 
     await expect(firstValueFrom(service.getAlerts({ from: 'f', to: 't' }))).resolves.toEqual([
       {
-        tenantId: 'tenant-3',
+        id: '2f20f670-1f5e-4f81-a2cf-dcafe6e45163',
         type: AlertsType.GATEWAY_OFFLINE,
         gatewayId: 'gw-7',
-        details: 'string-details',
+        details: { message: 'string-details' },
         createdAt: '2026-03-31T12:20:00.000Z',
       },
       {
-        tenantId: 'tenant-3',
+        id: '32cb57ef-b46a-43ad-ba9d-a4f2f9a503e4',
         type: AlertsType.GATEWAY_OFFLINE,
         gatewayId: 'gw-8',
-        details: 'timeout=7000ms',
+        details: {
+          timeout_configured: 7000,
+          timeoutConfigured: 7000,
+        },
         createdAt: '2026-03-31T12:25:00.000Z',
       },
     ]);

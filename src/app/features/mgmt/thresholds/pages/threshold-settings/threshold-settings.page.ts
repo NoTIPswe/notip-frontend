@@ -42,6 +42,7 @@ export class ThresholdSettingsPageComponent implements OnInit {
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly formErrorMessage = signal<string | null>(null);
   readonly infoMessage = signal<string | null>(null);
   readonly canEditThresholds = this.authService.getRole() === UserRole.tenant_admin;
 
@@ -55,10 +56,12 @@ export class ThresholdSettingsPageComponent implements OnInit {
       return;
     }
 
+    this.formErrorMessage.set(null);
     this.showForm.set(!this.showForm());
   }
 
   closeForm(): void {
+    this.formErrorMessage.set(null);
     this.showForm.set(false);
   }
 
@@ -68,7 +71,7 @@ export class ThresholdSettingsPageComponent implements OnInit {
     }
 
     this.isSaving.set(true);
-    this.errorMessage.set(null);
+    this.formErrorMessage.set(null);
     this.infoMessage.set(null);
 
     this.thresholdService
@@ -82,7 +85,7 @@ export class ThresholdSettingsPageComponent implements OnInit {
         },
         error: () => {
           this.isSaving.set(false);
-          this.errorMessage.set('Unable to save threshold by type.');
+          this.formErrorMessage.set('Unable to save threshold by type.');
         },
       });
   }
@@ -94,12 +97,12 @@ export class ThresholdSettingsPageComponent implements OnInit {
 
     const sensorType = this.sensorTypeBySensorId()[payload.sensorId];
     if (!sensorType) {
-      this.errorMessage.set(`Unable to determine sensor type for sensor ${payload.sensorId}.`);
+      this.formErrorMessage.set(`Unable to determine sensor type for sensor ${payload.sensorId}.`);
       return;
     }
 
     this.isSaving.set(true);
-    this.errorMessage.set(null);
+    this.formErrorMessage.set(null);
     this.infoMessage.set(null);
 
     this.thresholdService
@@ -113,7 +116,7 @@ export class ThresholdSettingsPageComponent implements OnInit {
         },
         error: () => {
           this.isSaving.set(false);
-          this.errorMessage.set('Unable to save threshold for sensor.');
+          this.formErrorMessage.set('Unable to save threshold for sensor.');
         },
       });
   }

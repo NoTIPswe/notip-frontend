@@ -19,7 +19,7 @@
     </div>
   </form>
 
-  @if (errorMessage()) {
+  @if (!showCreateForm() && errorMessage()) {
     <p class="error">{{ errorMessage() }}</p>
   }
 
@@ -37,6 +37,7 @@
       <app-admin-gateway-form
         [isSaving]="isSaving()"
         [tenantIds]="tenantOptions()"
+        [errorMessage]="formErrorMessage()"
         (createRequested)="onCreateGateway($event)"
         (cancelRequested)="onCreateCancelled()"
       ></app-admin-gateway-form>

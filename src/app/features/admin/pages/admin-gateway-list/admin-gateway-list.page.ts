@@ -27,6 +27,7 @@ export class AdminGatewayListPageComponent implements OnInit {
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly formErrorMessage = signal<string | null>(null);
   readonly infoMessage = signal<string | null>(null);
 
   ngOnInit(): void {
@@ -46,15 +47,17 @@ export class AdminGatewayListPageComponent implements OnInit {
   }
 
   toggleCreateForm(): void {
+    this.formErrorMessage.set(null);
     this.showCreateForm.set(!this.showCreateForm());
   }
 
   onCreateCancelled(): void {
+    this.formErrorMessage.set(null);
     this.showCreateForm.set(false);
   }
 
   onCreateGateway(payload: CreateAdminGatewayPayload): void {
-    this.errorMessage.set(null);
+    this.formErrorMessage.set(null);
     this.infoMessage.set(null);
     this.isSaving.set(true);
 
@@ -74,7 +77,7 @@ export class AdminGatewayListPageComponent implements OnInit {
         },
         error: () => {
           this.isSaving.set(false);
-          this.errorMessage.set('Unable to create gateway.');
+          this.formErrorMessage.set('Unable to create gateway.');
         },
       });
   }

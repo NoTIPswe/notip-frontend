@@ -8,7 +8,7 @@
     }
   </div>
 
-  @if (errorMessage()) {
+  @if (!(showCreateForm() || editingTenant()) && errorMessage()) {
     <p class="error">{{ errorMessage() }}</p>
   }
 
@@ -29,6 +29,7 @@
         [initialStatus]="editingTenant()?.status ?? tenantStatusActive"
         [initialSuspensionIntervalDays]="editingTenant()?.suspensionIntervalDays ?? 0"
         [isSaving]="isSaving()"
+        [errorMessage]="formErrorMessage()"
         (createRequested)="onCreateRequested($event)"
         (updateRequested)="onUpdateRequested($event)"
         (cancelRequested)="onCancelEdit()"

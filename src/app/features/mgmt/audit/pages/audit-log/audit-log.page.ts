@@ -23,6 +23,7 @@ export class AuditLogPageComponent implements OnInit {
 
   readonly logs = signal<Logs[]>([]);
   readonly isLoading = signal<boolean>(false);
+  readonly isExporting = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
 
   readonly from = signal<string>(this.toDatetimeLocal(new Date(Date.now() - 24 * 60 * 60 * 1000)));
@@ -48,6 +49,24 @@ export class AuditLogPageComponent implements OnInit {
     this.userIds.set('');
     this.actions.set('');
     this.loadLogs();
+  }
+
+  canExportLogs(): boolean {
+    return this.logs().length > 0 && !this.isLoading() && !this.isExporting();
+  }
+
+  onExportLogs(): void {
+    if (!this.canExportLogs()) {
+      return;
+    }
+
+    this.isExporting.set(true);
+
+    try {
+      this.downloadAsCsv(this.logs());
+    } finally {
+      this.isExporting.set(false);
+    }
   }
 
   private loadLogs(): void {
@@ -86,5 +105,47 @@ export class AuditLogPageComponent implements OnInit {
 
   private toDatetimeLocal(value: Date): string {
     return toRomeDateTimeInput(value);
+  }
+
+  private downloadAsCsv(rows: Logs[]): void {
+    const header = ['timestamp', 'userId', 'action', 'resource', 'details'];
+    const body = rows.map((row) => [
+      row.timestamp,
+      row.userId,
+      row.action,
+      row.resource,
+      row.details,
+    ]);
+
+    const csv = [
+      header.join(','),
+      ...body.map((line) => line.map((value) => this.escapeCsv(value)).join(',')),
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `system-logs-export-${new Date().toISOString().replaceAll(':', '-').replaceAll('.', '-')}.csv`;
+    anchor.click();
+
+    URL.revokeObjectURL(url);
+  }
+
+  private escapeCsv(value: unknown): string {
+    let raw = '';
+
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+      raw = String(value);
+    } else if (value != null) {
+      raw = JSON.stringify(value);
+    }
+
+    if (!/[",\n]/.test(raw)) {
+      return raw;
+    }
+
+    return `"${raw.replaceAll('"', '""')}"`;
   }
 }

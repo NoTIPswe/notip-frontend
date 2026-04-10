@@ -6,7 +6,7 @@
     }
   </div>
 
-  @if (errorMessage()) {
+  @if (!(showCreateForm() || editingUser()) && errorMessage()) {
     <p class="error">{{ errorMessage() }}</p>
   }
 
@@ -27,6 +27,7 @@
       <app-user-form
         [editUser]="editingUser()"
         [isSaving]="isSaving()"
+        [errorMessage]="formErrorMessage()"
         (createRequested)="createUser($event)"
         (updateRequested)="updateUser($event)"
         (cancelRequested)="cancelEdit()"

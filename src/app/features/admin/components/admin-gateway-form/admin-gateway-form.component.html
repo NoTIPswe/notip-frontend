@@ -1,6 +1,10 @@
 <section class="admin-gateway-form">
   <h3>Add gateway</h3>
 
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
   <form (submit)="onSubmit($event, factoryId.value, tenantId.value, factoryKey.value, model.value)">
     <label>
       Factory ID

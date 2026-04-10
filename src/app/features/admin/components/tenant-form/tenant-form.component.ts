@@ -27,6 +27,7 @@ export class TenantFormComponent implements OnChanges {
   readonly initialStatus = input<TenantStatus>(TenantStatus.active);
   readonly initialSuspensionIntervalDays = input<number>(0);
   readonly isSaving = input<boolean>(false);
+  readonly errorMessage = input<string | null>(null);
   readonly tenantStatusSuspended = TenantStatus.suspended;
 
   readonly currentStatus = signal<TenantStatus>(TenantStatus.active);

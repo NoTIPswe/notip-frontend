@@ -14,6 +14,10 @@
         class="create-form"
         (submit)="$event.preventDefault(); createClient(name.value); name.value = ''"
       >
+        @if (formErrorMessage()) {
+          <p class="error form-error">{{ formErrorMessage() }}</p>
+        }
+
         <label>
           Client name
           <input #name type="text" required minlength="2" placeholder="Backoffice integration" />
@@ -26,7 +30,7 @@
     </app-modal-layer>
   }
 
-  @if (errorMessage()) {
+  @if (!showCreateForm() && errorMessage()) {
     <p class="error">{{ errorMessage() }}</p>
   }
 

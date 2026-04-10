@@ -22,6 +22,7 @@ export class ApiClientListPageComponent implements OnInit {
   readonly isSaving = signal<boolean>(false);
   readonly deletingClientId = signal<string | null>(null);
   readonly errorMessage = signal<string | null>(null);
+  readonly formErrorMessage = signal<string | null>(null);
   readonly infoMessage = signal<string | null>(null);
 
   ngOnInit(): void {
@@ -29,21 +30,24 @@ export class ApiClientListPageComponent implements OnInit {
   }
 
   toggleCreateForm(): void {
+    this.formErrorMessage.set(null);
     this.showCreateForm.set(!this.showCreateForm());
   }
 
   closeCreateForm(): void {
+    this.formErrorMessage.set(null);
     this.showCreateForm.set(false);
   }
 
   createClient(name: string): void {
     const cleanName = name.trim();
     if (!cleanName) {
+      this.formErrorMessage.set('Client name is required.');
       return;
     }
 
     this.isSaving.set(true);
-    this.errorMessage.set(null);
+    this.formErrorMessage.set(null);
     this.infoMessage.set(null);
 
     this.clientsService.createClient(cleanName).subscribe({
@@ -56,7 +60,7 @@ export class ApiClientListPageComponent implements OnInit {
       },
       error: () => {
         this.isSaving.set(false);
-        this.errorMessage.set('Unable to create API client.');
+        this.formErrorMessage.set('Unable to create API client.');
       },
     });
   }

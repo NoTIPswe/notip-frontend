@@ -46,6 +46,7 @@ export class TenantManagerPageComponent implements OnInit {
   readonly deletingTenantId = signal<string | null>(null);
   readonly editingTenant = signal<Tenant | null>(null);
   readonly errorMessage = signal<string | null>(null);
+  readonly formErrorMessage = signal<string | null>(null);
   readonly tenantStatusActive = TenantStatus.active;
 
   ngOnInit(): void {
@@ -61,16 +62,19 @@ export class TenantManagerPageComponent implements OnInit {
     const tenant = this.tenants().find((item) => item.tenantId === tenantId) ?? null;
     this.showCreateForm.set(false);
     this.editingTenant.set(tenant);
+    this.formErrorMessage.set(null);
   }
 
   openCreateTenantForm(): void {
     if (this.editingTenant()) {
       this.editingTenant.set(null);
       this.showCreateForm.set(true);
+      this.formErrorMessage.set(null);
       return;
     }
 
     this.showCreateForm.set(!this.showCreateForm());
+    this.formErrorMessage.set(null);
   }
 
   onDeleteTenantRequested(tenantId: string): void {
@@ -107,7 +111,7 @@ export class TenantManagerPageComponent implements OnInit {
   }
 
   onCreateRequested(payload: CreateTenantRequestPayload): void {
-    this.errorMessage.set(null);
+    this.formErrorMessage.set(null);
     this.isSaving.set(true);
 
     this.tenantService
@@ -125,13 +129,13 @@ export class TenantManagerPageComponent implements OnInit {
         },
         error: () => {
           this.isSaving.set(false);
-          this.errorMessage.set('Unable to create tenant.');
+          this.formErrorMessage.set('Unable to create tenant.');
         },
       });
   }
 
   onUpdateRequested(payload: UpdateTenantRequestPayload): void {
-    this.errorMessage.set(null);
+    this.formErrorMessage.set(null);
     this.isSaving.set(true);
 
     this.tenantService
@@ -149,12 +153,13 @@ export class TenantManagerPageComponent implements OnInit {
         },
         error: () => {
           this.isSaving.set(false);
-          this.errorMessage.set('Unable to update tenant.');
+          this.formErrorMessage.set('Unable to update tenant.');
         },
       });
   }
 
   onCancelEdit(): void {
+    this.formErrorMessage.set(null);
     this.editingTenant.set(null);
     this.showCreateForm.set(false);
   }

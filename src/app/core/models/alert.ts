@@ -2,11 +2,17 @@ import { AlertsType } from './enums';
 
 export { AlertsType } from './enums';
 
+export interface AlertDetails {
+  lastSeen?: string;
+  timeoutConfigured?: number;
+  [key: string]: unknown;
+}
+
 export interface Alerts {
-  tenantId: string;
+  id: string;
   type: AlertsType;
   gatewayId: string;
-  details: string;
+  details: AlertDetails;
   createdAt: string;
 }
 
