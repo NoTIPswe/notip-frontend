@@ -1,3 +1,16 @@
+# [2.1.0](https://github.com/NoTIPswe/notip-frontend/compare/v2.0.0...v2.1.0) (2026-04-10)
+
+
+### Bug Fixes
+
+* error on alert.service.ts ([00c0385](https://github.com/NoTIPswe/notip-frontend/commit/00c0385312b660afc03ecbacc183a71790f3cc9b))
+
+
+### Features
+
+* enhance error handling in admin and tenant forms, and clean up alert list ([c64dc60](https://github.com/NoTIPswe/notip-frontend/commit/c64dc6092e71e10e523f7010512a042cf1b00e5b))
+* update alert structure and enhance user interface for alerts and thresholds ([5589090](https://github.com/NoTIPswe/notip-frontend/commit/558909048b3f319c340d91e48cfc73717ce214ad))
+
 # [2.0.0](https://github.com/NoTIPswe/notip-frontend/compare/v1.6.1...v2.0.0) (2026-04-09)
 
 
