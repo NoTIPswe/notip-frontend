@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/NoTIPswe/notip-frontend/compare/v2.1.0...v2.2.0) (2026-04-10)
+
+
+### Features
+
+* enhance password validation in tenant form ([904fe97](https://github.com/NoTIPswe/notip-frontend/commit/904fe97620b708c90142d9c54591e267c2e80dcf))
+
 # [2.1.0](https://github.com/NoTIPswe/notip-frontend/compare/v2.0.0...v2.1.0) (2026-04-10)
 
 
