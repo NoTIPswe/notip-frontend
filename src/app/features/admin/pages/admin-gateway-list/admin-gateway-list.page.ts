@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import {
   AdminGatewayFormComponent,
   CreateAdminGatewayPayload,
@@ -8,11 +8,17 @@ import { ObfuscatedGateway } from '../../../../core/models/gateway';
 import { AdminGatewayService } from '../../services/admin-gateway.service';
 import { TenantService } from '../../services/tenant.service';
 import { ModalLayerComponent } from '../../../../shared/components/modal-layer/modal-layer.component';
+import { MultiSelectDropdownComponent } from '../../../../shared/components/multi-select-dropdown/multi-select-dropdown.component';
 
 @Component({
   selector: 'app-admin-gateway-list-page',
   standalone: true,
-  imports: [AdminGatewayTableComponent, AdminGatewayFormComponent, ModalLayerComponent],
+  imports: [
+    AdminGatewayTableComponent,
+    AdminGatewayFormComponent,
+    ModalLayerComponent,
+    MultiSelectDropdownComponent,
+  ],
   templateUrl: './admin-gateway-list.page.html',
   styleUrl: './admin-gateway-list.page.css',
 })
@@ -22,7 +28,8 @@ export class AdminGatewayListPageComponent implements OnInit {
 
   readonly gateways = signal<ObfuscatedGateway[]>([]);
   readonly tenantOptions = signal<string[]>([]);
-  readonly tenantFilter = signal<string>('');
+  readonly selectedTenantIds = signal<string[]>([]);
+  readonly draftTenantIds = signal<string[]>([]);
   readonly showCreateForm = signal<boolean>(false);
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
@@ -30,20 +37,33 @@ export class AdminGatewayListPageComponent implements OnInit {
   readonly formErrorMessage = signal<string | null>(null);
   readonly infoMessage = signal<string | null>(null);
 
+  readonly filteredGateways = computed(() => {
+    const selectedTenants = this.selectedTenantIds();
+
+    if (selectedTenants.length === 0) {
+      return this.gateways();
+    }
+
+    return this.gateways().filter((gateway) => selectedTenants.includes(gateway.tenantId));
+  });
+
   ngOnInit(): void {
     this.loadGateways();
     this.loadTenantOptions();
   }
 
-  onApplyFilter(event: Event, tenantId: string): void {
+  onApplyFilter(event: Event): void {
     event.preventDefault();
-    this.tenantFilter.set(tenantId.trim());
-    this.loadGateways();
+    this.selectedTenantIds.set([...this.draftTenantIds()]);
+  }
+
+  onTenantFilterSelectionChanged(tenantIds: string[]): void {
+    this.draftTenantIds.set(this.normalizeList(tenantIds));
   }
 
   onResetFilter(): void {
-    this.tenantFilter.set('');
-    this.loadGateways();
+    this.draftTenantIds.set([]);
+    this.selectedTenantIds.set([]);
   }
 
   toggleCreateForm(): void {
@@ -86,10 +106,7 @@ export class AdminGatewayListPageComponent implements OnInit {
     this.errorMessage.set(null);
     this.isLoading.set(true);
 
-    const filter = this.tenantFilter();
-    const tenantId = filter.length > 0 ? filter : undefined;
-
-    this.adminGatewayService.getGateways(tenantId).subscribe({
+    this.adminGatewayService.getGateways().subscribe({
       next: (rows) => {
         this.isLoading.set(false);
         this.gateways.set(rows);
@@ -110,10 +127,31 @@ export class AdminGatewayListPageComponent implements OnInit {
           .sort((a, b) => a.localeCompare(b));
 
         this.tenantOptions.set(tenantIds);
+        this.draftTenantIds.update((selected) =>
+          selected.filter((tenantId) => tenantIds.includes(tenantId)),
+        );
+        this.selectedTenantIds.update((selected) =>
+          selected.filter((tenantId) => tenantIds.includes(tenantId)),
+        );
       },
       error: () => {
         this.tenantOptions.set([]);
       },
     });
+  }
+
+  private normalizeList(values: string[]): string[] {
+    const unique = new Set<string>();
+
+    for (const value of values) {
+      const normalized = value.trim();
+      if (normalized.length === 0) {
+        continue;
+      }
+
+      unique.add(normalized);
+    }
+
+    return Array.from(unique);
   }
 }

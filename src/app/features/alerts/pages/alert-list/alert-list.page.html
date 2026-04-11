@@ -9,7 +9,8 @@
   <app-alert-filter-panel
     [from]="from()"
     [to]="to()"
-    [gatewayId]="gatewayId()"
+    [gatewayIds]="gatewayIds()"
+    [gatewayOptions]="gatewayOptions()"
     [isLoading]="isLoading()"
     (filterSubmitted)="applyFilter($event)"
     (resetRequested)="resetFilter()"

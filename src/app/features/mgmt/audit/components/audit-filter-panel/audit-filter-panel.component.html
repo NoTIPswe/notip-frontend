@@ -1,11 +1,7 @@
 <section class="audit-filter-panel">
   <h3>Audit Filters</h3>
 
-  <form
-    (submit)="
-      submit($event, fromInput.value, toInput.value, userIdsInput.value, actionsInput.value)
-    "
-  >
+  <form (submit)="submit($event, fromInput.value, toInput.value)">
     <label>
       From
       <input #fromInput type="datetime-local" [value]="from()" />
@@ -16,15 +12,29 @@
       <input #toInput type="datetime-local" [value]="to()" />
     </label>
 
-    <label>
-      User IDs (csv)
-      <input #userIdsInput type="text" [value]="userIds()" placeholder="u1,u2" />
-    </label>
+    <div class="field">
+      <span>User IDs</span>
+      <app-multi-select-dropdown
+        [options]="userIdOptions()"
+        [selected]="selectedUserIds()"
+        [placeholder]="'Select user'"
+        [searchPlaceholder]="'Search user...'"
+        [disabled]="isLoading()"
+        (selectedChange)="onUserIdsChanged($event)"
+      ></app-multi-select-dropdown>
+    </div>
 
-    <label>
-      Actions (csv)
-      <input #actionsInput type="text" [value]="actions()" placeholder="login,create,update" />
-    </label>
+    <div class="field">
+      <span>Actions</span>
+      <app-multi-select-dropdown
+        [options]="actionOptions()"
+        [selected]="selectedActions()"
+        [placeholder]="'Select action'"
+        [searchPlaceholder]="'Search action...'"
+        [disabled]="isLoading()"
+        (selectedChange)="onActionsChanged($event)"
+      ></app-multi-select-dropdown>
+    </div>
 
     <div class="actions-row">
       <button type="submit" [disabled]="isLoading()">Apply</button>

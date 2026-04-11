@@ -4,11 +4,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Sensor } from '../../../../core/models/sensor';
 import { SensorService } from '../../services/sensor.service';
 import { RomeDateTimePipe } from '../../../../shared/pipes/rome-date-time.pipe';
+import { MultiSelectDropdownComponent } from '../../../../shared/components/multi-select-dropdown/multi-select-dropdown.component';
 
 @Component({
   selector: 'app-sensor-list-page',
   standalone: true,
-  imports: [RomeDateTimePipe],
+  imports: [RomeDateTimePipe, MultiSelectDropdownComponent],
   templateUrl: './sensor-list.page.html',
   styleUrl: './sensor-list.page.css',
 })
@@ -20,16 +21,23 @@ export class SensorListPageComponent implements OnInit {
   readonly sensors = signal<Sensor[]>([]);
   readonly isLoading = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
-  readonly gatewayFilter = signal<string>('');
-  readonly typeFilter = signal<string>('');
+  readonly gatewayFilters = signal<string[]>([]);
+  readonly typeFilters = signal<string[]>([]);
+
+  readonly gatewayOptions = computed(() =>
+    this.uniqueSorted(this.sensors().map((row) => row.gatewayId)),
+  );
+  readonly sensorTypeOptions = computed(() =>
+    this.uniqueSorted(this.sensors().map((row) => row.sensorType)),
+  );
 
   readonly filteredSensors = computed(() => {
-    const gateway = this.gatewayFilter().trim().toLowerCase();
-    const type = this.typeFilter().trim().toLowerCase();
+    const gatewayIds = this.gatewayFilters();
+    const sensorTypes = this.typeFilters();
 
     return this.sensors().filter((row) => {
-      const gatewayOk = gateway.length === 0 || row.gatewayId.toLowerCase().includes(gateway);
-      const typeOk = type.length === 0 || row.sensorType.toLowerCase().includes(type);
+      const gatewayOk = gatewayIds.length === 0 || gatewayIds.includes(row.gatewayId);
+      const typeOk = sensorTypes.length === 0 || sensorTypes.includes(row.sensorType);
       return gatewayOk && typeOk;
     });
   });
@@ -38,16 +46,17 @@ export class SensorListPageComponent implements OnInit {
     this.loadSensors();
   }
 
-  onFilterChanged(gateway: string, sensorType: string): void {
-    this.gatewayFilter.set(gateway);
-    this.typeFilter.set(sensorType);
+  onGatewayFilterChanged(gatewayIds: string[]): void {
+    this.gatewayFilters.set(this.normalizeList(gatewayIds));
   }
 
-  onClearFilters(gatewayInput: HTMLInputElement, typeInput: HTMLInputElement): void {
-    gatewayInput.value = '';
-    typeInput.value = '';
-    this.gatewayFilter.set('');
-    this.typeFilter.set('');
+  onTypeFilterChanged(sensorTypes: string[]): void {
+    this.typeFilters.set(this.normalizeList(sensorTypes));
+  }
+
+  onClearFilters(): void {
+    this.gatewayFilters.set([]);
+    this.typeFilters.set([]);
   }
 
   openSensorDetail(sensorId: string): void {
@@ -71,5 +80,26 @@ export class SensorListPageComponent implements OnInit {
           this.errorMessage.set('Unable to load sensor list.');
         },
       });
+  }
+
+  private normalizeList(values: string[]): string[] {
+    const unique = new Set<string>();
+
+    for (const value of values) {
+      const normalized = value.trim();
+      if (normalized.length === 0) {
+        continue;
+      }
+
+      unique.add(normalized);
+    }
+
+    return Array.from(unique);
+  }
+
+  private uniqueSorted(values: string[]): string[] {
+    return Array.from(new Set(values.filter((value) => value.length > 0))).sort((a, b) =>
+      a.localeCompare(b),
+    );
   }
 }

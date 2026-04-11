@@ -203,4 +203,53 @@ describe('AlertService', () => {
     await expect(firstValueFrom(service.deleteGatewayConfig('gw-1'))).resolves.toBeUndefined();
     expect(apiMock.alertsControllerDeleteGatewayAlertsConfig).toHaveBeenCalledWith('gw-1');
   });
+
+  it('loads and merges alerts when multiple gateway ids are selected', async () => {
+    apiMock.alertsControllerGetAlerts
+      .mockReturnValueOnce(
+        of([
+          {
+            id: '1',
+            gateway_id: 'gw-1',
+            type: AlertsType.GATEWAY_OFFLINE,
+            created_at: '2026-03-31T12:00:00.000Z',
+            details: { message: 'first' },
+          },
+        ]),
+      )
+      .mockReturnValueOnce(
+        of([
+          {
+            id: '2',
+            gateway_id: 'gw-2',
+            type: AlertsType.GATEWAY_OFFLINE,
+            created_at: '2026-03-31T12:10:00.000Z',
+            details: { message: 'second' },
+          },
+        ]),
+      );
+
+    await expect(
+      firstValueFrom(service.getAlerts({ from: 'from', to: 'to', gatewayId: ['gw-1', 'gw-2'] })),
+    ).resolves.toEqual([
+      {
+        id: '2',
+        type: AlertsType.GATEWAY_OFFLINE,
+        gatewayId: 'gw-2',
+        details: { message: 'second' },
+        createdAt: '2026-03-31T12:10:00.000Z',
+      },
+      {
+        id: '1',
+        type: AlertsType.GATEWAY_OFFLINE,
+        gatewayId: 'gw-1',
+        details: { message: 'first' },
+        createdAt: '2026-03-31T12:00:00.000Z',
+      },
+    ]);
+
+    expect(apiMock.alertsControllerGetAlerts).toHaveBeenCalledTimes(2);
+    expect(apiMock.alertsControllerGetAlerts).toHaveBeenNthCalledWith(1, 'from', 'to', 'gw-1');
+    expect(apiMock.alertsControllerGetAlerts).toHaveBeenNthCalledWith(2, 'from', 'to', 'gw-2');
+  });
 });

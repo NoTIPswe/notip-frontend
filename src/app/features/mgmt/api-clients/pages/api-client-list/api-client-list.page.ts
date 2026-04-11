@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ApiClientTableComponent } from '../../components/api-client-table/api-client-table.component';
 import { SecretClient } from '../../../../../core/models/client';
@@ -30,16 +31,23 @@ export class ApiClientListPageComponent implements OnInit {
   }
 
   toggleCreateForm(): void {
+    this.errorMessage.set(null);
     this.formErrorMessage.set(null);
     this.showCreateForm.set(!this.showCreateForm());
   }
 
   closeCreateForm(): void {
+    this.errorMessage.set(null);
     this.formErrorMessage.set(null);
     this.showCreateForm.set(false);
   }
 
-  createClient(name: string): void {
+  submitCreateForm(event: Event, nameInput: HTMLInputElement): void {
+    event.preventDefault();
+    this.createClient(nameInput.value, nameInput);
+  }
+
+  createClient(name: string, nameInput?: HTMLInputElement): void {
     const cleanName = name.trim();
     if (!cleanName) {
       this.formErrorMessage.set('Client name is required.');
@@ -47,6 +55,7 @@ export class ApiClientListPageComponent implements OnInit {
     }
 
     this.isSaving.set(true);
+    this.errorMessage.set(null);
     this.formErrorMessage.set(null);
     this.infoMessage.set(null);
 
@@ -56,11 +65,16 @@ export class ApiClientListPageComponent implements OnInit {
         this.showCreateForm.set(false);
         this.lastCreated.set(client);
         this.infoMessage.set(`Client created: ${client.clientId}`);
+        if (nameInput) {
+          nameInput.value = '';
+        }
         this.loadClients();
       },
-      error: () => {
+      error: (error: unknown) => {
         this.isSaving.set(false);
-        this.formErrorMessage.set('Unable to create API client.');
+        this.showCreateForm.set(true);
+        this.errorMessage.set(null);
+        this.formErrorMessage.set(this.resolveCreateClientErrorMessage(error));
       },
     });
   }
@@ -111,5 +125,53 @@ export class ApiClientListPageComponent implements OnInit {
         this.errorMessage.set('Unable to load API clients.');
       },
     });
+  }
+
+  private resolveCreateClientErrorMessage(error: unknown): string {
+    if (!(error instanceof HttpErrorResponse)) {
+      return 'Unable to create API client credentials.';
+    }
+
+    const payloadMessage = this.pickErrorMessage(error.error);
+    if (payloadMessage) {
+      return payloadMessage;
+    }
+
+    if (typeof error.message === 'string') {
+      const trimmed = error.message.trim();
+      if (trimmed.length > 0) {
+        return trimmed;
+      }
+    }
+
+    return 'Unable to create API client credentials.';
+  }
+
+  private pickErrorMessage(payload: unknown): string | null {
+    if (typeof payload === 'string') {
+      const trimmed = payload.trim();
+      return trimmed.length > 0 ? trimmed : null;
+    }
+
+    if (!payload || typeof payload !== 'object') {
+      return null;
+    }
+
+    const source = payload as Record<string, unknown>;
+    const candidateKeys = ['message', 'error', 'detail', 'title'];
+
+    for (const key of candidateKeys) {
+      const value = source[key];
+      if (typeof value !== 'string') {
+        continue;
+      }
+
+      const trimmed = value.trim();
+      if (trimmed.length > 0) {
+        return trimmed;
+      }
+    }
+
+    return null;
   }
 }

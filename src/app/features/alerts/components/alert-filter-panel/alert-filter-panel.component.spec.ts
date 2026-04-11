@@ -18,13 +18,14 @@ describe('AlertFilterPanelComponent', () => {
     const event = { preventDefault } as unknown as Event;
     const emitSpy = vi.spyOn(component.filterSubmitted, 'emit');
 
-    component.submit(event, ' 2026-04-01 ', ' 2026-04-02 ', ' gw-1 ');
+    component.onGatewaySelectionChanged([' gw-1 ', 'gw-2']);
+    component.submit(event, ' 2026-04-01 ', ' 2026-04-02 ');
 
     expect(preventDefault).toHaveBeenCalledOnce();
     expect(emitSpy).toHaveBeenCalledWith({
       from: '2026-04-01',
       to: '2026-04-02',
-      gatewayId: 'gw-1',
+      gatewayIds: ['gw-1', 'gw-2'],
     });
   });
 

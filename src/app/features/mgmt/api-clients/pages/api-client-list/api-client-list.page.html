@@ -10,10 +10,7 @@
 
   @if (showCreateForm()) {
     <app-modal-layer [open]="true">
-      <form
-        class="create-form"
-        (submit)="$event.preventDefault(); createClient(name.value); name.value = ''"
-      >
+      <form class="create-form" (submit)="submitCreateForm($event, name)">
         @if (formErrorMessage()) {
           <p class="error form-error">{{ formErrorMessage() }}</p>
         }
