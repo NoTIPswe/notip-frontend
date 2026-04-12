@@ -59,6 +59,7 @@ export default defineConfig({
         'src/app/features/mgmt/users/components/user-table/user-table.component.ts',
         'src/app/shared/components/impersonation-banner/impersonation-banner.component.ts',
         'src/app/shared/components/impersonation-tag/impersonation-tag.component.ts',
+        'src/app/shared/components/multi-select-dropdown/multi-select-dropdown.component.ts',
         'src/app/shared/components/placeholder-page/placeholder-page.component.ts',
         'src/app/shared/components/profile-section/profile-section.component.ts',
         'src/app/shared/pipes/rome-date-time.pipe.ts',
