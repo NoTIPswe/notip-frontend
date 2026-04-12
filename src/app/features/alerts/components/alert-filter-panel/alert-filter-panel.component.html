@@ -1,7 +1,7 @@
 <section class="alert-filter-panel">
   <h3>Alert Filters</h3>
 
-  <form (submit)="submit($event, fromInput.value, toInput.value, gatewayInput.value)">
+  <form (submit)="submit($event, fromInput.value, toInput.value)">
     <label>
       From
       <input #fromInput type="datetime-local" [value]="from()" />
@@ -12,10 +12,17 @@
       <input #toInput type="datetime-local" [value]="to()" />
     </label>
 
-    <label>
-      Gateway ID
-      <input #gatewayInput type="text" [value]="gatewayId()" placeholder="gateway_123" />
-    </label>
+    <div class="field">
+      <span>Gateway ID</span>
+      <app-multi-select-dropdown
+        [options]="gatewayOptions()"
+        [selected]="selectedGatewayIds()"
+        [placeholder]="'Select gateway'"
+        [searchPlaceholder]="'Search gateway...'"
+        [disabled]="isLoading()"
+        (selectedChange)="onGatewaySelectionChanged($event)"
+      ></app-multi-select-dropdown>
+    </div>
 
     <div class="actions">
       <button type="submit" [disabled]="isLoading()">Apply</button>

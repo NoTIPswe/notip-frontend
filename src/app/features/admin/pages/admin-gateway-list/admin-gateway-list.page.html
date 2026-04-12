@@ -8,14 +8,24 @@
     }
   </div>
 
-  <form class="filter-row" (submit)="onApplyFilter($event, tenantFilterInput.value)">
-    <label>
-      Tenant ID filter
-      <input #tenantFilterInput type="text" [value]="tenantFilter()" placeholder="tenant_123" />
-    </label>
+  <form class="filter-row" (submit)="onApplyFilter($event)">
+    <div class="filter-control">
+      <span>Tenant ID filter</span>
+      <app-multi-select-dropdown
+        [options]="tenantOptions()"
+        [selected]="draftTenantIds()"
+        [placeholder]="'Select tenant'"
+        [searchPlaceholder]="'Search tenant...'"
+        [disabled]="isLoading()"
+        (selectedChange)="onTenantFilterSelectionChanged($event)"
+      ></app-multi-select-dropdown>
+    </div>
+
     <div class="actions">
-      <button type="submit">Apply</button>
-      <button type="button" class="ghost" (click)="onResetFilter()">Reset</button>
+      <button type="submit" [disabled]="isLoading()">Apply</button>
+      <button type="button" class="ghost" (click)="onResetFilter()" [disabled]="isLoading()">
+        Reset
+      </button>
     </div>
   </form>
 
@@ -28,7 +38,7 @@
   }
 
   <app-admin-gateway-table
-    [gateways]="gateways()"
+    [gateways]="filteredGateways()"
     [isLoading]="isLoading()"
   ></app-admin-gateway-table>
 

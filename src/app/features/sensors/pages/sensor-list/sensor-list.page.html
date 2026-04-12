@@ -2,30 +2,32 @@
   <h2>Sensor List</h2>
 
   <form class="filter-row" (submit)="$event.preventDefault()">
-    <label>
-      Gateway ID
-      <input
-        #gatewayFilterInput
-        type="text"
-        (input)="onFilterChanged(gatewayFilterInput.value, typeFilterInput.value)"
-      />
-    </label>
+    <div class="filter-control">
+      <span>Gateway ID</span>
+      <app-multi-select-dropdown
+        [options]="gatewayOptions()"
+        [selected]="gatewayFilters()"
+        [placeholder]="'Select gateway'"
+        [searchPlaceholder]="'Search gateway...'"
+        [disabled]="isLoading()"
+        (selectedChange)="onGatewayFilterChanged($event)"
+      ></app-multi-select-dropdown>
+    </div>
 
-    <label>
-      Sensor Type
-      <input
-        #typeFilterInput
-        type="text"
-        (input)="onFilterChanged(gatewayFilterInput.value, typeFilterInput.value)"
-      />
-    </label>
+    <div class="filter-control">
+      <span>Sensor Type</span>
+      <app-multi-select-dropdown
+        [options]="sensorTypeOptions()"
+        [selected]="typeFilters()"
+        [placeholder]="'Select sensor type'"
+        [searchPlaceholder]="'Search type...'"
+        [disabled]="isLoading()"
+        (selectedChange)="onTypeFilterChanged($event)"
+      ></app-multi-select-dropdown>
+    </div>
 
     <div class="actions">
-      <button
-        type="button"
-        class="ghost"
-        (click)="onClearFilters(gatewayFilterInput, typeFilterInput)"
-      >
+      <button type="button" class="ghost" (click)="onClearFilters()" [disabled]="isLoading()">
         Clear
       </button>
     </div>

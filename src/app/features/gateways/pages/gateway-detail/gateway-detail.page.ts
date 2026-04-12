@@ -184,14 +184,13 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.isBusy.set(true);
+    this.closeCommandModal();
     this.commandService
       .sendConfig(gatewayId, config)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (update) => this.handleCommandUpdate(gatewayId, update),
         error: () => {
-          this.isBusy.set(false);
           this.errorMessage.set('Failed to send configuration command.');
         },
       });
@@ -203,14 +202,13 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.isBusy.set(true);
+    this.closeCommandModal();
     this.commandService
       .sendFirmware(gatewayId, firmware)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (update) => this.handleCommandUpdate(gatewayId, update),
         error: () => {
-          this.isBusy.set(false);
           this.errorMessage.set('Failed to send firmware command.');
         },
       });
@@ -219,25 +217,9 @@ export class GatewayDetailPageComponent implements OnInit, OnDestroy {
   private handleCommandUpdate(gatewayId: string, update: CommandStatusUpdate): void {
     this.commandStatus.set(update);
 
-    if (!this.isTerminalCommandStatus(update.status)) {
-      return;
-    }
-
-    this.isBusy.set(false);
-    this.closeCommandModal();
-
     if (update.status === CommandStatus.ack) {
       this.loadGateway(gatewayId);
     }
-  }
-
-  private isTerminalCommandStatus(status: CommandStatus): boolean {
-    return (
-      status === CommandStatus.ack ||
-      status === CommandStatus.nack ||
-      status === CommandStatus.expired ||
-      status === CommandStatus.timeout
-    );
   }
 
   openDeleteModal(): void {

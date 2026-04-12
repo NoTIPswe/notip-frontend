@@ -19,19 +19,16 @@ h2 {
   gap: 0.7rem;
 }
 
-.filter-row label {
-  display: flex;
-  flex-direction: column;
+.filter-control {
+  display: grid;
   gap: 0.25rem;
-  font-size: 0.9rem;
-  color: #364152;
+  flex: 1 1 280px;
+  min-width: 220px;
 }
 
-.filter-row input {
-  height: 2.2rem;
-  border: 1px solid #d4dae3;
-  border-radius: 8px;
-  padding: 0 0.65rem;
+.filter-control span {
+  font-size: 0.9rem;
+  color: #364152;
 }
 
 .actions {
@@ -93,6 +90,11 @@ td {
   .filter-row {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .filter-control {
+    min-width: 0;
+    width: 100%;
   }
 
   .actions {

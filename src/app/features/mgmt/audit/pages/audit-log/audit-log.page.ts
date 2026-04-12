@@ -22,14 +22,16 @@ export class AuditLogPageComponent implements OnInit {
   private readonly auditService = inject(AuditService);
 
   readonly logs = signal<Logs[]>([]);
+  readonly userIdOptions = signal<string[]>([]);
+  readonly actionOptions = signal<string[]>([]);
   readonly isLoading = signal<boolean>(false);
   readonly isExporting = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
 
   readonly from = signal<string>(this.toDatetimeLocal(new Date(Date.now() - 24 * 60 * 60 * 1000)));
   readonly to = signal<string>(this.toDatetimeLocal(new Date()));
-  readonly userIds = signal<string>('');
-  readonly actions = signal<string>('');
+  readonly userIds = signal<string[]>([]);
+  readonly actions = signal<string[]>([]);
 
   ngOnInit(): void {
     this.loadLogs();
@@ -38,16 +40,16 @@ export class AuditLogPageComponent implements OnInit {
   applyFilters(form: AuditFilterFormValue): void {
     this.from.set(form.from);
     this.to.set(form.to);
-    this.userIds.set(form.userIds);
-    this.actions.set(form.actions);
+    this.userIds.set(this.normalizeList(form.userIds));
+    this.actions.set(this.normalizeList(form.actions));
     this.loadLogs();
   }
 
   resetFilters(): void {
     this.from.set(this.toDatetimeLocal(new Date(Date.now() - 24 * 60 * 60 * 1000)));
     this.to.set(this.toDatetimeLocal(new Date()));
-    this.userIds.set('');
-    this.actions.set('');
+    this.userIds.set([]);
+    this.actions.set([]);
     this.loadLogs();
   }
 
@@ -77,13 +79,14 @@ export class AuditLogPageComponent implements OnInit {
       .getLogs({
         from: this.toIsoOrNow(this.from()),
         to: this.toIsoOrNow(this.to()),
-        userId: this.parseCsv(this.userIds()),
-        actions: this.parseCsv(this.actions()),
+        userId: this.userIds(),
+        actions: this.actions(),
       })
       .subscribe({
         next: (rows) => {
           this.isLoading.set(false);
           this.logs.set(rows);
+          this.refreshFilterOptions(rows);
         },
         error: () => {
           this.isLoading.set(false);
@@ -92,11 +95,39 @@ export class AuditLogPageComponent implements OnInit {
       });
   }
 
-  private parseCsv(value: string): string[] {
-    return value
-      .split(',')
-      .map((item) => item.trim())
-      .filter((item) => item.length > 0);
+  private refreshFilterOptions(rows: Logs[]): void {
+    const userIds = new Set<string>(this.userIds());
+    const actions = new Set<string>(this.actions());
+
+    for (const row of rows) {
+      const userId = row.userId.trim();
+      if (userId.length > 0) {
+        userIds.add(userId);
+      }
+
+      const action = row.action.trim();
+      if (action.length > 0) {
+        actions.add(action);
+      }
+    }
+
+    this.userIdOptions.set(Array.from(userIds).sort((a, b) => a.localeCompare(b)));
+    this.actionOptions.set(Array.from(actions).sort((a, b) => a.localeCompare(b)));
+  }
+
+  private normalizeList(values: string[]): string[] {
+    const unique = new Set<string>();
+
+    for (const value of values) {
+      const normalized = value.trim();
+      if (normalized.length === 0) {
+        continue;
+      }
+
+      unique.add(normalized);
+    }
+
+    return Array.from(unique);
   }
 
   private toIsoOrNow(value: string): string {

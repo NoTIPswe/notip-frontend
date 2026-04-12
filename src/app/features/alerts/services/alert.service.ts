@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { forkJoin, map, Observable } from 'rxjs';
 import {
   AlertsService as AlertsApiService,
   SetAlertsConfigDefaultRequestDto,
@@ -86,8 +86,26 @@ export class AlertService {
   }
 
   getAlerts(af: AlertsFilter): Observable<Alerts[]> {
+    const gatewayIds = this.normalizeGatewayIds(af.gatewayId);
+
+    if (gatewayIds.length <= 1) {
+      return this.fetchAlerts(af.from, af.to, gatewayIds[0]);
+    }
+
+    return forkJoin(
+      gatewayIds.map((gatewayId) => this.fetchAlerts(af.from, af.to, gatewayId)),
+    ).pipe(map((results) => this.mergeAlerts(results.flat())));
+  }
+
+  deleteGatewayConfig(gatewayId: string): Observable<void> {
     return this.alertsApi
-      .alertsControllerGetAlerts(af.from, af.to, af.gatewayId?.[0])
+      .alertsControllerDeleteGatewayAlertsConfig(gatewayId)
+      .pipe(map(() => void 0));
+  }
+
+  private fetchAlerts(from: string, to: string, gatewayId?: string): Observable<Alerts[]> {
+    return this.alertsApi
+      .alertsControllerGetAlerts(from, to, gatewayId)
       .pipe(
         map((rows) =>
           this.toAlerts(Array.isArray(rows) ? (rows as Record<string, unknown>[]) : []),
@@ -95,10 +113,49 @@ export class AlertService {
       );
   }
 
-  deleteGatewayConfig(gatewayId: string): Observable<void> {
-    return this.alertsApi
-      .alertsControllerDeleteGatewayAlertsConfig(gatewayId)
-      .pipe(map(() => void 0));
+  private normalizeGatewayIds(values?: string[]): string[] {
+    if (!Array.isArray(values)) {
+      return [];
+    }
+
+    const unique = new Set<string>();
+
+    for (const value of values) {
+      if (typeof value !== 'string') {
+        continue;
+      }
+
+      const normalized = value.trim();
+      if (normalized.length === 0) {
+        continue;
+      }
+
+      unique.add(normalized);
+    }
+
+    return Array.from(unique);
+  }
+
+  private mergeAlerts(rows: Alerts[]): Alerts[] {
+    const unique = new Map<string, Alerts>();
+
+    for (const row of rows) {
+      const key = `${row.id}|${row.gatewayId}|${row.createdAt}`;
+      if (!unique.has(key)) {
+        unique.set(key, row);
+      }
+    }
+
+    return Array.from(unique.values()).sort((a, b) => {
+      const first = Date.parse(a.createdAt);
+      const second = Date.parse(b.createdAt);
+
+      if (Number.isFinite(first) && Number.isFinite(second)) {
+        return second - first;
+      }
+
+      return b.createdAt.localeCompare(a.createdAt);
+    });
   }
 
   private toAlerts(rows: Record<string, unknown>[]): Alerts[] {

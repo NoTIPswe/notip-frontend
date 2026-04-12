@@ -18,40 +18,38 @@ describe('AuditFilterPanelComponent', () => {
   it('hydrates form inputs from signal inputs', () => {
     fixture.componentRef.setInput('from', '2026-04-01T10:00');
     fixture.componentRef.setInput('to', '2026-04-02T10:00');
-    fixture.componentRef.setInput('userIds', 'u1,u2');
-    fixture.componentRef.setInput('actions', 'login,create');
+    fixture.componentRef.setInput('userIds', ['u1', 'u2']);
+    fixture.componentRef.setInput('actions', ['login', 'create']);
+    fixture.componentRef.setInput('userIdOptions', ['u1', 'u2', 'u3']);
+    fixture.componentRef.setInput('actionOptions', ['login', 'create', 'delete']);
     fixture.detectChanges();
 
-    const inputs = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLInputElement>(
-      'input',
-    );
+    const root = fixture.nativeElement as HTMLElement;
+    const inputs = root.querySelectorAll<HTMLInputElement>('input[type="datetime-local"]');
+    const triggers = root.querySelectorAll<HTMLElement>('.multi-select-trigger .trigger-text');
 
     expect(inputs[0].value).toBe('2026-04-01T10:00');
     expect(inputs[1].value).toBe('2026-04-02T10:00');
-    expect(inputs[2].value).toBe('u1,u2');
-    expect(inputs[3].value).toBe('login,create');
+    expect(triggers[0]?.textContent?.trim()).toBe('2 selected');
+    expect(triggers[1]?.textContent?.trim()).toBe('2 selected');
   });
 
   it('emits trimmed filter payload when form is submitted', () => {
-    fixture.detectChanges();
-
     const emitSpy = vi.spyOn(component.filterSubmitted, 'emit');
-    const root = fixture.nativeElement as HTMLElement;
-    const inputs = root.querySelectorAll<HTMLInputElement>('input');
-    const form = root.querySelector('form');
+    const preventDefault = vi.fn();
+    const event = { preventDefault } as unknown as Event;
 
-    inputs[0].value = '2026-04-01T10:00';
-    inputs[1].value = '2026-04-02T10:00';
-    inputs[2].value = ' u1,u2 ';
-    inputs[3].value = ' login,create ';
+    component.onUserIdsChanged([' u1 ', 'u2']);
+    component.onActionsChanged([' login ', 'create']);
+    component.submit(event, ' 2026-04-01T10:00 ', ' 2026-04-02T10:00 ');
 
-    form?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    expect(preventDefault).toHaveBeenCalledOnce();
 
     expect(emitSpy).toHaveBeenCalledWith({
       from: '2026-04-01T10:00',
       to: '2026-04-02T10:00',
-      userIds: 'u1,u2',
-      actions: 'login,create',
+      userIds: ['u1', 'u2'],
+      actions: ['login', 'create'],
     });
   });
 
@@ -69,14 +67,16 @@ describe('AuditFilterPanelComponent', () => {
   });
 
   it('disables form actions while loading', () => {
+    fixture.componentRef.setInput('userIdOptions', ['u1']);
+    fixture.componentRef.setInput('actionOptions', ['login']);
     fixture.componentRef.setInput('isLoading', true);
     fixture.detectChanges();
 
-    const buttons = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(
-      'button',
-    );
+    const root = fixture.nativeElement as HTMLElement;
+    const submitButton = root.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const resetButton = root.querySelector('button.ghost') as HTMLButtonElement;
 
-    expect(buttons[0].disabled).toBe(true);
-    expect(buttons[1].disabled).toBe(true);
+    expect(submitButton.disabled).toBe(true);
+    expect(resetButton.disabled).toBe(true);
   });
 });

@@ -1,0 +1,45 @@
+<div class="multi-select">
+  <button
+    type="button"
+    class="multi-select-trigger"
+    [class.open]="isOpen()"
+    [disabled]="disabled()"
+    (click)="toggleMenu()"
+  >
+    <span class="trigger-text">{{ selectionLabel() }}</span>
+    <span class="trigger-caret" aria-hidden="true"></span>
+  </button>
+
+  @if (isOpen()) {
+    <div class="multi-select-menu">
+      <input
+        type="search"
+        class="multi-select-search"
+        [placeholder]="searchPlaceholder()"
+        [value]="searchTerm()"
+        [disabled]="disabled()"
+        (input)="updateSearch($any($event.target).value)"
+      />
+
+      <ul class="multi-select-options">
+        @for (option of filteredOptions(); track option) {
+          <li>
+            <button
+              type="button"
+              class="multi-select-option"
+              [class.selected]="isSelected(option)"
+              (click)="toggleOption(option)"
+            >
+              <span class="option-label">{{ option }}</span>
+              @if (isSelected(option)) {
+                <span class="checkmark" aria-hidden="true">✓</span>
+              }
+            </button>
+          </li>
+        } @empty {
+          <li class="multi-select-empty">{{ noResultsLabel() }}</li>
+        }
+      </ul>
+    </div>
+  }
+</div>

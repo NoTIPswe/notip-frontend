@@ -31,20 +31,16 @@ h2 {
   gap: 0.75rem;
 }
 
-.filter-row label {
-  display: flex;
-  flex-direction: column;
+.filter-control {
+  display: grid;
   gap: 0.25rem;
-  font-size: 0.9rem;
-  color: #364152;
+  flex: 1 1 320px;
+  min-width: 260px;
 }
 
-.filter-row input {
-  height: 2.2rem;
-  border: 1px solid #d4dae3;
-  border-radius: 8px;
-  padding: 0 0.65rem;
-  min-width: 260px;
+.filter-control span {
+  font-size: 0.9rem;
+  color: #364152;
 }
 
 .actions {
@@ -101,7 +97,7 @@ button.ghost {
     align-items: stretch;
   }
 
-  .filter-row input {
+  .filter-control {
     min-width: 0;
     width: 100%;
   }
