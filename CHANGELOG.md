@@ -1,3 +1,10 @@
+# [2.4.0](https://github.com/NoTIPswe/notip-frontend/compare/v2.3.0...v2.4.0) (2026-04-12)
+
+
+### Features
+
+* update OpenAPI specifications and version numbers for Data and Management APIs ([bb5b0e3](https://github.com/NoTIPswe/notip-frontend/commit/bb5b0e3660c6aa50f8975b62de7720036793e024))
+
 # [2.3.0](https://github.com/NoTIPswe/notip-frontend/compare/v2.2.0...v2.3.0) (2026-04-12)
 
 
