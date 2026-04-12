@@ -1,3 +1,13 @@
+# [2.3.0](https://github.com/NoTIPswe/notip-frontend/compare/v2.2.0...v2.3.0) (2026-04-12)
+
+
+### Features
+
+* enhance alert management with multi-gateway support ([f31fd77](https://github.com/NoTIPswe/notip-frontend/commit/f31fd778705fb7e99082dc44e303ce037ec066b3))
+* enhance README with detailed architecture, features, and environment setup ([c20b496](https://github.com/NoTIPswe/notip-frontend/commit/c20b49643635f1aceb429307eaa507f841c05126))
+* update README with detailed software description and usage commands ([7196dd9](https://github.com/NoTIPswe/notip-frontend/commit/7196dd9b2362a587673a188ede6b572cf2845d5b))
+* update session timeout and enhance gateway detail component tests ([9843686](https://github.com/NoTIPswe/notip-frontend/commit/9843686a0991fa6fd377cc509b3dcafb875d9ff7))
+
 # [2.2.0](https://github.com/NoTIPswe/notip-frontend/compare/v2.1.0...v2.2.0) (2026-04-10)
 
 
