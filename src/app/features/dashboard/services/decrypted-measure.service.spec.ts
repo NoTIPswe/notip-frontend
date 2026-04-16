@@ -37,7 +37,7 @@ vi.mock('@notip/crypto-sdk', () => {
   class ValidationError extends SdkError {}
   class DecryptionError extends SdkError {}
 
-  class DataApiService {
+  class CryptoSdk {
     constructor(config: unknown) {
       constructorMock(config);
     }
@@ -49,7 +49,7 @@ vi.mock('@notip/crypto-sdk', () => {
 
   return {
     ApiError,
-    DataApiService,
+    CryptoSdk,
     DecryptionError,
     SdkError,
     ValidationError,

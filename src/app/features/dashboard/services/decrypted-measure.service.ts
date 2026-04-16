@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import {
   ApiError,
-  DataApiService,
+  CryptoSdk,
   DecryptionError,
   type ExportModel,
   type PlaintextMeasure,
@@ -31,7 +31,7 @@ export class DecryptedMeasureService {
       cache: 'no-store',
     });
 
-  private readonly sdk = new DataApiService({
+  private readonly sdk = new CryptoSdk({
     baseUrl: '/api',
     tokenProvider: () => this.auth.getToken(),
     fetcher: this.noStoreFetch,
