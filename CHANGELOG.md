@@ -1,3 +1,11 @@
+## [2.4.1](https://github.com/NoTIPswe/notip-frontend/compare/v2.4.0...v2.4.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* updated CryptoSdk mock in decryped-measure.service.spec.ts ([46bfdbe](https://github.com/NoTIPswe/notip-frontend/commit/46bfdbe52f31673709f64f63552c1b671d9d6e6a))
+* updated the old version of our npm package ([9ff597d](https://github.com/NoTIPswe/notip-frontend/commit/9ff597db84866e4ee0f6bb56109e10cb986c1e77))
+
 # [2.4.0](https://github.com/NoTIPswe/notip-frontend/compare/v2.3.0...v2.4.0) (2026-04-12)
 
 
