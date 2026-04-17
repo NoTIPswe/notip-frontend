@@ -1,3 +1,10 @@
+## [2.4.2](https://github.com/NoTIPswe/notip-frontend/compare/v2.4.1...v2.4.2) (2026-04-17)
+
+
+### Bug Fixes
+
+* removed obsolete modules ([20d7d07](https://github.com/NoTIPswe/notip-frontend/commit/20d7d073734664ab4e61e3cede8cf9f00bdcd660))
+
 ## [2.4.1](https://github.com/NoTIPswe/notip-frontend/compare/v2.4.0...v2.4.1) (2026-04-16)
 
 
